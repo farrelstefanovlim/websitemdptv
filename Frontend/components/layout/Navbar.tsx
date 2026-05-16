@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
@@ -17,6 +18,7 @@ export default function Navbar() {
   const [activeHash, setActiveHash] = useState("#home");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const handleHashChange = () =>
@@ -89,8 +91,11 @@ export default function Navbar() {
         </nav>
 
         {/* Mobile Hamburger */}
-        <button
-          className="md:hidden flex flex-col gap-1.5 p-2 cursor-pointer"
+        <div
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setMobileOpen(!mobileOpen); } }}
+          className="md:hidden flex flex-col gap-1.5 p-2 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
@@ -103,12 +108,12 @@ export default function Navbar() {
           <span
             className={`w-6 h-0.5 transition-all duration-300 ${isScrolled ? "bg-primary" : "bg-white"} ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`}
           />
-        </button>
+        </div>
 
         {/* CTA — Desktop */}
         <div className="hidden md:block">
-          <Button variant={isScrolled ? "primary" : "glass"} size="sm">
-            Get in Touch
+          <Button variant={isScrolled ? "primary" : "glass"} size="sm" onClick={() => router.push("/daftar")}>
+            Join Us
           </Button>
         </div>
       </div>
@@ -138,8 +143,11 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
-            <Button variant="primary" size="sm" className="mt-2 w-full">
-              Get in Touch
+            <Button variant="primary" size="sm" className="mt-2 w-full" onClick={() => {
+              router.push("/daftar");
+              setMobileOpen(false);
+            }}>
+              Join Us
             </Button>
           </nav>
         </motion.div>

@@ -2,8 +2,9 @@
 
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
+import { useRouter } from "next/navigation";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
-import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useRecruitmentStore } from "@/stores/recruitment.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
@@ -11,12 +12,13 @@ export default function CtaSection() {
   const ctaStore = useSectionContentStore((s) => s.cta);
   const registrationOpen = useRecruitmentStore((s) => s.registrationOpen);
   const hydrated = useHydrated();
-  const c = hydrated ? ctaStore : useSectionContentStore.getState().cta;
+  const router = useRouter();
+  const c = hydrated ? ctaStore : DEFAULTS.cta;
 
   if (hydrated && !registrationOpen) return null;
 
   return (
-    <section className="py-20 sm:py-28 md:py-[160px] px-4 sm:px-6 md:px-[80px] relative">
+    <section className="py-20 sm:py-28 md:py-[160px] px-4 sm:px-6 md:px-[80px] relative" id="cta">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent" />
 
       <AnimateOnScroll variant="scaleUp" duration={0.8}>
@@ -59,11 +61,8 @@ export default function CtaSection() {
 
             <AnimateOnScroll variant="fadeUp" delay={0.8}>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto" onClick={() => router.push("/daftar")}>
                   {c.buttonPrimary}
-                </Button>
-                <Button variant="glass" size="lg" className="w-full sm:w-auto">
-                  {c.buttonSecondary}
                 </Button>
               </div>
             </AnimateOnScroll>

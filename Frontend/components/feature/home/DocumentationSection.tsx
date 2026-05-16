@@ -10,7 +10,7 @@ import AnimateOnScroll, {
   StaggerContainer,
   StaggerItem,
 } from "@/components/ui/AnimateOnScroll";
-import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
 /* Layout config — visual properties only, images come from the store */
@@ -44,7 +44,7 @@ const galleryLayout = [
 export default function DocumentationSection() {
   const doc = useSectionContentStore((s) => s.documentation);
   const hydrated = useHydrated();
-  const d = hydrated ? doc : useSectionContentStore.getState().documentation;
+  const d = hydrated ? doc : DEFAULTS.documentation;
 
   return (
     <section className="py-20 sm:py-28 md:py-[160px] relative" id="documentation">

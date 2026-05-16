@@ -7,13 +7,13 @@ import AnimateOnScroll, {
   StaggerContainer,
   StaggerItem,
 } from "@/components/ui/AnimateOnScroll";
-import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
 export default function AboutSection() {
   const about = useSectionContentStore((s) => s.about);
   const hydrated = useHydrated();
-  const a = hydrated ? about : useSectionContentStore.getState().about;
+  const a = hydrated ? about : DEFAULTS.about;
 
   return (
     <section className="py-20 sm:py-28 md:py-[160px] relative" id="about">

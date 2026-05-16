@@ -2,29 +2,14 @@
 
 import { useState, useRef } from "react";
 import Icon from "@/components/ui/Icon";
+import Button from "@/components/ui/Button";
 import AttendanceTable from "@/components/feature/absensi/AttendanceTable";
 import AttendanceSummary from "@/components/feature/absensi/AttendanceSummary";
 import { useAttendanceStore } from "@/stores/attendance.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel, ABSENSI_COLUMNS } from "@/lib/excel";
 
-function formatDateDisplay(dateStr: string) {
-  const date = new Date(dateStr + "T00:00:00");
-  return date.toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-function getToday() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+import { formatDateDisplay, getToday } from "./utils";
 
 export default function AbsensiPage() {
   const [selectedDate, setSelectedDate] = useState(getToday);
@@ -86,29 +71,25 @@ export default function AbsensiPage() {
               </p>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <button onClick={handleExport}
-                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-all"
-                title="Export ke Excel">
+              <Button variant="success" size="sm" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
                 <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
-              </button>
-              <button onClick={() => importRef.current?.click()}
-                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all"
-                title="Import dari Excel">
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
                 <Icon name="upload" size="sm" /> <span className="hidden sm:inline">Import</span>
-              </button>
+              </Button>
               <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
-              <button
+              <Button variant="secondary" size="md"
                 onClick={() => setSelectedDate(getToday())}
-                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl bg-secondary text-on-secondary hover:brightness-110 transition-all duration-300"
+                className="px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs"
               >
                 <Icon name="today" size="sm" />
                 <span className="hidden xs:inline">Hari Ini</span>
-              </button>
+              </Button>
             </div>
           </div>
           {/* Date Navigation */}
           <div className="flex items-center gap-1 mt-2 sm:mt-0">
-            <button
+            <Button variant="none" size="none"
               onClick={() => {
                 const d = new Date(selectedDate + "T00:00:00");
                 d.setDate(d.getDate() - 1);
@@ -117,14 +98,14 @@ export default function AbsensiPage() {
               className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/50 hover:bg-surface-container-low hover:text-primary transition-all"
             >
               <Icon name="chevron_left" size="sm" />
-            </button>
+            </Button>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary font-medium focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
             />
-            <button
+            <Button variant="none" size="none"
               onClick={() => {
                 const d = new Date(selectedDate + "T00:00:00");
                 d.setDate(d.getDate() + 1);
@@ -133,7 +114,7 @@ export default function AbsensiPage() {
               className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/50 hover:bg-surface-container-low hover:text-primary transition-all"
             >
               <Icon name="chevron_right" size="sm" />
-            </button>
+            </Button>
           </div>
         </div>
       </header>

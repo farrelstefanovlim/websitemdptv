@@ -1,19 +1,19 @@
-"use client";
-
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
+import { useRouter } from "next/navigation";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
-import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
 export default function HeroSection() {
   const hero = useSectionContentStore((s) => s.hero);
   const hydrated = useHydrated();
+  const router = useRouter();
 
   // Use defaults during SSR to avoid hydration mismatch
-  const h = hydrated ? hero : useSectionContentStore.getState().hero;
+  const h = hydrated ? hero : DEFAULTS.hero;
 
   return (
     <section
@@ -77,13 +77,14 @@ export default function HeroSection() {
           <AnimateOnScroll variant="fadeUp" delay={1.0}>
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6">
               <Button
-                variant="primary"
+                variant="secondary"
                 size="lg"
-                className="bg-white !text-black hover:bg-secondary hover:!text-white border-b-4 border-gray-300 w-full sm:w-auto"
+                className="w-full sm:w-auto shadow-lg shadow-secondary/20"
+                onClick={() => router.push("/galeri")}
               >
                 {h.buttonPrimary}
               </Button>
-              <Button variant="glass" size="lg" className="w-full sm:w-auto">
+              <Button variant="glass" size="lg" className="w-full sm:w-auto" onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}>
                 {h.buttonSecondary}
               </Button>
             </div>

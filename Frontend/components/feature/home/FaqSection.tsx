@@ -6,14 +6,14 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Container from "@/components/layout/Container";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import Icon from "@/components/ui/Icon";
-import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
 export default function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const faqStore = useSectionContentStore((s) => s.faq);
   const hydrated = useHydrated();
-  const f = hydrated ? faqStore : useSectionContentStore.getState().faq;
+  const f = hydrated ? faqStore : DEFAULTS.faq;
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -73,8 +73,11 @@ export default function FaqSection() {
                     `}
                   />
 
-                  <button
-                    className="w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left cursor-pointer gap-4"
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(index); } }}
+                    className="w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left cursor-pointer gap-4 select-none outline-none focus-visible:bg-secondary/5 focus-visible:ring-2 focus-visible:ring-secondary/50"
                     onClick={() => toggle(index)}
                     aria-expanded={isOpen}
                   >
@@ -121,7 +124,7 @@ export default function FaqSection() {
                         }`}
                       />
                     </motion.div>
-                  </button>
+                  </div>
 
                   <AnimatePresence initial={false}>
                     {isOpen && (

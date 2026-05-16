@@ -1,11 +1,11 @@
 import { ButtonHTMLAttributes, ReactNode } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "glass";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonVariant = "primary" | "secondary" | "outline" | "glass" | "ghost" | "danger" | "success" | "icon" | "none";
+type ButtonSize = "sm" | "md" | "lg" | "icon" | "none";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
-  children: ReactNode;
+  children?: ReactNode;
   size?: ButtonSize;
   icon?: ReactNode;
 }
@@ -19,12 +19,23 @@ const variantStyles: Record<ButtonVariant, string> = {
     "bg-white/80 backdrop-blur-sm text-secondary border border-outline-variant/25 border-b-4 border-gray-200/80 hover:bg-secondary hover:text-on-secondary hover:border-secondary hover:shadow-lg hover:shadow-secondary/10",
   glass:
     "glass-card-premium text-white border-b-4 border-white/8 hover:bg-white/12 hover:text-white",
+  ghost:
+    "bg-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-primary",
+  danger:
+    "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200",
+  success:
+    "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200",
+  icon:
+    "bg-transparent text-on-surface-variant/50 hover:bg-surface-container-high hover:text-primary",
+  none: "",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "px-5 py-2.5 text-xs rounded-xl",
   md: "px-8 py-4 text-sm rounded-2xl",
   lg: "px-10 py-5 text-sm rounded-2xl",
+  icon: "w-8 h-8 rounded-lg",
+  none: "", // Allows overriding with inline classes
 };
 
 export default function Button({

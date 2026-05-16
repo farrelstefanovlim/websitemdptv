@@ -57,8 +57,8 @@ export default function SectionPreview() {
         <div className="flex items-center gap-2 px-4 py-3 bg-surface-container-low border-b border-outline-variant/15">
           <div className="flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-error/40" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#f5c542]/40" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#34d058]/40" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
           </div>
           <div className="flex-1 mx-3 px-3 py-1 bg-surface-container rounded-lg text-[10px] text-on-surface-variant/40 font-medium text-center truncate">
             mdptv.vercel.app

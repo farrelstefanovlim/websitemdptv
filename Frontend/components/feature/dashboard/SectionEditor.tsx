@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Icon from "@/components/ui/Icon";
+import Button from "@/components/ui/Button";
 import { useLayoutConfigStore } from "@/stores/layoutConfig.store";
 
 export default function SectionEditor() {
@@ -64,13 +65,13 @@ export default function SectionEditor() {
             Drag & drop atau gunakan tombol untuk mengatur urutan
           </p>
         </div>
-        <button
+        <Button variant="none" size="none"
           onClick={resetToDefault}
           className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300 shrink-0"
         >
           <Icon name="restart_alt" size="sm" />
           Reset
-        </button>
+        </Button>
       </div>
 
       {/* Section List */}
@@ -140,7 +141,7 @@ export default function SectionEditor() {
             {/* Controls */}
             <div className="flex items-center gap-1 shrink-0">
               {/* Move Up */}
-              <button
+              <Button variant="none" size="none"
                 onClick={(e) => {
                   e.stopPropagation();
                   moveUp(index);
@@ -149,10 +150,10 @@ export default function SectionEditor() {
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-primary hover:bg-surface-container-high disabled:opacity-20 disabled:cursor-not-allowed transition-all"
               >
                 <Icon name="arrow_upward" size="sm" />
-              </button>
+              </Button>
 
               {/* Move Down */}
-              <button
+              <Button variant="none" size="none"
                 onClick={(e) => {
                   e.stopPropagation();
                   moveDown(index);
@@ -161,19 +162,22 @@ export default function SectionEditor() {
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-primary hover:bg-surface-container-high disabled:opacity-20 disabled:cursor-not-allowed transition-all"
               >
                 <Icon name="arrow_downward" size="sm" />
-              </button>
+              </Button>
 
               {/* Divider */}
               <div className="w-px h-6 bg-outline-variant/15 mx-1 hidden sm:block" />
 
               {/* Visibility Toggle */}
-              <button
+              <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggleVisibility(section.id); } }}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleVisibility(section.id);
                 }}
                 className={`
-                  relative w-12 h-7 rounded-full transition-all duration-300 shrink-0
+                  relative w-12 h-7 rounded-full transition-all duration-300 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50
                   ${
                     section.visible
                       ? "bg-secondary shadow-inner"
@@ -197,7 +201,7 @@ export default function SectionEditor() {
                     }`}
                   />
                 </div>
-              </button>
+              </div>
             </div>
           </div>
         ))}

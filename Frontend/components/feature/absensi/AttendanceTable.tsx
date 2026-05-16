@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
+import Button from "@/components/ui/Button";
 import { useAttendanceStore } from "@/stores/attendance.store";
 import type { AttendanceStatus } from "@/components/feature/absensi/types/attendance.type";
 import { STATUS_LABELS, STATUS_ICONS } from "@/components/feature/absensi/types/attendance.type";
@@ -12,12 +13,12 @@ interface AttendanceTableProps {
 
 const statusStyles: Record<AttendanceStatus, { active: string; ring: string }> = {
   present: {
-    active: "bg-[#34d058] text-white border-[#34d058]",
-    ring: "ring-[#34d058]/20",
+    active: "bg-green-500 text-white border-green-500",
+    ring: "ring-green-500/20",
   },
   late: {
-    active: "bg-[#f5c542] text-white border-[#f5c542]",
-    ring: "ring-[#f5c542]/20",
+    active: "bg-yellow-500 text-white border-yellow-500",
+    ring: "ring-yellow-500/20",
   },
   excused: {
     active: "bg-secondary text-white border-secondary",
@@ -60,27 +61,27 @@ export default function AttendanceTable({ selectedDate }: AttendanceTableProps) 
           </p>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <button
+          <Button variant="none" size="none"
             onClick={() => markAllPresent(selectedDate)}
-            className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl bg-[#34d058]/10 text-[#34d058] border border-[#34d058]/20 hover:bg-[#34d058]/20 transition-all duration-300"
+            className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500/20 transition-all duration-300"
           >
             <Icon name="done_all" size="sm" />
             <span className="hidden sm:inline">All</span> Hadir
-          </button>
-          <button
+          </Button>
+          <Button variant="none" size="none"
             onClick={() => clearDate(selectedDate)}
             className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300"
           >
             <Icon name="clear_all" size="sm" />
             Clear
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Division Filter */}
       <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-6">
         {divisions.map((div) => (
-          <button
+          <Button variant="none" size="none"
             key={div}
             onClick={() => setFilterDivision(div)}
             className={`
@@ -94,7 +95,7 @@ export default function AttendanceTable({ selectedDate }: AttendanceTableProps) 
           >
             <span className="sm:hidden">{divisionShort[div]}</span>
             <span className="hidden sm:inline">{div}</span>
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -130,7 +131,7 @@ export default function AttendanceTable({ selectedDate }: AttendanceTableProps) 
                 {allStatuses.map((status) => {
                   const isActive = currentStatus === status;
                   return (
-                    <button
+                    <Button variant="none" size="none"
                       key={status}
                       onClick={() => setAttendance(member.id, selectedDate, status)}
                       className={`
@@ -148,7 +149,7 @@ export default function AttendanceTable({ selectedDate }: AttendanceTableProps) 
                         className={isActive ? "text-white" : ""}
                       />
                       <span className="hidden sm:inline">{STATUS_LABELS[status]}</span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>

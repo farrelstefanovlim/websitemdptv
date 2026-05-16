@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Icon from "@/components/ui/Icon";
+import Button from "@/components/ui/Button";
 import { useSectionContentStore } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
@@ -176,29 +177,29 @@ export default function GaleriPage() {
             className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-8"
             onClick={() => setSelectedIndex(null)}
           >
-            <button
+            <Button variant="none" size="none"
               onClick={() => setSelectedIndex(null)}
               className="absolute top-4 sm:top-6 right-4 sm:right-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10"
             >
               <Icon name="close" className="text-white" />
-            </button>
+            </Button>
 
             {selectedIndex > 0 && (
-              <button
+              <Button variant="none" size="none"
                 onClick={(e) => { e.stopPropagation(); setSelectedIndex(selectedIndex - 1); }}
                 className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10"
               >
                 <Icon name="chevron_left" className="text-white !text-2xl" />
-              </button>
+              </Button>
             )}
 
             {selectedIndex < items.length - 1 && (
-              <button
+              <Button variant="none" size="none"
                 onClick={(e) => { e.stopPropagation(); setSelectedIndex(selectedIndex + 1); }}
                 className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10"
               >
                 <Icon name="chevron_right" className="text-white !text-2xl" />
-              </button>
+              </Button>
             )}
 
             <motion.div
