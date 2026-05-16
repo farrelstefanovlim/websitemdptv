@@ -1,31 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type KegiatanStatus = "draft" | "diajukan" | "disetujui" | "ditolak" | "selesai";
+import type {
+  KegiatanStatus,
+  ProposalFile,
+  Kegiatan,
+} from "@/components/feature/kegiatan/types/kegiatan.type";
 
-export interface ProposalFile {
-  name: string;
-  size: number;
-  type: string;
-  /** base64-encoded file content (for localStorage demo) */
-  data: string;
-  uploadedAt: string;
-}
-
-export interface Kegiatan {
-  id: string;
-  title: string;
-  description: string;
-  division: string;
-  date: string;
-  location: string;
-  status: KegiatanStatus;
-  pic: string;
-  budget: string;
-  proposal: ProposalFile | null;
-  notes: string;
-  createdAt: string;
-}
+export type * from "@/components/feature/kegiatan/types/kegiatan.type";
 
 interface KegiatanState {
   items: Kegiatan[];

@@ -1,19 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type UserRole = "superadmin" | "admin";
-
-export interface AppUser {
-  id: string;
-  username: string;
-  fullName: string;
-  email: string;
-  role: UserRole;
-  password: string;
-  isActive: boolean;
-  createdAt: string;
-  lastLogin: string | null;
-}
+import type { UserRole, AppUser } from "@/components/feature/users/types/user.type";
+export type * from "@/components/feature/users/types/user.type";
 
 const DEFAULT_USERS: AppUser[] = [
   {

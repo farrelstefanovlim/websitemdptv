@@ -10,8 +10,8 @@ interface AttendanceSummaryProps {
 }
 
 const statCards: { status: AttendanceStatus; icon: string; color: string; bgColor: string }[] = [
-  { status: "present", icon: "check_circle", color: "text-[#34d058]", bgColor: "bg-[#34d058]/10 border-[#34d058]/15" },
-  { status: "late", icon: "schedule", color: "text-[#f5c542]", bgColor: "bg-[#f5c542]/10 border-[#f5c542]/15" },
+  { status: "present", icon: "check_circle", color: "text-green-500", bgColor: "bg-green-500/10 border-green-500/15" },
+  { status: "late", icon: "schedule", color: "text-yellow-500", bgColor: "bg-yellow-500/10 border-yellow-500/15" },
   { status: "excused", icon: "info", color: "text-secondary", bgColor: "bg-secondary/10 border-secondary/15" },
   { status: "absent", icon: "cancel", color: "text-error", bgColor: "bg-error/10 border-error/15" },
 ];
@@ -56,13 +56,13 @@ export default function AttendanceSummary({ selectedDate }: AttendanceSummaryPro
           <div className="h-full flex rounded-full overflow-hidden">
             {totalMarked > 0 && counts.present > 0 && (
               <div
-                className="bg-[#34d058] transition-all duration-500"
+                className="bg-green-500 transition-all duration-500"
                 style={{ width: `${(counts.present / totalMarked) * 100}%` }}
               />
             )}
             {totalMarked > 0 && counts.late > 0 && (
               <div
-                className="bg-[#f5c542] transition-all duration-500"
+                className="bg-yellow-500 transition-all duration-500"
                 style={{ width: `${(counts.late / totalMarked) * 100}%` }}
               />
             )}

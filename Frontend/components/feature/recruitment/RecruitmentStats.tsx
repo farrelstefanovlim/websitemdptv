@@ -50,7 +50,7 @@ export default function RecruitmentStats() {
         <div className="h-1.5 sm:h-2 bg-surface-container-highest rounded-full overflow-hidden">
           <div className="h-full flex rounded-full overflow-hidden">
             {counts.accepted > 0 && (
-              <div className="bg-[#34d058] transition-all duration-500"
+              <div className="bg-green-500 transition-all duration-500"
                 style={{ width: `${(counts.accepted / total) * 100}%` }} />
             )}
             {counts.interview > 0 && (
@@ -58,7 +58,7 @@ export default function RecruitmentStats() {
                 style={{ width: `${(counts.interview / total) * 100}%` }} />
             )}
             {counts.pending > 0 && (
-              <div className="bg-[#f5a623] transition-all duration-500"
+              <div className="bg-orange-500 transition-all duration-500"
                 style={{ width: `${(counts.pending / total) * 100}%` }} />
             )}
             {counts.rejected > 0 && (
@@ -107,7 +107,7 @@ export default function RecruitmentStats() {
                   {div}
                 </span>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] sm:text-xs text-[#34d058] font-bold">{divAccepted}</span>
+                  <span className="text-[10px] sm:text-xs text-green-500 font-bold">{divAccepted}</span>
                   <span className="text-[10px] text-on-surface-variant/30">/</span>
                   <span className="text-[10px] sm:text-xs text-on-surface-variant/50 font-medium">{divApplicants.length}</span>
                 </div>

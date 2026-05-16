@@ -4,7 +4,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Accordion from "@/components/ui/Accordion";
 import Container from "@/components/layout/Container";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
-import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
 /* Visual styling per division (not editable, purely decorative) */
@@ -38,7 +38,7 @@ const divisionStyles = [
 export default function DivisionsSection() {
   const divs = useSectionContentStore((s) => s.divisions);
   const hydrated = useHydrated();
-  const d = hydrated ? divs : useSectionContentStore.getState().divisions;
+  const d = hydrated ? divs : DEFAULTS.divisions;
 
   // Merge editable content with visual styles
   const divisionsData = d.divisions.map((div, i) => ({

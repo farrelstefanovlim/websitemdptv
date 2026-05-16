@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Icon from "@/components/ui/Icon";
+import Button from "@/components/ui/Button";
 import ApplicantTable from "@/components/feature/recruitment/ApplicantTable";
 import RecruitmentStats from "@/components/feature/recruitment/RecruitmentStats";
 import { useRecruitmentStore } from "@/stores/recruitment.store";
@@ -66,21 +67,17 @@ export default function RecruitmentPage() {
             </p>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <button onClick={handleExport}
-              className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-all"
-              title="Export ke Excel">
+            <Button variant="success" size="sm" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
               <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
-            </button>
-            <button onClick={() => importRef.current?.click()}
-              className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all"
-              title="Import dari Excel">
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
               <Icon name="upload" size="sm" /> <span className="hidden sm:inline">Import</span>
-            </button>
+            </Button>
             <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
             {pendingCount > 0 && (
-              <div className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#f5a623]/10 rounded-xl border border-[#f5a623]/20">
-                <div className="w-2 h-2 rounded-full bg-[#f5a623] animate-pulse" />
-                <span className="text-[10px] sm:text-xs font-medium text-[#f5a623]">
+              <div className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-500/10 rounded-xl border border-orange-500/20">
+                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                <span className="text-[10px] sm:text-xs font-medium text-orange-500">
                   {pendingCount} pending
                 </span>
               </div>
@@ -114,16 +111,19 @@ export default function RecruitmentPage() {
               </p>
             </div>
           </div>
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={toggleRegistration}
-            className={`relative w-14 h-8 rounded-full transition-all duration-300 shrink-0 ${
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleRegistration(); } }}
+            className={`relative w-14 h-8 rounded-full transition-all duration-300 shrink-0 cursor-pointer ${
               registrationOpen ? "bg-green-500" : "bg-red-400"
             }`}
           >
             <div className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-300 ${
               registrationOpen ? "left-7" : "left-1"
             }`} />
-          </button>
+          </div>
         </div>
         <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-8">
           {/* Stats — shown first on mobile */}

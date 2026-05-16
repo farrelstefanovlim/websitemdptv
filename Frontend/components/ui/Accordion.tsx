@@ -85,8 +85,11 @@ export default function Accordion({ items }: AccordionProps) {
               `}
             />
 
-            <button
-              className="w-full flex items-center justify-between p-5 sm:p-8 md:p-10 text-left cursor-pointer gap-3 sm:gap-4"
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(index); } }}
+              className="w-full flex items-center justify-between p-5 sm:p-8 md:p-10 text-left cursor-pointer gap-3 sm:gap-4 select-none outline-none focus-visible:bg-secondary/5 focus-visible:ring-2 focus-visible:ring-secondary/50"
               onClick={() => toggle(index)}
             >
               <div className="flex items-center gap-3 sm:gap-6 md:gap-8 min-w-0">
@@ -115,7 +118,7 @@ export default function Accordion({ items }: AccordionProps) {
               >
                 add
               </span>
-            </button>
+            </div>
 
             <div
               className={`

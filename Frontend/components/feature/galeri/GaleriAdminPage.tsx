@@ -1,7 +1,8 @@
 "use client";
-
 import { useState, useRef } from "react";
+import UploadPhotoForm from "./UploadPhotoForm";
 import Icon from "@/components/ui/Icon";
+import Button from "@/components/ui/Button";
 import { useSectionContentStore } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import type { GalleryItem } from "@/stores/sectionContent.store";
@@ -11,8 +12,6 @@ export default function GaleriAdminPage() {
   const hydrated = useHydrated();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState({ label: "", title: "" });
-  const [preview, setPreview] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
 
   const items = documentation.galleryItems;
@@ -42,26 +41,8 @@ export default function GaleriAdminPage() {
     });
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-
-  const handleAdd = () => {
-    if (!preview) return;
-    const item: GalleryItem = {
-      label: form.label,
-      title: form.title,
-      image: preview,
-      uploadedAt: new Date().toISOString().split("T")[0],
-    };
+  const handleAdd = (item: GalleryItem) => {
     addGalleryItem(item);
-    setForm({ label: "", title: "" });
-    setPreview("");
     setShowForm(false);
   };
 
@@ -102,13 +83,13 @@ export default function GaleriAdminPage() {
               <Icon name="open_in_new" size="sm" />
               <span className="hidden sm:inline">Preview</span>
             </a>
-            <button
+            <Button variant="secondary" size="md"
               onClick={() => setShowForm(!showForm)}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl bg-secondary text-on-secondary hover:brightness-110 transition-all"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs"
             >
               <Icon name={showForm ? "close" : "add_photo_alternate"} size="sm" />
               {showForm ? "Batal" : "Tambah Foto"}
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -117,76 +98,10 @@ export default function GaleriAdminPage() {
         <div className="max-w-5xl mx-auto">
           {/* Add Form */}
           {showForm && (
-            <div className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-dashed border-secondary/30 bg-secondary/5">
-              <h3 className="text-sm font-bold text-primary mb-4 flex items-center gap-2">
-                <Icon name="add_photo_alternate" className="text-secondary" />
-                Tambah Foto Baru
-              </h3>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                {/* Image upload */}
-                <div>
-                  {preview ? (
-                    <div className="relative rounded-xl overflow-hidden aspect-video group">
-                      <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                      <button
-                        onClick={() => setPreview("")}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
-                      >
-                        <Icon name="close" size="sm" className="text-white" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => fileRef.current?.click()}
-                      className="w-full aspect-video rounded-xl border-2 border-dashed border-outline-variant/25 bg-surface-container-lowest hover:border-secondary/40 hover:bg-secondary/5 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Icon name="cloud_upload" className="text-on-surface-variant/30 !text-4xl" />
-                      <span className="text-xs text-on-surface-variant/40 font-medium">
-                        Klik untuk upload foto
-                      </span>
-                    </button>
-                  )}
-                  <input ref={fileRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                </div>
-
-                {/* Fields */}
-                <div className="flex flex-col gap-3">
-                  <div>
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">
-                      Label <span className="normal-case text-on-surface-variant/25">(opsional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.label}
-                      onChange={(e) => setForm({ ...form, label: e.target.value })}
-                      placeholder="Contoh: Workshop 2025"
-                      className="w-full px-3 py-2.5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">
-                      Judul <span className="normal-case text-on-surface-variant/25">(opsional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.title}
-                      onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      placeholder="Contoh: Cinematography Masterclass"
-                      className="w-full px-3 py-2.5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
-                    />
-                  </div>
-                  <button
-                    onClick={handleAdd}
-                    disabled={!preview}
-                    className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-secondary text-on-secondary text-xs font-bold uppercase tracking-widest hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    <Icon name="add" size="sm" />
-                    Tambah ke Galeri
-                  </button>
-                </div>
-              </div>
-            </div>
+            <UploadPhotoForm
+              onAdd={handleAdd}
+              onCancel={() => setShowForm(false)}
+            />
           )}
 
           {/* Gallery grouped by date */}
@@ -241,12 +156,12 @@ export default function GaleriAdminPage() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3">
                               {/* Delete button */}
                               <div className="flex justify-end">
-                                <button
+                                <Button variant="none" size="none"
                                   onClick={() => handleDelete(originalIndex)}
                                   className="w-8 h-8 rounded-full bg-error/80 hover:bg-error flex items-center justify-center transition-colors"
                                 >
                                   <Icon name="delete" size="sm" className="text-white !text-sm" />
-                                </button>
+                                </Button>
                               </div>
                               {/* Info */}
                               <div>

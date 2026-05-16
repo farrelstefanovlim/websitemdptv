@@ -1,94 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-/* ── Hero ─────────────────────────────────────────── */
-export interface HeroStat {
-  value: string;
-  label: string;
-}
+import type {
+  HeroStat,
+  HeroContent,
+  AboutFeature,
+  AboutContent,
+  DivisionItem,
+  DivisionsContent,
+  GalleryItem,
+  DocumentationContent,
+  FaqItem,
+  FaqContent,
+  CtaContent,
+} from "@/components/feature/content/types/content.type";
 
-export interface HeroContent {
-  badgeText: string;
-  titleLine1: string;
-  titleLine2: string;
-  description: string;
-  buttonPrimary: string;
-  buttonSecondary: string;
-  stats: HeroStat[];
-}
-
-/* ── About ────────────────────────────────────────── */
-export interface AboutFeature {
-  icon: string;
-  title: string;
-  description: string;
-}
-
-export interface AboutContent {
-  label: string;
-  headingLine1: string;
-  headingLine2: string;
-  description: string;
-  features: AboutFeature[];
-}
-
-/* ── Divisions ────────────────────────────────────── */
-export interface DivisionItem {
-  title: string;
-  subtitle: string;
-  description: string;
-  features: string[];
-}
-
-export interface DivisionsContent {
-  label: string;
-  headingBold: string;
-  headingItalic: string;
-  description: string;
-  divisions: DivisionItem[];
-}
-
-/* ── Documentation ────────────────────────────────── */
-export interface GalleryItem {
-  label: string;
-  title: string;
-  image: string;
-  uploadedAt: string;
-  featured: boolean;
-}
-
-export interface DocumentationContent {
-  badgeText: string;
-  headingBold: string;
-  headingItalic: string;
-  description: string;
-  buttonText: string;
-  galleryItems: GalleryItem[];
-}
-
-/* ── FAQ ──────────────────────────────────────────── */
-export interface FaqItem {
-  question: string;
-  answer: string;
-}
-
-export interface FaqContent {
-  label: string;
-  headingBold: string;
-  headingItalic: string;
-  description: string;
-  items: FaqItem[];
-}
-
-/* ── CTA ──────────────────────────────────────────── */
-export interface CtaContent {
-  label: string;
-  headingLine1: string;
-  headingLine2: string;
-  description: string;
-  buttonPrimary: string;
-  buttonSecondary: string;
-}
+export type * from "@/components/feature/content/types/content.type";
 
 /* ── Full Store ───────────────────────────────────── */
 export interface SectionContentState {
@@ -119,8 +46,8 @@ const DEFAULT_HERO: HeroContent = {
   titleLine2: "Excellence in Media",
   description:
     "Wadah bagi para kreator muda Universitas Multi Data Palembang untuk mengeksplorasi batas teknologi media dan seni visual.",
-  buttonPrimary: "Explore Projects",
-  buttonSecondary: "Learn More",
+  buttonPrimary: "Lihat Galeri",
+  buttonSecondary: "Tentang Kami",
   stats: [
     { value: "50+", label: "Active Members" },
     { value: "120+", label: "Projects" },
@@ -206,7 +133,7 @@ const DEFAULT_CTA: CtaContent = {
   buttonSecondary: "Hubungi Kami",
 };
 
-const DEFAULTS = {
+export const DEFAULTS = {
   hero: DEFAULT_HERO,
   about: DEFAULT_ABOUT,
   divisions: DEFAULT_DIVISIONS,
