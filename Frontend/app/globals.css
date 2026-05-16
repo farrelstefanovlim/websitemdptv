@@ -1,0 +1,437 @@
+@import "tailwindcss";
+
+/* ========================================
+   MDPTV Design System — CSS Variables
+   ======================================== */
+
+:root {
+  /* --- Core Colors --- */
+  --background: #f7f9fb;
+  --foreground: #191c1e;
+  --on-background: #191c1e;
+
+  /* --- Primary --- */
+  --primary: #000000;
+  --on-primary: #ffffff;
+  --primary-container: #131b2e;
+  --on-primary-container: #7c839b;
+  --primary-fixed: #dae2fd;
+  --primary-fixed-dim: #bec6e0;
+  --on-primary-fixed: #131b2e;
+  --on-primary-fixed-variant: #3f465c;
+  --inverse-primary: #bec6e0;
+
+  /* --- Secondary --- */
+  --secondary: #712ae2;
+  --on-secondary: #ffffff;
+  --secondary-container: #8a4cfc;
+  --on-secondary-container: #fffbff;
+  --secondary-fixed: #eaddff;
+  --secondary-fixed-dim: #d2bbff;
+  --on-secondary-fixed: #25005a;
+  --on-secondary-fixed-variant: #5a00c6;
+
+  /* --- Tertiary --- */
+  --tertiary: #000000;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #00201d;
+  --on-tertiary-container: #0c9488;
+  --tertiary-fixed: #89f5e7;
+  --tertiary-fixed-dim: #6bd8cb;
+  --on-tertiary-fixed: #00201d;
+  --on-tertiary-fixed-variant: #005049;
+
+  /* --- Error --- */
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+
+  /* --- Surface --- */
+  --surface: #f7f9fb;
+  --on-surface: #191c1e;
+  --on-surface-variant: #45464d;
+  --surface-variant: #e0e3e5;
+  --surface-tint: #565e74;
+  --surface-dim: #d8dadc;
+  --surface-bright: #f7f9fb;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f4f6;
+  --surface-container: #eceef0;
+  --surface-container-high: #e6e8ea;
+  --surface-container-highest: #e0e3e5;
+  --inverse-surface: #2d3133;
+  --inverse-on-surface: #eff1f3;
+
+  /* --- Outline --- */
+  --outline: #76777d;
+  --outline-variant: #c6c6cd;
+
+  /* --- Spacing --- */
+  --spacing-unit: 8px;
+  --spacing-gutter: 24px;
+  --spacing-section-gap: 160px;
+  --spacing-margin-desktop: 80px;
+  --spacing-margin-mobile: 24px;
+  --spacing-container-max: 1440px;
+}
+
+/* ========================================
+   Tailwind v4 Theme Registration
+   ======================================== */
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-on-background: var(--on-background);
+
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-on-primary-fixed: var(--on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
+  --color-inverse-primary: var(--inverse-primary);
+
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-secondary-fixed: var(--secondary-fixed);
+  --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--on-secondary-fixed-variant);
+
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-tertiary-fixed: var(--tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--on-tertiary-fixed-variant);
+
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-surface-variant: var(--surface-variant);
+  --color-surface-tint: var(--surface-tint);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  /* Typography — Font Families */
+  --font-display: "Montserrat", sans-serif;
+  --font-headline: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+
+  /* Typography — Font Sizes */
+  --font-size-display: 88px;
+  --line-height-display: 92px;
+  --letter-spacing-display: -0.04em;
+
+  --font-size-headline-lg: 56px;
+  --line-height-headline-lg: 64px;
+  --letter-spacing-headline-lg: -0.02em;
+
+  --font-size-headline-lg-mobile: 40px;
+  --line-height-headline-lg-mobile: 48px;
+
+  --font-size-headline-md: 36px;
+  --line-height-headline-md: 44px;
+
+  --font-size-body-lg: 20px;
+  --line-height-body-lg: 32px;
+
+  --font-size-body-md: 16px;
+  --line-height-body-md: 24px;
+
+  --font-size-label-bold: 14px;
+  --line-height-label-bold: 20px;
+  --letter-spacing-label-bold: 0.1em;
+
+  --font-size-label-sm: 12px;
+  --line-height-label-sm: 16px;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--on-surface);
+  font-family: "Inter", sans-serif;
+  font-size: var(--font-size-body-md);
+  line-height: var(--line-height-body-md);
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--secondary) 30%, transparent);
+}
+
+/* ========================================
+   Typography Utilities
+   ======================================== */
+
+.text-display {
+  font-family: "Montserrat", sans-serif;
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-display);
+  letter-spacing: var(--letter-spacing-display);
+  font-weight: 900;
+}
+
+.text-headline-lg {
+  font-family: "Montserrat", sans-serif;
+  font-size: var(--font-size-headline-lg);
+  line-height: var(--line-height-headline-lg);
+  letter-spacing: var(--letter-spacing-headline-lg);
+  font-weight: 800;
+}
+
+.text-headline-lg-mobile {
+  font-family: "Montserrat", sans-serif;
+  font-size: var(--font-size-headline-lg-mobile);
+  line-height: var(--line-height-headline-lg-mobile);
+  font-weight: 800;
+}
+
+.text-headline-md {
+  font-family: "Montserrat", sans-serif;
+  font-size: var(--font-size-headline-md);
+  line-height: var(--line-height-headline-md);
+  font-weight: 700;
+}
+
+.text-body-lg {
+  font-family: "Inter", sans-serif;
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-body-lg);
+  font-weight: 300;
+}
+
+.text-body-md {
+  font-family: "Inter", sans-serif;
+  font-size: var(--font-size-body-md);
+  line-height: var(--line-height-body-md);
+  font-weight: 400;
+}
+
+.text-label-bold {
+  font-family: "Inter", sans-serif;
+  font-size: var(--font-size-label-bold);
+  line-height: var(--line-height-label-bold);
+  letter-spacing: var(--letter-spacing-label-bold);
+  font-weight: 700;
+}
+
+.text-label-sm {
+  font-family: "Inter", sans-serif;
+  font-size: var(--font-size-label-sm);
+  line-height: var(--line-height-label-sm);
+  font-weight: 600;
+}
+
+/* ========================================
+   Glass & Visual Effects
+   ======================================== */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.glass-card-premium {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(32px) saturate(1.5);
+  -webkit-backdrop-filter: blur(32px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.card-elevated {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 12px 24px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.4s ease, transform 0.4s ease;
+}
+
+.card-elevated:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.noise-bg {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.grid-pattern {
+  background-image: radial-gradient(color-mix(in srgb, var(--secondary) 10%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ========================================
+   Section Transitions
+   ======================================== */
+
+.section-fade-to-light {
+  background: linear-gradient(to bottom, #000000 0%, var(--background) 100%);
+}
+
+.section-fade-to-dark {
+  background: linear-gradient(to bottom, var(--background) 0%, #000000 100%);
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.scroll-indicator {
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--secondary), var(--tertiary-fixed-dim));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================
+   Material Symbols
+   ======================================== */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ========================================
+   Accordion Utilities
+   ======================================== */
+
+.accordion-content {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-icon {
+  transition: transform 0.4s ease;
+}
+
+.accordion-item {
+  transition: all 0.3s ease;
+}
