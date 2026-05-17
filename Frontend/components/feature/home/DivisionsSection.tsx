@@ -43,6 +43,7 @@ export default function DivisionsSection() {
   // Merge editable content with visual styles
   const divisionsData = d.divisions.map((div, i) => ({
     ...divisionStyles[i],
+    image: div.image || divisionStyles[i].image,
     number: String(i + 1).padStart(2, "0"),
     title: div.title,
     subtitle: div.subtitle,

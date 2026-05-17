@@ -3,6 +3,8 @@ import { useState, useRef } from "react";
 import UserModal from "@/components/feature/users/UserModal";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import { createPortal } from "react-dom";
+import { usePortalTarget } from "@/hooks/usePortalTarget";
 import { useUserStore, type AppUser, type UserRole, ROLE_CONFIG } from "@/stores/user.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel } from "@/lib/excel";
@@ -24,6 +26,8 @@ const USER_COLUMNS = [
 export default function UserManagementPage() {
   const { users, addUser, updateUser, removeUser, toggleActive } = useUserStore();
   const hydrated = useHydrated();
+  const portalTarget = usePortalTarget("mobile-topbar-actions");
+  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const [modal, setModal] = useState<{ mode: "add" | "edit"; user: AppUser | null } | null>(null);
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [search, setSearch] = useState("");
@@ -76,16 +80,44 @@ export default function UserManagementPage() {
     ...ALL_ROLES.reduce((acc, r) => ({ ...acc, [r]: users.filter((u) => u.role === r).length }), {} as Record<UserRole, number>),
   };
 
+  const mobileActions = (
+    <>
+      <Button variant="success" size="none" onClick={handleExport} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="download" size="sm" />
+      </Button>
+      <Button variant="outline" size="none" onClick={() => importRef.current?.click()} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="upload" size="sm" />
+      </Button>
+      <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+      <Button variant="primary" size="none" onClick={() => setModal({ mode: "add", user: null })} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="person_add" size="sm" />
+      </Button>
+    </>
+  );
+
+  const mobileTitle = (
+    <div className="min-w-0 pr-2">
+      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+        Manajemen User
+      </h2>
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
+        Kelola akun pengguna & hak akses
+      </p>
+    </div>
+  );
+
   return (
     <>
+      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
+      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
           <div>
             <h2 className="text-base sm:text-xl font-bold text-primary">Manajemen User</h2>
             <p className="text-[10px] sm:text-xs text-on-surface-variant/50">Kelola akun pengguna & hak akses</p>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="hidden lg:flex items-center gap-1.5 sm:gap-2">
             <Button size="sm" variant="success" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs" title="Export ke Excel">
               <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
             </Button>

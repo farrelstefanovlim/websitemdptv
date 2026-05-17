@@ -2,6 +2,7 @@
 
 import { useSectionContentStore } from "@/stores/sectionContent.store";
 import Field from "./Field";
+import ImageUploadField from "./ImageUploadField";
 
 export default function DivisionsEditor() {
   const { divisions, updateDivisions } = useSectionContentStore();
@@ -15,7 +16,10 @@ export default function DivisionsEditor() {
       <Field label="Description" value={divisions.description} onChange={(v) => updateDivisions({ description: v })} />
       {divisions.divisions.map((div, i) => (
         <div key={i} className="p-3 rounded-xl border border-outline-variant/15 bg-surface-container-low/50 grid gap-2">
-          <span className="text-[9px] uppercase tracking-widest font-bold text-secondary">Divisi {i + 1}</span>
+          <span className="text-[9px] uppercase tracking-widest font-bold text-secondary flex justify-between items-center">
+            Divisi {i + 1}
+          </span>
+          <ImageUploadField label="Cover Image" value={div.image} onChange={(v) => { const d = [...divisions.divisions]; d[i] = { ...d[i], image: v }; updateDivisions({ divisions: d }); }} />
           <div className="grid sm:grid-cols-2 gap-2">
             <input type="text" value={div.title} onChange={(e) => { const d = [...divisions.divisions]; d[i] = { ...d[i], title: e.target.value }; updateDivisions({ divisions: d }); }}
               className="px-3 py-2 rounded-lg border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary/40 transition-all" placeholder="Title" />

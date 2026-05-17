@@ -11,6 +11,7 @@ export interface HeroContent {
   description: string;
   buttonPrimary: string;
   buttonSecondary: string;
+  image?: string;
   stats: HeroStat[];
 }
 
@@ -26,6 +27,7 @@ export interface AboutContent {
   headingLine1: string;
   headingLine2: string;
   description: string;
+  image?: string;
   features: AboutFeature[];
 }
 
@@ -34,6 +36,7 @@ export interface DivisionItem {
   title: string;
   subtitle: string;
   description: string;
+  image?: string;
   features: string[];
 }
 

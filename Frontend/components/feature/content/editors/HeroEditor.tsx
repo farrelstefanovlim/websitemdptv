@@ -2,12 +2,14 @@
 
 import { useSectionContentStore } from "@/stores/sectionContent.store";
 import Field from "./Field";
+import ImageUploadField from "./ImageUploadField";
 
 export default function HeroEditor() {
   const { hero, updateHero } = useSectionContentStore();
   const h = hero;
   return (
     <div className="grid gap-3">
+      <ImageUploadField label="Background Image" value={h.image} onChange={(v) => updateHero({ image: v })} />
       <Field label="Badge Text" value={h.badgeText} onChange={(v) => updateHero({ badgeText: v })} />
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Title Line 1" value={h.titleLine1} onChange={(v) => updateHero({ titleLine1: v })} />

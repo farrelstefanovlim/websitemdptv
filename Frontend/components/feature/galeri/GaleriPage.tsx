@@ -52,25 +52,25 @@ export default function GaleriPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white relative">
+    <div className="min-h-screen bg-background text-on-surface relative">
       <div className="fixed inset-0 noise-bg z-0" />
-      <div className="fixed inset-0 grid-pattern z-0 opacity-20" />
+      <div className="fixed inset-0 grid-pattern z-0 opacity-15" />
 
       {/* Top Nav */}
-      <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-[80px] h-16 sm:h-20 flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-3 text-white/60 hover:text-white transition-colors group"
+            className="flex items-center gap-3 text-on-surface-variant hover:text-primary transition-colors group"
           >
             <Icon name="arrow_back" className="group-hover:-translate-x-1 transition-transform" />
             <span className="text-sm font-medium tracking-wide">Kembali</span>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
               <Icon name="settings_input_component" size="sm" />
             </div>
-            <span className="text-xl font-black tracking-tighter font-display">MDPTV</span>
+            <span className="text-xl font-black tracking-tighter font-display text-primary">MDPTV</span>
           </div>
         </div>
       </header>
@@ -86,17 +86,17 @@ export default function GaleriPage() {
               </span>
               <span className="w-8 h-px bg-secondary" />
             </div>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight mb-4">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight mb-4 text-primary">
               {d.headingBold}{" "}
               <span className="font-extralight italic opacity-80">{d.headingItalic}</span>
             </h1>
-            <p className="text-sm sm:text-lg text-white/40 max-w-2xl leading-relaxed">{d.description}</p>
-            <div className="mt-6 flex items-center gap-4 text-white/30 text-sm">
+            <p className="text-sm sm:text-lg text-on-surface-variant/80 max-w-2xl leading-relaxed">{d.description}</p>
+            <div className="mt-6 flex items-center gap-4 text-on-surface-variant/60 text-sm">
               <div className="flex items-center gap-2">
                 <Icon name="photo_library" size="sm" />
                 <span>{items.length} foto</span>
               </div>
-              <span className="text-white/10">·</span>
+              <span className="text-outline-variant">·</span>
               <div className="flex items-center gap-2">
                 <Icon name="folder" size="sm" />
                 <span>{grouped.length} album</span>
@@ -111,8 +111,8 @@ export default function GaleriPage() {
         <div className="max-w-[1440px] mx-auto">
           {items.length === 0 ? (
             <div className="text-center py-32">
-              <Icon name="photo_library" className="text-white/10 !text-7xl mx-auto mb-4" />
-              <p className="text-white/30 text-lg">Belum ada dokumentasi</p>
+              <Icon name="photo_library" className="text-outline-variant !text-7xl mx-auto mb-4" />
+              <p className="text-on-surface-variant/60 text-lg">Belum ada dokumentasi</p>
             </div>
           ) : (
             <div className="flex flex-col gap-12 sm:gap-16">
@@ -127,10 +127,10 @@ export default function GaleriPage() {
                   <div className="flex items-center gap-4 mb-5 sm:mb-6">
                     <div className="flex items-center gap-2.5">
                       <div className="w-2 h-2 rounded-full bg-secondary" />
-                      <h2 className="text-lg sm:text-xl font-bold text-white">{formatDate(date)}</h2>
+                      <h2 className="text-lg sm:text-xl font-bold text-primary">{formatDate(date)}</h2>
                     </div>
-                    <span className="text-xs text-white/20 font-medium">{groupItems.length} foto</span>
-                    <div className="flex-1 h-px bg-white/5" />
+                    <span className="text-xs text-on-surface-variant/50 font-medium">{groupItems.length} foto</span>
+                    <div className="flex-1 h-px bg-outline-variant/15" />
                   </div>
 
                   {/* Masonry grid */}
@@ -141,7 +141,7 @@ export default function GaleriPage() {
                         className="mb-3 sm:mb-4 break-inside-avoid group cursor-pointer"
                         onClick={() => setSelectedIndex(flatIndexOf(item))}
                       >
-                        <div className="rounded-2xl sm:rounded-3xl overflow-hidden relative border border-white/5 hover:border-secondary/30 transition-all duration-500">
+                        <div className="rounded-2xl sm:rounded-3xl overflow-hidden relative border border-outline-variant/15 bg-surface-container-low hover:border-secondary/30 transition-all duration-500 shadow-sm hover:shadow-xl hover:-translate-y-1">
                           <img
                             src={item.image}
                             alt={item.title || `Dokumentasi ${i + 1}`}

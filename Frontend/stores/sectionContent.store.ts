@@ -53,6 +53,7 @@ const DEFAULT_HERO: HeroContent = {
     { value: "120+", label: "Projects" },
     { value: "3+", label: "Divisions" },
   ],
+  image: "https://i.pinimg.com/1200x/65/0e/80/650e807f610ffe0df4b057f1e0dbb5f6.jpg",
 };
 
 const DEFAULT_ABOUT: AboutContent = {
@@ -66,6 +67,7 @@ const DEFAULT_ABOUT: AboutContent = {
     { icon: "groups", title: "Kolaborasi Lintas Disiplin", description: "Menyatukan berbagai bakat dari fotografi hingga IT." },
     { icon: "verified", title: "Standar Studio Profesional", description: "Hasil karya dengan kualitas yang diakui industri." },
   ],
+  image: "https://i.pinimg.com/736x/75/57/f1/7557f1e58b18c5dcb21efd283e0bb48a.jpg",
 };
 
 const DEFAULT_DIVISIONS: DivisionsContent = {
@@ -78,18 +80,21 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       title: "Photography & Videography",
       subtitle: "VISUAL STORYTELLING",
       description: "Menangkap momen dan merangkai narasi visual melalui lensa dengan standar sinematografi tinggi. Kami berfokus pada teknik pengambilan gambar profesional dan penceritaan visual yang kuat.",
+      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBiZlRZqqTnnWd0G44h6NFUk5MZGCEAqOaUbt9PCh8jFMcZ6KyYekvNTyqqayhnaZRLlYlLEzzYs_i83CH34eFfVqaaYFCtxJipqRHoqlDwmyKBxXLVzubaTNdsIUfMQ_Be7LXj4BfW2NsIh6DGyfOxdb5AzUrneAo_Zr0Rx-Jm2lASh-eCVARMh-RLvUwDK1W7XojLUXsSlrf_hcIp71PAbebvbtDmwr5ar5NATyPIGidnt88RIDuoaxygn89cxF8hqw7veqkl-LBN",
       features: ["Studio Production", "Field Documentation", "Post-Processing Mastery"],
     },
     {
       title: "Graphic Design",
       subtitle: "IDENTITY & LAYOUT",
       description: "Eksplorasi identitas visual, tipografi modern, dan desain user interface yang intuitif dan estetik. Kami menciptakan bahasa visual yang bermakna dan memikat audiens.",
+      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBvAlHRGFnEg-9VzjA5IdT1TvIpNSpd9Y4yq7xzeIXwmdvi6Q437GAAz7SVCQ4Ry5I8IhfJ8dFw66Gx2zZneSMDFmpQy0Knlj9imau-ZzucMtjHC6r1dkEUSnpexdBO6Nvy1YQxeJbIm1Cc4GiLy4uCkJ3_TeRrPaYk3v1DzCHNInLiYTGqVm8PK94Zyh6RwJU0vDCGNlllGw-jo_UNloy8DTBjBK8pqb8rbAFzaexqiVwqUrWl84Pcik4pETRVWL4qDql-aSndO0HD",
       features: ["Branding & Identity", "Digital Illustration", "UI/UX Design"],
     },
     {
       title: "Kominfo",
       subtitle: "INFORMATION HUB",
       description: "Menjembatani informasi dan teknologi komunikasi untuk memperkuat jangkauan digital organisasi. Kami mengelola aliran informasi dan infrastruktur digital komunitas.",
+      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3YPirtyYQqUulGH_4ce37GHXSDyI5GIagMVsb7mGo-LhxxvOXh1HxHinJd0jdRWIDhrfWsKDuRsXsdOa91QHqsOjSLvyv2wU6gErgwTk4vKvRke7qmUDoiExVzhmqhJilOwWrhlo_vpgJQW76zI5qRjdppZg_O-nQm6gLvF0Z_SkQ0_5rX7zH-ZDN_x78ayUaBFcsnZnFyASb0IuGer9h-YMxwE2gp5elbv2yBQMSNC_QYDSf8jV5cQWWmopcpTCCLag8aTdBKwSy",
       features: ["Social Media Management", "Public Relations", "Digital Networking"],
     },
   ],

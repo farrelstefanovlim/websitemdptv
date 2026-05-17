@@ -3,16 +3,21 @@
 import { useState, useRef } from "react";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import DatePicker from "@/components/ui/DatePicker";
 import AttendanceTable from "@/components/feature/absensi/AttendanceTable";
 import AttendanceSummary from "@/components/feature/absensi/AttendanceSummary";
 import { useAttendanceStore } from "@/stores/attendance.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel, ABSENSI_COLUMNS } from "@/lib/excel";
 
+import { createPortal } from "react-dom";
+import { usePortalTarget } from "@/hooks/usePortalTarget";
 import { formatDateDisplay, getToday } from "./utils";
 
 export default function AbsensiPage() {
-  const [selectedDate, setSelectedDate] = useState(getToday);
+  const portalTarget = usePortalTarget("mobile-topbar-actions");
+  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
+  const [selectedDate, setSelectedDate] = useState(getToday());
   const { members, records, setAttendance } = useAttendanceStore();
   const hydrated = useHydrated();
   const importRef = useRef<HTMLInputElement>(null);
@@ -55,13 +60,41 @@ export default function AbsensiPage() {
     );
   }
 
+  const mobileActions = (
+    <>
+      <Button variant="success" size="none" onClick={handleExport} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="download" size="sm" />
+      </Button>
+      <Button variant="outline" size="none" onClick={() => importRef.current?.click()} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="upload" size="sm" />
+      </Button>
+      <Button variant="secondary" size="none" onClick={() => setSelectedDate(getToday())} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="today" size="sm" />
+      </Button>
+      <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+    </>
+  );
+
+  const mobileTitle = (
+    <div className="min-w-0 pr-2">
+      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+        Absensi
+      </h2>
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
+        {formatDateDisplay(selectedDate)}
+      </p>
+    </div>
+  );
+
   return (
     <>
+      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
+      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="px-4 sm:px-8 py-3 sm:py-4">
+      <header className="sticky top-[68px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+        <div className="px-4 sm:px-8 py-2.5 lg:py-4">
           {/* Title Row */}
-          <div className="flex items-center justify-between mb-2 sm:mb-0">
+          <div className="hidden lg:flex items-center justify-between mb-2 lg:mb-0">
             <div>
               <h2 className="text-base sm:text-xl font-bold text-primary">
                 Absensi
@@ -70,7 +103,7 @@ export default function AbsensiPage() {
                 {formatDateDisplay(selectedDate)}
               </p>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden lg:flex items-center gap-1.5 sm:gap-2">
               <Button variant="success" size="sm" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
                 <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
               </Button>
@@ -99,12 +132,13 @@ export default function AbsensiPage() {
             >
               <Icon name="chevron_left" size="sm" />
             </Button>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary font-medium focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
-            />
+            <div className="flex-1 sm:flex-none sm:w-40">
+              <DatePicker
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="!py-1.5"
+              />
+            </div>
             <Button variant="none" size="none"
               onClick={() => {
                 const d = new Date(selectedDate + "T00:00:00");

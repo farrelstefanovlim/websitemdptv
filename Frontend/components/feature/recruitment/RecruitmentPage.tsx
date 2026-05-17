@@ -9,7 +9,12 @@ import { useRecruitmentStore } from "@/stores/recruitment.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel, RECRUITMENT_COLUMNS } from "@/lib/excel";
 
+import { createPortal } from "react-dom";
+import { usePortalTarget } from "@/hooks/usePortalTarget";
+
 export default function RecruitmentPage() {
+  const portalTarget = usePortalTarget("mobile-topbar-actions");
+  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const { applicants, addApplicant, registrationOpen, toggleRegistration } = useRecruitmentStore();
   const pendingCount = applicants.filter((a) => a.status === "pending").length;
   const hydrated = useHydrated();
@@ -53,10 +58,43 @@ export default function RecruitmentPage() {
     );
   }
 
+  const mobileActions = (
+    <>
+      <Button variant="success" size="none" onClick={handleExport} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="download" size="sm" />
+      </Button>
+      <Button variant="outline" size="none" onClick={() => importRef.current?.click()} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+        <Icon name="upload" size="sm" />
+      </Button>
+      {pendingCount > 0 && (
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-orange-500/10 rounded-lg border border-orange-500/20 shrink-0">
+          <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+          <span className="text-[10px] font-medium text-orange-500">
+            {pendingCount}
+          </span>
+        </div>
+      )}
+      <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+    </>
+  );
+
+  const mobileTitle = (
+    <div className="min-w-0 pr-2">
+      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+        Penerimaan Anggota
+      </h2>
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
+        Kelola pendaftaran calon anggota MDPTV
+      </p>
+    </div>
+  );
+
   return (
     <>
+      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
+      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
           <div>
             <h2 className="text-base sm:text-xl font-bold text-primary">
@@ -66,7 +104,7 @@ export default function RecruitmentPage() {
               Kelola pendaftaran calon anggota MDPTV
             </p>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="hidden lg:flex items-center gap-1.5 sm:gap-2">
             <Button variant="success" size="sm" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
               <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
             </Button>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Select from "@/components/ui/Select";
+import DatePicker from "@/components/ui/DatePicker";
 import Button from "@/components/ui/Button";
 import { type Kegiatan, type KegiatanStatus } from "@/stores/kegiatan.store";
 import { STATUS_CONFIG, ALL_STATUSES } from "./utils";
@@ -63,7 +64,7 @@ export default function KegiatanModal({ kegiatan, onClose, onSave }: KegiatanMod
             />
             <div>
               <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Tanggal</label>
-              <input type="date" value={form.date} onChange={(e) => set("date", e.target.value)} className={inputCls} />
+              <DatePicker value={form.date} onChange={(e) => set("date", e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

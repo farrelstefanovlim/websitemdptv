@@ -1,5 +1,7 @@
 "use client";
 
+import { createPortal } from "react-dom";
+import { usePortalTarget } from "@/hooks/usePortalTarget";
 import SectionEditor from "@/components/feature/dashboard/SectionEditor";
 import SectionPreview from "@/components/feature/dashboard/SectionPreview";
 import Icon from "@/components/ui/Icon";
@@ -7,9 +9,11 @@ import { useLayoutConfigStore } from "@/stores/layoutConfig.store";
 import { useHydrated } from "@/hooks/useHydrated";
 
 export default function Page() {
+  const hydrated = useHydrated();
+  const portalTarget = usePortalTarget("mobile-topbar-actions");
+  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const sections = useLayoutConfigStore((s) => s.sections);
   const visibleCount = sections.filter((s) => s.visible).length;
-  const hydrated = useHydrated();
 
   if (!hydrated) {
     return (
@@ -19,10 +23,42 @@ export default function Page() {
     );
   }
 
+  const mobileActions = (
+    <>
+      <div className="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low rounded-lg border border-outline-variant/10 shrink-0">
+        <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+        <span className="text-[10px] font-medium text-on-surface-variant/60">
+          {visibleCount}/{sections.length} sect
+        </span>
+      </div>
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-8 h-8 rounded-lg flex items-center justify-center bg-secondary text-on-secondary hover:brightness-110 transition-all shrink-0"
+      >
+        <Icon name="open_in_new" size="sm" />
+      </a>
+    </>
+  );
+
+  const mobileTitle = (
+    <div className="min-w-0 pr-2">
+      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+        Layout Editor
+      </h2>
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
+        Kelola tampilan dan urutan section
+      </p>
+    </div>
+  );
+
   return (
     <>
+      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
+      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
           <div>
             <h2 className="text-base sm:text-xl font-bold text-primary">
@@ -32,7 +68,7 @@ export default function Page() {
               Kelola tampilan dan urutan section landing page
             </p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="hidden lg:flex items-center gap-2 sm:gap-4">
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-xl border border-outline-variant/10">
               <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
               <span className="text-xs font-medium text-on-surface-variant/60">
