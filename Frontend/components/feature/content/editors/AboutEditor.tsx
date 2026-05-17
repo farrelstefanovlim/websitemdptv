@@ -2,11 +2,13 @@
 
 import { useSectionContentStore } from "@/stores/sectionContent.store";
 import Field from "./Field";
+import ImageUploadField from "./ImageUploadField";
 
 export default function AboutEditor() {
   const { about, updateAbout } = useSectionContentStore();
   return (
     <div className="grid gap-3">
+      <ImageUploadField label="Side Image" value={about.image} onChange={(v) => updateAbout({ image: v })} />
       <Field label="Section Label" value={about.label} onChange={(v) => updateAbout({ label: v })} />
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Heading Line 1" value={about.headingLine1} onChange={(v) => updateAbout({ headingLine1: v })} />

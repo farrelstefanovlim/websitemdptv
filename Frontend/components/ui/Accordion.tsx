@@ -102,7 +102,7 @@ export default function Accordion({ items }: AccordionProps) {
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-headline-md text-base sm:text-xl md:text-2xl lg:text-3xl text-primary truncate">
+                  <h3 className="font-headline font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl text-primary leading-tight">
                     {item.title}
                   </h3>
                   <span className="text-[9px] sm:text-[10px] text-label-bold text-secondary/50 uppercase tracking-widest mt-0.5 sm:mt-1 block">

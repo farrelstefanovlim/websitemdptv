@@ -1,6 +1,8 @@
 "use client";
 import { useState, useRef } from "react";
 import UploadPhotoForm from "./UploadPhotoForm";
+import { createPortal } from "react-dom";
+import { usePortalTarget } from "@/hooks/usePortalTarget";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 import { useSectionContentStore } from "@/stores/sectionContent.store";
@@ -10,6 +12,8 @@ import type { GalleryItem } from "@/stores/sectionContent.store";
 export default function GaleriAdminPage() {
   const { documentation, addGalleryItem, removeGalleryItem } = useSectionContentStore();
   const hydrated = useHydrated();
+  const portalTarget = usePortalTarget("mobile-topbar-actions");
+  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [showForm, setShowForm] = useState(false);
@@ -60,10 +64,40 @@ export default function GaleriAdminPage() {
     );
   }
 
+  const mobileActions = (
+    <>
+      <a
+        href="/galeri"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-8 h-8 rounded-lg flex items-center justify-center border border-outline-variant/25 text-on-surface-variant hover:bg-surface-container-high transition-all shrink-0"
+      >
+        <Icon name="open_in_new" size="sm" />
+      </a>
+      <Button variant="secondary" size="none" onClick={() => setShowForm(!showForm)} className="w-auto px-2.5 h-8 flex items-center justify-center rounded-lg text-[10px] shrink-0 font-bold tracking-widest gap-1.5 uppercase">
+        <Icon name={showForm ? "close" : "add_photo_alternate"} size="sm" className="!text-xs" />
+        {showForm ? "Batal" : "Tambah"}
+      </Button>
+    </>
+  );
+
+  const mobileTitle = (
+    <div className="min-w-0 pr-2">
+      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+        Galeri Dokumentasi
+      </h2>
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
+        {items.length} foto dokumentasi
+      </p>
+    </div>
+  );
+
   return (
     <>
+      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
+      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
           <div>
             <h2 className="text-base sm:text-xl font-bold text-primary">
@@ -73,7 +107,7 @@ export default function GaleriAdminPage() {
               {items.length} foto dokumentasi
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2">
             <a
               href="/galeri"
               target="_blank"

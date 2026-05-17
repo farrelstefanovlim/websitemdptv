@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
+import { usePortalTarget } from "@/hooks/usePortalTarget";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 import { useSectionContentStore } from "@/stores/sectionContent.store";
@@ -40,6 +42,8 @@ export default function ContentEditorPage() {
   const [openSection, setOpenSection] = useState<SectionKey | null>("hero");
   const { resetSection, resetAll } = useSectionContentStore();
   const hydrated = useHydrated();
+  const portalTarget = usePortalTarget("mobile-topbar-actions");
+  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
 
   if (!hydrated) {
     return (
@@ -49,16 +53,42 @@ export default function ContentEditorPage() {
     );
   }
 
+  const mobileActions = (
+    <>
+      <Button variant="none" size="none" onClick={resetAll}
+        className="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all shrink-0">
+        <Icon name="restart_alt" size="sm" />
+      </Button>
+      <a href="/" target="_blank" rel="noopener noreferrer"
+        className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary text-on-secondary hover:brightness-110 transition-all shrink-0">
+        <Icon name="open_in_new" size="sm" />
+      </a>
+    </>
+  );
+
+  const mobileTitle = (
+    <div className="min-w-0 pr-2">
+      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+        Content Editor
+      </h2>
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
+        Edit konten setiap section
+      </p>
+    </div>
+  );
+
   return (
     <>
+      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
+      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
           <div>
             <h2 className="text-base sm:text-xl font-bold text-primary">Content Editor</h2>
             <p className="text-[10px] sm:text-xs text-on-surface-variant/50">Edit konten setiap section landing page</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2">
             <Button variant="none" size="none" onClick={resetAll}
               className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300">
               <Icon name="restart_alt" size="sm" /> Reset All
