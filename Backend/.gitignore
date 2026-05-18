@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+
+# Environment variables (SANGAT PENTING: Jangan di-push ke Github)
+.env
+.env.local
+.env.production
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files and logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun.lockb
