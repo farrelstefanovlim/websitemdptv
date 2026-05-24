@@ -5,13 +5,14 @@ import Icon from "@/components/ui/Icon";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import { type AppUser, type UserRole, ROLE_CONFIG } from "@/stores/user.store";
+import Alert from "@/components/ui/Alert";
 
 const ALL_ROLES: UserRole[] = ["superadmin", "admin"];
 
 interface UserModalProps {
   user: AppUser | null;
   onClose: () => void;
-  onSave: (data: Partial<AppUser>) => void;
+  onSave: (data: Partial<AppUser>) => Promise<void> | void;
 }
 
 export default function UserModal({ user, onClose, onSave }: UserModalProps) {
@@ -24,6 +25,21 @@ export default function UserModal({ user, onClose, onSave }: UserModalProps) {
     isActive: user?.isActive ?? true,
   });
   const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSave = async () => {
+    setError(null);
+    if (!form.username.trim() || form.password.length < 6 || !form.email.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await onSave(form);
+    } catch (e: any) {
+      setError(e.message || "Gagal menyimpan user");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const set = (field: string, value: string | boolean) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -40,6 +56,7 @@ export default function UserModal({ user, onClose, onSave }: UserModalProps) {
           </Button>
         </div>
         <div className="p-5 grid gap-3">
+          {error && <Alert variant="error">{error}</Alert>}
           <div>
             <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Username *</label>
             <input type="text" value={form.username} onChange={(e) => set("username", e.target.value)} className={inputCls} placeholder="username" />
@@ -83,9 +100,9 @@ export default function UserModal({ user, onClose, onSave }: UserModalProps) {
           <Button variant="ghost" size="sm" onClick={onClose}>
             Batal
           </Button>
-          <Button variant="primary" size="sm" onClick={() => { if (form.username.trim() && form.password.length >= 6) onSave(form); }}
-            disabled={!form.username.trim() || form.password.length < 6 || !form.email.trim()}>
-            {user ? "Simpan" : "Tambah User"}
+          <Button variant="primary" size="sm" onClick={handleSave}
+            disabled={isSubmitting || !form.username.trim() || form.password.length < 6 || !form.email.trim()}>
+            {isSubmitting ? "Menyimpan..." : (user ? "Simpan" : "Tambah User")}
           </Button>
         </div>
       </div>

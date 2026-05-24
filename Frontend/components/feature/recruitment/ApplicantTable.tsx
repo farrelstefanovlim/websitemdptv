@@ -11,6 +11,7 @@ import {
 } from "@/components/feature/recruitment/types/recruitment.type";
 import Button from "@/components/ui/Button";
 import ApplicantCard from "./ApplicantCard";
+import ActionMenu from "@/components/ui/ActionMenu";
 
 const allStatuses: RecruitmentStatus[] = ["pending", "interview", "accepted", "rejected"];
 const divisions = ["Semua", "Photography & Videography", "Graphic Design", "Kominfo"];
@@ -21,14 +22,16 @@ const divisionShort: Record<string, string> = {
   "Kominfo": "Kominfo",
 };
 
-export default function ApplicantTable() {
+export default function ApplicantTable({ actions }: { actions?: React.ReactNode }) {
   const { applicants } = useRecruitmentStore();
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<RecruitmentStatus | "all">("all");
   const [filterDivision, setFilterDivision] = useState("Semua");
 
   const filtered = applicants.filter((a) => {
     if (filterStatus !== "all" && a.status !== filterStatus) return false;
     if (filterDivision !== "Semua" && a.division !== filterDivision) return false;
+    if (search && !a.name.toLowerCase().includes(search.toLowerCase()) && !a.nim.includes(search)) return false;
     return true;
   });
 
@@ -44,47 +47,41 @@ export default function ApplicantTable() {
         </div>
       </div>
 
-      {/* Status Filter */}
-      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-        <Button
-          variant="none" size="none"
-          onClick={() => setFilterStatus("all")}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200
-            ${filterStatus === "all" ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface-variant/60 border border-outline-variant/15 hover:bg-surface-container-high"}`}
-        >
-          Semua
-        </Button>
-        {allStatuses.map((status) => {
-          const colors = STATUS_COLORS[status];
-          return (
-            <Button
-              variant="none" size="none"
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200
-                ${filterStatus === status ? `${colors.bg} ${colors.text} ${colors.border} border` : "bg-surface-container-low text-on-surface-variant/60 border border-outline-variant/15 hover:bg-surface-container-high"}`}
-            >
-              <Icon name={STATUS_ICONS[status]} size="sm" className="!text-xs" />
-              <span className="hidden sm:inline">{STATUS_LABELS[status]}</span>
-            </Button>
-          );
-        })}
-      </div>
+      {/* Toolbar: Search, Filter & Actions */}
+      <div className="mb-6 flex items-center gap-2 w-full">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Icon name="search" size="sm" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30" />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+            className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-sm focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
+            placeholder="Cari nama atau NIM..." />
+        </div>
 
-      {/* Division Filter */}
-      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-        {divisions.map((div) => (
-          <Button
-            variant="none" size="none"
-            key={div}
-            onClick={() => setFilterDivision(div)}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200
-              ${filterDivision === div ? "bg-secondary text-on-secondary border border-transparent" : "bg-surface-container-low text-on-surface-variant/60 border border-outline-variant/15 hover:bg-surface-container-high"}`}
-          >
-            <span className="sm:hidden">{divisionShort[div]}</span>
-            <span className="hidden sm:inline">{div}</span>
-          </Button>
-        ))}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Filter Menu */}
+          <ActionMenu triggerIcon="filter_list" title="Saring Pelamar" actions={[
+            { type: "header", label: "Status" },
+            { label: "Semua Status", icon: "list", active: filterStatus === "all", onClick: () => setFilterStatus("all") },
+            ...allStatuses.map(s => ({
+              label: STATUS_LABELS[s],
+              icon: STATUS_ICONS[s],
+              active: filterStatus === s,
+              onClick: () => setFilterStatus(s)
+            })),
+            { type: "divider" },
+            { type: "header", label: "Divisi" },
+            { label: "Semua Divisi", icon: "list", active: filterDivision === "Semua", onClick: () => setFilterDivision("Semua") },
+            ...divisions.filter(d => d !== "Semua").map(d => ({
+              label: d,
+              icon: "group",
+              active: filterDivision === d,
+              onClick: () => setFilterDivision(d)
+            }))
+          ]} />
+
+          {/* Actions (from parent) */}
+          {actions}
+        </div>
       </div>
 
       {/* Applicant Cards */}

@@ -7,8 +7,11 @@ import { useAttendanceStore } from "@/stores/attendance.store";
 import type { AttendanceStatus } from "@/components/feature/absensi/types/attendance.type";
 import { STATUS_LABELS, STATUS_ICONS } from "@/components/feature/absensi/types/attendance.type";
 
+import ActionMenu from "@/components/ui/ActionMenu";
+
 interface AttendanceTableProps {
   selectedDate: string;
+  actions?: React.ReactNode;
 }
 
 const statusStyles: Record<AttendanceStatus, { active: string; ring: string }> = {
@@ -38,15 +41,19 @@ const divisionShort: Record<string, string> = {
   "Kominfo": "Kominfo",
 };
 
-export default function AttendanceTable({ selectedDate }: AttendanceTableProps) {
-  const { members, setAttendance, markAllPresent, clearDate, getMemberStatus } =
+export default function AttendanceTable({ selectedDate, actions }: AttendanceTableProps) {
+  const { members, setAttendance, markAllPresent, clearDate, getMemberStatus, isDateLocked } =
     useAttendanceStore();
   const [filterDivision, setFilterDivision] = useState("Semua");
+  const [search, setSearch] = useState("");
+  const isLocked = isDateLocked(selectedDate);
 
-  const filteredMembers =
-    filterDivision === "Semua"
-      ? members
-      : members.filter((m) => m.division === filterDivision);
+  const filteredMembers = members.filter((m) => {
+    const matchesDiv = filterDivision === "Semua" || m.division === filterDivision;
+    const s = search.toLowerCase();
+    const matchesSearch = !s || m.name.toLowerCase().includes(s);
+    return matchesDiv && matchesSearch;
+  });
 
   const allStatuses: AttendanceStatus[] = ["present", "late", "excused", "absent"];
 
@@ -61,42 +68,57 @@ export default function AttendanceTable({ selectedDate }: AttendanceTableProps) 
           </p>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Button variant="none" size="none"
-            onClick={() => markAllPresent(selectedDate)}
-            className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500/20 transition-all duration-300"
-          >
-            <Icon name="done_all" size="sm" />
-            <span className="hidden sm:inline">All</span> Hadir
-          </Button>
-          <Button variant="none" size="none"
-            onClick={() => clearDate(selectedDate)}
-            className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300"
-          >
-            <Icon name="clear_all" size="sm" />
-            Clear
-          </Button>
+          {isLocked && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 bg-red-50 text-red-500 rounded-lg sm:rounded-xl border border-red-200">
+              <Icon name="lock" size="sm" className="!text-xs sm:!text-sm" />
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest hidden sm:inline">Terkunci</span>
+            </div>
+          )}
+          {!isLocked && (
+            <>
+              <Button variant="none" size="none"
+                onClick={() => markAllPresent(selectedDate)}
+                className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500/20 transition-all duration-300"
+              >
+                <Icon name="done_all" size="sm" />
+                <span className="hidden sm:inline">All</span> Hadir
+              </Button>
+              <Button variant="none" size="none"
+                onClick={() => clearDate(selectedDate)}
+                className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-[9px] sm:text-xs font-bold uppercase tracking-widest rounded-lg sm:rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300"
+              >
+                <Icon name="clear_all" size="sm" />
+                Clear
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Division Filter */}
-      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-        {divisions.map((div) => (
-          <Button variant="none" size="none"
-            key={div}
-            onClick={() => setFilterDivision(div)}
-            className={`
-              px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200
-              ${
-                filterDivision === div
-                  ? "bg-secondary text-on-secondary border border-transparent"
-                  : "bg-surface-container-low text-on-surface-variant/60 border border-outline-variant/15 hover:bg-surface-container-high"
-              }
-            `}
-          >
-            <span className="sm:hidden">{divisionShort[div]}</span>
-            <span className="hidden sm:inline">{div}</span>
-          </Button>
-        ))}
+      {/* Toolbar: Search, Filter & Actions */}
+      <div className="mb-6 flex items-center gap-2 w-full">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Icon name="search" size="sm" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30" />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+            className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-sm focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
+            placeholder="Cari nama anggota..." />
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Filter Menu */}
+          <ActionMenu triggerIcon="filter_list" title="Saring Divisi" actions={[
+            ...divisions.map(d => ({
+              label: d,
+              icon: "group",
+              active: filterDivision === d,
+              onClick: () => setFilterDivision(d)
+            }))
+          ]} />
+
+          {/* Page Actions */}
+          {actions}
+        </div>
       </div>
 
       {/* Table */}
@@ -134,13 +156,17 @@ export default function AttendanceTable({ selectedDate }: AttendanceTableProps) 
                     <Button variant="none" size="none"
                       key={status}
                       onClick={() => setAttendance(member.id, selectedDate, status)}
+                      disabled={isLocked}
                       className={`
                         flex items-center justify-center gap-1 px-1 sm:px-3 py-2 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border transition-all duration-200
                         ${
                           isActive
                             ? `${statusStyles[status].active} ring-2 ${statusStyles[status].ring} shadow-sm`
-                            : "border-outline-variant/15 text-on-surface-variant/40 hover:border-outline-variant/30 hover:bg-surface-container-low"
+                            : isLocked 
+                              ? "border-outline-variant/10 text-on-surface-variant/20 bg-surface-container-lowest"
+                              : "border-outline-variant/15 text-on-surface-variant/40 hover:border-outline-variant/30 hover:bg-surface-container-low"
                         }
+                        ${isActive && isLocked ? "opacity-75" : ""}
                       `}
                     >
                       <Icon

@@ -1,12 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useGalleryStore } from "@/stores/gallery.store";
 import Field from "./Field";
+import { getImageUrl } from "@/lib/image";
+import type { GalleryItem } from "@/components/feature/content/types/content.type";
+import Alert from "@/components/ui/Alert";
 
 export default function DocumentationEditor() {
-  const { documentation, updateDocumentation, toggleFeatured } = useSectionContentStore();
-  const allItems = documentation.galleryItems;
+  const { documentation, updateDocumentation } = useSectionContentStore();
+  const { items: allItems, fetchGallery, toggleGalleryFeature } = useGalleryStore();
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchItems = async () => {
+    await fetchGallery();
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const toggleFeatured = async (item: GalleryItem) => {
+    if (!item.id) return;
+    setError(null);
+    try {
+      await toggleGalleryFeature(item.id);
+    } catch (e: any) {
+      setError(e?.message || "Gagal mengubah status foto.");
+    }
+  };
+
   const featuredCount = allItems.filter((i) => i.featured).length;
   const withImages = allItems.filter((i) => i.image);
 
@@ -22,6 +47,11 @@ export default function DocumentationEditor() {
 
       {/* Featured Photo Picker */}
       <div className="mt-1">
+        {error && (
+          <Alert variant="error" className="mb-4">
+            {error}
+          </Alert>
+        )}
         <div className="flex items-center justify-between mb-3">
           <div>
             <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block">
@@ -52,16 +82,16 @@ export default function DocumentationEditor() {
                 <div
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleFeatured(i); } }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleFeatured(item); } }}
                   key={i}
-                  onClick={() => toggleFeatured(i)}
+                  onClick={() => toggleFeatured(item)}
                   className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50
                     ${item.featured
                       ? "border-secondary ring-2 ring-secondary/20 shadow-md"
                       : "border-outline-variant/15 opacity-50 hover:opacity-80 hover:border-outline-variant/30"
                     }`}
                 >
-                  <img src={item.image} alt={item.title || `Foto ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={getImageUrl(item.image)} alt={item.title || `Foto ${i + 1}`} className="w-full h-full object-cover" />
                   {/* Selected overlay */}
                   {item.featured && (
                     <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-secondary flex items-center justify-center shadow-lg">

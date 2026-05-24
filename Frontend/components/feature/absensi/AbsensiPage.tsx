@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 import DatePicker from "@/components/ui/DatePicker";
 import AttendanceTable from "@/components/feature/absensi/AttendanceTable";
 import AttendanceSummary from "@/components/feature/absensi/AttendanceSummary";
+import AbsensiRekapModal from "@/components/feature/absensi/AbsensiRekapModal";
 import { useAttendanceStore } from "@/stores/attendance.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel, ABSENSI_COLUMNS } from "@/lib/excel";
+import { toast } from "@/stores/toast.store";
+import ActionMenu from "@/components/ui/ActionMenu";
 
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "@/hooks/usePortalTarget";
@@ -18,9 +21,18 @@ export default function AbsensiPage() {
   const portalTarget = usePortalTarget("mobile-topbar-actions");
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const [selectedDate, setSelectedDate] = useState(getToday());
-  const { members, records, setAttendance } = useAttendanceStore();
+  const [showRekapModal, setShowRekapModal] = useState(false);
+  const { members, records, setAttendance, fetchMembers, fetchRecords, toggleLockDate, isDateLocked } = useAttendanceStore();
   const hydrated = useHydrated();
   const importRef = useRef<HTMLInputElement>(null);
+  
+  const isLocked = isDateLocked(selectedDate);
+
+  // Fetch data dari API saat mount
+  useEffect(() => {
+    fetchMembers();
+    fetchRecords();
+  }, [fetchMembers, fetchRecords]);
 
   const handleExport = () => {
     const exportData = members.map((m) => {
@@ -47,8 +59,8 @@ export default function AbsensiPage() {
           imported++;
         }
       }
-      alert(`Berhasil import ${imported} data absensi`);
-    } catch { alert("Gagal membaca file Excel"); }
+      toast.success(`Berhasil import ${imported} data absensi`);
+    } catch { toast.error("Gagal membaca file Excel"); }
     e.target.value = "";
   };
 
@@ -60,20 +72,6 @@ export default function AbsensiPage() {
     );
   }
 
-  const mobileActions = (
-    <>
-      <Button variant="success" size="none" onClick={handleExport} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="download" size="sm" />
-      </Button>
-      <Button variant="outline" size="none" onClick={() => importRef.current?.click()} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="upload" size="sm" />
-      </Button>
-      <Button variant="secondary" size="none" onClick={() => setSelectedDate(getToday())} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="today" size="sm" />
-      </Button>
-      <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
-    </>
-  );
 
   const mobileTitle = (
     <div className="min-w-0 pr-2">
@@ -88,67 +86,53 @@ export default function AbsensiPage() {
 
   return (
     <>
-      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
       {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
       <header className="sticky top-[68px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="px-4 sm:px-8 py-2.5 lg:py-4">
-          {/* Title Row */}
-          <div className="hidden lg:flex items-center justify-between mb-2 lg:mb-0">
-            <div>
-              <h2 className="text-base sm:text-xl font-bold text-primary">
+        <div className="px-4 sm:px-8 py-3 lg:py-5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* Title Row */}
+            <div className="hidden lg:block shrink-0">
+              <h2 className="text-xl font-bold text-primary leading-tight">
                 Absensi
               </h2>
-              <p className="text-[10px] sm:text-xs text-on-surface-variant/50">
+              <p className="text-xs font-semibold text-on-surface-variant/50 mt-0.5">
                 {formatDateDisplay(selectedDate)}
               </p>
             </div>
-            <div className="hidden lg:flex items-center gap-1.5 sm:gap-2">
-              <Button variant="success" size="sm" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
-                <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
-                <Icon name="upload" size="sm" /> <span className="hidden sm:inline">Import</span>
-              </Button>
-              <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
-              <Button variant="secondary" size="md"
-                onClick={() => setSelectedDate(getToday())}
-                className="px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs"
+            
+            {/* Date Navigation & Actions */}
+            <div className="flex items-center gap-1 bg-surface-container-lowest border border-outline-variant/15 rounded-xl p-1 shadow-sm w-full lg:w-auto shrink-0">
+              <Button variant="none" size="none"
+                onClick={() => {
+                  const d = new Date(selectedDate + "T00:00:00");
+                  d.setDate(d.getDate() - 1);
+                  setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+                }}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-low hover:text-primary transition-colors shrink-0"
               >
-                <Icon name="today" size="sm" />
-                <span className="hidden xs:inline">Hari Ini</span>
+                <Icon name="chevron_left" size="sm" />
+              </Button>
+              
+              <div className="flex-1 lg:w-44">
+                <DatePicker
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="!py-0 !h-9 w-full !border-none !shadow-none !bg-transparent !ring-0 !justify-center gap-2 text-center font-bold text-sm"
+                />
+              </div>
+              
+              <Button variant="none" size="none"
+                onClick={() => {
+                  const d = new Date(selectedDate + "T00:00:00");
+                  d.setDate(d.getDate() + 1);
+                  setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+                }}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-low hover:text-primary transition-colors shrink-0"
+              >
+                <Icon name="chevron_right" size="sm" />
               </Button>
             </div>
-          </div>
-          {/* Date Navigation */}
-          <div className="flex items-center gap-1 mt-2 sm:mt-0">
-            <Button variant="none" size="none"
-              onClick={() => {
-                const d = new Date(selectedDate + "T00:00:00");
-                d.setDate(d.getDate() - 1);
-                setSelectedDate(d.toISOString().split("T")[0]);
-              }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/50 hover:bg-surface-container-low hover:text-primary transition-all"
-            >
-              <Icon name="chevron_left" size="sm" />
-            </Button>
-            <div className="flex-1 sm:flex-none sm:w-40">
-              <DatePicker
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="!py-1.5"
-              />
-            </div>
-            <Button variant="none" size="none"
-              onClick={() => {
-                const d = new Date(selectedDate + "T00:00:00");
-                d.setDate(d.getDate() + 1);
-                setSelectedDate(d.toISOString().split("T")[0]);
-              }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant/50 hover:bg-surface-container-low hover:text-primary transition-all"
-            >
-              <Icon name="chevron_right" size="sm" />
-            </Button>
           </div>
         </div>
       </header>
@@ -166,11 +150,25 @@ export default function AbsensiPage() {
           {/* Table */}
           <div className="lg:col-span-3 lg:order-1">
             <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 p-3 sm:p-6">
-              <AttendanceTable selectedDate={selectedDate} />
+              <AttendanceTable selectedDate={selectedDate} actions={
+                <>
+                  <ActionMenu actions={[
+                    { label: "Hari Ini", icon: "today", onClick: () => setSelectedDate(getToday()) },
+                    { label: "Rekap Data", icon: "date_range", onClick: () => setShowRekapModal(true) },
+                    { label: isLocked ? "Buka Kunci" : "Kunci", icon: isLocked ? "lock_open" : "lock", onClick: () => toggleLockDate(selectedDate), variant: isLocked ? "default" : "danger" },
+                    { label: "Import Excel", icon: "upload", onClick: () => importRef.current?.click() },
+                    { label: "Export Harian", icon: "download", onClick: handleExport, variant: "success" },
+                  ]} />
+                  <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+                </>
+              } />
             </div>
           </div>
         </div>
       </div>
+
+      {/* Recap Modal */}
+      {showRekapModal && <AbsensiRekapModal onClose={() => setShowRekapModal(false)} />}
     </>
   );
 }

@@ -3,8 +3,10 @@
 import Icon from "@/components/ui/Icon";
 import Alert from "@/components/ui/Alert";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
+import { useRecruitmentStore } from "@/stores/recruitment.store";
 
 export default function RegistrationSuccess() {
+  const { groupLink } = useRecruitmentStore();
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
       <div className="fixed inset-0 noise-bg z-[1]" />
@@ -21,6 +23,15 @@ export default function RegistrationSuccess() {
           <Alert variant="info" title="Status: Pending Review" className="text-left mb-8">
             <span className="text-[10px] text-on-surface-variant/70">Kamu akan dihubungi dalam 3-5 hari kerja</span>
           </Alert>
+
+          {groupLink && (
+            <div className="mb-8">
+              <a href={groupLink} target="_blank" rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-green-500 text-white text-sm font-bold shadow-lg hover:bg-green-600 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Icon name="groups" size="sm" /> Bergabung Grup WhatsApp
+              </a>
+            </div>
+          )}
           <a href="/"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-secondary text-white text-sm font-bold hover:brightness-110 transition-all">
             <Icon name="arrow_back" size="sm" /> Kembali ke Beranda

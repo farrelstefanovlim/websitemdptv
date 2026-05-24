@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import UploadPhotoForm from "./UploadPhotoForm";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "@/hooks/usePortalTarget";
@@ -7,25 +7,33 @@ import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 import { useSectionContentStore } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
-import type { GalleryItem } from "@/stores/sectionContent.store";
+import type { GalleryItem } from "@/components/feature/content/types/content.type";
+import { getImageUrl } from "@/lib/image";
+import { useGalleryStore } from "@/stores/gallery.store";
+import Alert from "@/components/ui/Alert";
 
 export default function GaleriAdminPage() {
-  const { documentation, addGalleryItem, removeGalleryItem } = useSectionContentStore();
+  const { documentation } = useSectionContentStore();
   const hydrated = useHydrated();
   const portalTarget = usePortalTarget("mobile-topbar-actions");
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [showForm, setShowForm] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+  
+  const { items, fetchGallery, deleteGalleryImage, error: storeError } = useGalleryStore();
 
-  const items = documentation.galleryItems;
+  useEffect(() => {
+    fetchGallery();
+  }, [fetchGallery]);
 
   // Group items by uploadedAt date
   const grouped = items.reduce<Record<string, { items: GalleryItem[]; indices: number[] }>>((acc, item, i) => {
     const date = item.uploadedAt || "Tanpa Tanggal";
     if (!acc[date]) acc[date] = { items: [], indices: [] };
     acc[date].items.push(item);
-    acc[date].indices.push(i);
+    acc[date].indices.push(i); // This is index in full array, probably not needed since we'll use ID
     return acc;
   }, {});
 
@@ -45,14 +53,23 @@ export default function GaleriAdminPage() {
     });
   };
 
-  const handleAdd = (item: GalleryItem) => {
-    addGalleryItem(item);
+  const handleAdd = async (item: GalleryItem) => {
+    setLocalError(null);
     setShowForm(false);
   };
 
-  const handleDelete = (originalIndex: number) => {
+  const handleDelete = async (item: GalleryItem) => {
+    setLocalError(null);
+    if (!item.id) {
+       setLocalError("Error: Foto ini tidak memiliki ID valid di database.");
+       return;
+    }
     if (confirm("Hapus foto ini?")) {
-      removeGalleryItem(originalIndex);
+      try {
+        await deleteGalleryImage(item.id);
+      } catch (e: any) {
+        setLocalError(e?.response?.data?.message || "Gagal menghapus gambar.");
+      }
     }
   };
 
@@ -66,15 +83,13 @@ export default function GaleriAdminPage() {
 
   const mobileActions = (
     <>
-      <a
-        href="/galeri"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-8 h-8 rounded-lg flex items-center justify-center border border-outline-variant/25 text-on-surface-variant hover:bg-surface-container-high transition-all shrink-0"
+      <a href="/galeri" target="_blank" rel="noopener noreferrer"
+        className="w-9 h-9 flex items-center justify-center rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-surface-container-high transition-all duration-300 shrink-0"
       >
         <Icon name="open_in_new" size="sm" />
       </a>
-      <Button variant="secondary" size="none" onClick={() => setShowForm(!showForm)} className="w-auto px-2.5 h-8 flex items-center justify-center rounded-lg text-[10px] shrink-0 font-bold tracking-widest gap-1.5 uppercase">
+      <Button variant="none" size="none" onClick={() => setShowForm(!showForm)} 
+        className={`px-3 h-9 flex items-center justify-center rounded-xl text-[10px] shrink-0 font-bold tracking-widest gap-1.5 uppercase transition-all duration-300 shadow-sm ${showForm ? 'bg-surface-container-high text-on-surface hover:brightness-95' : 'bg-secondary text-on-secondary hover:brightness-110 shadow-secondary/20'}`}>
         <Icon name={showForm ? "close" : "add_photo_alternate"} size="sm" className="!text-xs" />
         {showForm ? "Batal" : "Tambah"}
       </Button>
@@ -108,18 +123,15 @@ export default function GaleriAdminPage() {
             </p>
           </div>
           <div className="hidden lg:flex items-center gap-2">
-            <a
-              href="/galeri"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-surface-container-high transition-all"
+            <a href="/galeri" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-surface-container-high transition-all duration-300"
             >
               <Icon name="open_in_new" size="sm" />
               <span className="hidden sm:inline">Preview</span>
             </a>
-            <Button variant="secondary" size="md"
+            <Button variant="none" size="none"
               onClick={() => setShowForm(!showForm)}
-              className="px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs"
+              className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl shadow-sm transition-all duration-300 ${showForm ? 'bg-surface-container-high text-on-surface hover:brightness-95' : 'bg-secondary text-on-secondary hover:brightness-110 shadow-secondary/20'}`}
             >
               <Icon name={showForm ? "close" : "add_photo_alternate"} size="sm" />
               {showForm ? "Batal" : "Tambah Foto"}
@@ -130,6 +142,12 @@ export default function GaleriAdminPage() {
 
       <div className="p-3 sm:p-8">
         <div className="max-w-5xl mx-auto">
+          {(localError || storeError) && (
+            <Alert variant="error" className="mb-6" title="Terjadi Kesalahan">
+              {localError || storeError}
+            </Alert>
+          )}
+
           {/* Add Form */}
           {showForm && (
             <UploadPhotoForm
@@ -174,16 +192,12 @@ export default function GaleriAdminPage() {
                             key={originalIndex}
                             className="relative group rounded-xl sm:rounded-2xl overflow-hidden border border-outline-variant/15 hover:border-secondary/30 transition-all duration-300"
                           >
-                            {item.image ? (
+                            {item.image && (
                               <img
-                                src={item.image}
+                                src={getImageUrl(item.image)}
                                 alt={item.title || `Foto ${originalIndex + 1}`}
                                 className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
                               />
-                            ) : (
-                              <div className="w-full aspect-square bg-surface-container-high flex items-center justify-center">
-                                <Icon name="image" className="text-on-surface-variant/15 !text-4xl" />
-                              </div>
                             )}
 
                             {/* Hover overlay */}
@@ -191,7 +205,7 @@ export default function GaleriAdminPage() {
                               {/* Delete button */}
                               <div className="flex justify-end">
                                 <Button variant="none" size="none"
-                                  onClick={() => handleDelete(originalIndex)}
+                                  onClick={() => handleDelete(item)}
                                   className="w-8 h-8 rounded-full bg-error/80 hover:bg-error flex items-center justify-center transition-colors"
                                 >
                                   <Icon name="delete" size="sm" className="text-white !text-sm" />

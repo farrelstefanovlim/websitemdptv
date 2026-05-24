@@ -75,6 +75,13 @@ export function importFromExcel(
 
 /* ── Preset column configs for each data type ──────── */
 
+export const MEMBERS_COLUMNS: Column[] = [
+  { key: "name", header: "Nama Lengkap" },
+  { key: "division", header: "Divisi" },
+  { key: "angkatan", header: "Angkatan" },
+  { key: "is_active", header: "Status Aktif" },
+];
+
 export const ABSENSI_COLUMNS: Column[] = [
   { key: "name", header: "Nama" },
   { key: "division", header: "Divisi" },

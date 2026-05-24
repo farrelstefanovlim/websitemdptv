@@ -9,58 +9,78 @@ import type {
 
 export type * from "@/components/feature/kegiatan/types/kegiatan.type";
 
+import { kegiatanService } from "@/services/kegiatan.service";
+
 interface KegiatanState {
   items: Kegiatan[];
-  addKegiatan: (k: Omit<Kegiatan, "id" | "createdAt">) => void;
+  isLoading: boolean;
+  error: string | null;
+  fetchKegiatan: (params?: { division_id?: string; status?: string }) => Promise<void>;
+  addKegiatan: (k: Omit<Kegiatan, "id" | "createdAt">) => Promise<void>;
   updateKegiatan: (id: string, data: Partial<Kegiatan>) => void;
   removeKegiatan: (id: string) => void;
   setProposal: (id: string, file: ProposalFile | null) => void;
+  updateStatus: (id: string, status: KegiatanStatus, notes?: string) => Promise<void>;
 }
-
-const DUMMY: Kegiatan[] = [
-  {
-    id: "keg-001", title: "Workshop Cinematography", description: "Workshop teknik sinematografi dasar untuk anggota baru MDPTV.", division: "Photography & Videography",
-    date: "2026-06-15", location: "Lab Multimedia Lt.3", status: "disetujui", pic: "Ahmad Rizky", budget: "Rp 2.500.000", proposal: null, notes: "Sudah dikonfirmasi ruangan.", createdAt: "2026-05-01",
-  },
-  {
-    id: "keg-002", title: "Seminar AI in Media", description: "Seminar nasional tentang peran AI dalam produksi media modern.", division: "Kominfo",
-    date: "2026-07-20", location: "Auditorium MDP", status: "diajukan", pic: "Siti Nurhaliza", budget: "Rp 8.000.000", proposal: null, notes: "", createdAt: "2026-05-10",
-  },
-  {
-    id: "keg-003", title: "Design Sprint Challenge", description: "Kompetisi desain grafis antar divisi selama 3 hari.", division: "Graphic Design",
-    date: "2026-08-05", location: "Ruang Kreatif Lt.2", status: "draft", pic: "Budi Santoso", budget: "Rp 1.500.000", proposal: null, notes: "Perlu sponsorship.", createdAt: "2026-05-14",
-  },
-  {
-    id: "keg-004", title: "Annual Showcase 2026", description: "Pameran karya tahunan MDPTV untuk publik dan stakeholder.", division: "All Division",
-    date: "2026-12-10", location: "Hall Utama MDP", status: "draft", pic: "Diana Putri", budget: "Rp 15.000.000", proposal: null, notes: "", createdAt: "2026-05-16",
-  },
-  {
-    id: "keg-005", title: "Pelatihan Social Media", description: "Pelatihan strategi konten dan analytics platform sosial media.", division: "Kominfo",
-    date: "2026-06-28", location: "Lab Komputer Lt.4", status: "ditolak", pic: "Eko Prasetyo", budget: "Rp 1.000.000", proposal: null, notes: "Budget kurang detail, revisi ulang.", createdAt: "2026-04-20",
-  },
-];
 
 export const useKegiatanStore = create<KegiatanState>()(
   persist(
-    (set) => ({
-      items: DUMMY,
-      addKegiatan: (k) =>
-        set((s) => ({
-          items: [
-            { ...k, id: `keg-${Date.now()}`, createdAt: new Date().toISOString().split("T")[0] },
-            ...s.items,
-          ],
-        })),
+    (set, get) => ({
+      items: [],
+      isLoading: false,
+      error: null,
+
+      fetchKegiatan: async (params) => {
+        set({ isLoading: true, error: null });
+        try {
+          const items = await kegiatanService.fetchKegiatan(params);
+          set({ items, isLoading: false });
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || "Gagal memuat data kegiatan.", isLoading: false });
+        }
+      },
+
+      addKegiatan: async (k) => {
+        set({ isLoading: true, error: null });
+        try {
+          await kegiatanService.create({
+            title: k.title,
+            description: k.description,
+            event_date: k.date,
+            location: k.location,
+            budget: k.budget,
+          });
+          await get().fetchKegiatan();
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || "Gagal menambahkan kegiatan.", isLoading: false });
+        }
+      },
+
       updateKegiatan: (id, data) =>
         set((s) => ({
           items: s.items.map((item) => (item.id === id ? { ...item, ...data } : item)),
         })),
+
       removeKegiatan: (id) =>
         set((s) => ({ items: s.items.filter((item) => item.id !== id) })),
+
       setProposal: (id, file) =>
         set((s) => ({
           items: s.items.map((item) => (item.id === id ? { ...item, proposal: file } : item)),
         })),
+
+      updateStatus: async (id, status, notes) => {
+        try {
+          await kegiatanService.updateStatus(id, status, notes);
+          set((s) => ({
+            items: s.items.map((item) =>
+              item.id === id ? { ...item, status, notes: notes || item.notes } : item
+            ),
+          }));
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || "Gagal mengubah status kegiatan." });
+        }
+      },
     }),
     { name: "mdptv-kegiatan" }
   )

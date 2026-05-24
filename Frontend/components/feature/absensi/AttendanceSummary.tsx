@@ -87,18 +87,20 @@ export default function AttendanceSummary({ selectedDate }: AttendanceSummaryPro
         {statCards.map(({ status, icon, color, bgColor }) => (
           <div
             key={status}
-            className={`rounded-lg sm:rounded-xl p-2.5 sm:p-4 border ${bgColor} transition-all duration-300`}
+            className={`group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border ${bgColor} hover:scale-[1.02] hover:shadow-sm transition-all duration-300`}
           >
-            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-              <Icon name={icon} size="sm" className={`${color} !text-sm sm:!text-base`} />
-              <span className="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 hidden sm:inline">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors bg-white/40 group-hover:bg-white/70">
+                <Icon name={icon} size="sm" className={`${color} !text-base sm:!text-xl`} />
+              </div>
+              <span className={`text-[9px] sm:text-[11px] uppercase tracking-widest font-bold ${color} hidden sm:inline`}>
                 {STATUS_LABELS[status]}
               </span>
             </div>
-            <div className="text-lg sm:text-2xl font-black text-primary text-center sm:text-left">
+            <div className="text-2xl sm:text-4xl font-black text-primary text-center sm:text-left">
               {counts[status]}
             </div>
-            <span className="text-[8px] uppercase tracking-wider font-bold text-on-surface-variant/40 sm:hidden block text-center mt-0.5">
+            <span className={`text-[8px] sm:text-[11px] uppercase tracking-wider font-bold ${color} sm:hidden block text-center mt-0.5`}>
               {STATUS_LABELS[status]}
             </span>
           </div>

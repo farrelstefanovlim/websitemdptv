@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
+import { getImageUrl } from "@/lib/image";
 
 export default function HeroSection() {
   const hero = useSectionContentStore((s) => s.hero);
@@ -17,16 +18,18 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative min-h-screen flex items-center overflow-hidden bg-black"
+      className="relative min-h-screen flex items-center overflow-hidden bg-black w-full max-w-[100vw]"
       id="home"
     >
       {/* Background image with stronger overlay */}
       <div className="absolute inset-0 z-0 bg-black">
-        <img
-          className="w-full h-full object-cover opacity-50 scale-105"
-          alt="Professional media studio"
-          src={h.image || "https://i.pinimg.com/1200x/65/0e/80/650e807f610ffe0df4b057f1e0dbb5f6.jpg"}
-        />
+        {h.image && (
+          <img
+            className="w-full h-full object-cover opacity-50 scale-105"
+            alt="Professional media studio"
+            src={getImageUrl(h.image)}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-secondary/8 mix-blend-color" />
@@ -54,11 +57,11 @@ export default function HeroSection() {
           </AnimateOnScroll>
 
           <AnimateOnScroll variant="fadeUp" delay={0.4} duration={0.8}>
-            <h1 className="text-4xl sm:text-headline-lg-mobile md:text-[96px] md:leading-[0.92] text-white leading-[0.95] mb-8 sm:mb-10 flex flex-col gap-1">
-              <span className="font-black relative tracking-tight">
+            <h1 className="text-3xl sm:text-headline-lg-mobile md:text-[96px] md:leading-[0.92] text-white leading-[0.95] mb-8 sm:mb-10 flex flex-col gap-1 w-full max-w-[100vw] break-words">
+              <span className="font-black relative tracking-tight whitespace-normal sm:whitespace-nowrap break-words overflow-hidden">
                 {h.titleLine1}
               </span>
-              <span className="font-extralight italic opacity-80 text-3xl sm:text-[36px] md:text-[72px]">
+              <span className="font-extralight italic opacity-80 text-2xl sm:text-[36px] md:text-[72px] whitespace-normal sm:whitespace-nowrap break-words overflow-hidden">
                 {h.titleLine2}
               </span>
             </h1>
@@ -97,7 +100,7 @@ export default function HeroSection() {
           delay={1.2}
           className="mt-16 sm:mt-20 lg:mt-24"
         >
-          <div className="grid grid-cols-3 gap-4 sm:gap-0 sm:flex sm:items-center sm:gap-8 lg:gap-16">
+          <div className="grid grid-cols-3 gap-2 sm:gap-0 sm:flex sm:items-center sm:gap-8 lg:gap-16 w-full max-w-[100vw] pr-4 sm:pr-0">
             {h.stats.map((stat, i) => (
               <div key={i} className="flex items-center gap-8 lg:gap-16">
                 {i > 0 && <div className="hidden sm:block w-px h-12 bg-white/15 shrink-0" />}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import Alert from "@/components/ui/Alert";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import { useRecruitmentStore } from "@/stores/recruitment.store";
 
@@ -18,6 +19,7 @@ export default function DaftarPage() {
   const { addApplicant, registrationOpen } = useRecruitmentStore();
   const [step, setStep] = useState<Step>(1);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMSG, setErrorMSG] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -30,12 +32,23 @@ export default function DaftarPage() {
 
   const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
-  const canNext1 = form.name.trim() && form.nim.trim() && form.email.trim() && form.phone.trim();
-  const canNext2 = !!form.division;
-  const canSubmit = canNext1 && canNext2 && form.motivation.trim().length >= 20;
+  const handleNext = () => {
+    setErrorMSG(null);
+    if (step === 1) {
+      if (!form.name.trim()) return setErrorMSG("Nama Lengkap harus diisi!");
+      if (!form.nim.trim() || !/^\d+$/.test(form.nim)) return setErrorMSG("NIM harus diisi dengan angka yang valid!");
+      if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return setErrorMSG("Format email tidak valid!");
+      if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone)) return setErrorMSG("Nomor WhatsApp harus diisi dengan angka (minimal 10 digit)!");
+      setStep(2);
+    } else if (step === 2) {
+      if (!form.division) return setErrorMSG("Silakan pilih Divisi terlebih dahulu!");
+      setStep(3);
+    }
+  };
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
+  const attemptSubmit = () => {
+    setErrorMSG(null);
+    if (form.motivation.trim().length < 10) return setErrorMSG("Motivasi harus diisi minimal 10 karakter!");
     addApplicant(form);
     setSubmitted(true);
   };
@@ -99,6 +112,11 @@ export default function DaftarPage() {
           <div className="bg-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 border border-outline-variant/15 shadow-xl">
 
             {/* Steps Rendering */}
+            {errorMSG && (
+              <Alert variant="error" className="mb-6">
+                {errorMSG}
+              </Alert>
+            )}
             {step === 1 && <StepDataDiri form={form} set={set} inputCls={inputCls} />}
             {step === 2 && <StepPilihDivisi selectedDivision={form.division} set={set} />}
             {step === 3 && <StepMotivasi form={form} set={set} inputCls={inputCls} />}
@@ -106,19 +124,18 @@ export default function DaftarPage() {
             {/* Navigation */}
             <div className="flex gap-3 mt-8">
               {step > 1 && (
-                <Button variant="outline" size="none" onClick={() => setStep((s) => (s - 1) as Step)}
+                <Button variant="outline" size="none" onClick={() => { setErrorMSG(null); setStep((s) => (s - 1) as Step); }}
                   className="flex-1 py-3.5 rounded-2xl text-sm justify-center">
                   Kembali
                 </Button>
               )}
               {step < 3 ? (
-                <Button variant="secondary" size="none" onClick={() => setStep((s) => (s + 1) as Step)}
-                  disabled={step === 1 ? !canNext1 : !canNext2}
+                <Button variant="secondary" size="none" onClick={handleNext}
                   className="flex-1 py-3.5 rounded-2xl text-sm justify-center">
                   Selanjutnya
                 </Button>
               ) : (
-                <Button variant="secondary" size="none" onClick={handleSubmit} disabled={!canSubmit}
+                <Button variant="secondary" size="none" onClick={attemptSubmit}
                   className="flex-1 py-3.5 rounded-2xl text-sm justify-center">
                   <Icon name="send" size="sm" /> Kirim Pendaftaran
                 </Button>

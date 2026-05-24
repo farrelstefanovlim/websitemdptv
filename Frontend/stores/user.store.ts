@@ -4,61 +4,29 @@ import { persist } from "zustand/middleware";
 import type { UserRole, AppUser } from "@/components/feature/users/types/user.type";
 export type * from "@/components/feature/users/types/user.type";
 
-const DEFAULT_USERS: AppUser[] = [
-  {
-    id: "u1",
-    username: "superadmin",
-    fullName: "Super Administrator",
-    email: "admin@mdptv.ac.id",
-    role: "superadmin",
-    password: "admin123",
-    isActive: true,
-    createdAt: "2026-01-01",
-    lastLogin: "2026-05-16",
-  },
-  {
-    id: "u2",
-    username: "ahmad",
-    fullName: "Ahmad Rizky",
-    email: "ahmad@mdptv.ac.id",
-    role: "admin",
-    password: "admin789",
-    isActive: true,
-    createdAt: "2026-03-15",
-    lastLogin: "2026-05-14",
-  },
-  {
-    id: "u3",
-    username: "admin1",
-    fullName: "Siti Nurhaliza",
-    email: "siti@mdptv.ac.id",
-    role: "admin",
-    password: "admin456",
-    isActive: true,
-    createdAt: "2026-04-01",
-    lastLogin: "2026-05-10",
-  },
-  {
-    id: "u4",
-    username: "budi",
-    fullName: "Budi Santoso",
-    email: "budi@mdptv.ac.id",
-    role: "admin",
-    password: "admin012",
-    isActive: false,
-    createdAt: "2026-04-20",
-    lastLogin: null,
-  },
-];
+import { userService } from "@/services/user.service";
 
-export const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bg: string; icon: string }> = {
-  superadmin: { label: "Super Admin", color: "text-purple-600", bg: "bg-purple-50", icon: "shield" },
-  admin: { label: "Admin", color: "text-blue-600", bg: "bg-blue-50", icon: "admin_panel_settings" },
+export const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bg: string; border: string; activeBg: string; activeBorder: string; activeShadow: string; icon: string }> = {
+  superadmin: { 
+    label: "Super Admin", color: "text-purple-600", 
+    bg: "bg-purple-50/50", border: "border-purple-200/50", 
+    activeBg: "bg-purple-50", activeBorder: "border-purple-400/60", activeShadow: "shadow-purple-500/10",
+    icon: "shield" 
+  },
+  admin: { 
+    label: "Admin", color: "text-blue-600", 
+    bg: "bg-blue-50/50", border: "border-blue-200/50", 
+    activeBg: "bg-blue-50", activeBorder: "border-blue-400/60", activeShadow: "shadow-blue-500/10",
+    icon: "admin_panel_settings" 
+  },
 };
 
 interface UserState {
   users: AppUser[];
-  addUser: (data: Omit<AppUser, "id" | "createdAt" | "lastLogin">) => void;
+  isLoading: boolean;
+  error: string | null;
+  fetchUsers: () => Promise<void>;
+  addUser: (data: Omit<AppUser, "id" | "createdAt" | "lastLogin">) => Promise<void>;
   updateUser: (id: string, data: Partial<AppUser>) => void;
   removeUser: (id: string) => void;
   toggleActive: (id: string) => void;
@@ -66,21 +34,39 @@ interface UserState {
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set) => ({
-      users: DEFAULT_USERS,
+    (set, get) => ({
+      users: [],
+      isLoading: false,
+      error: null,
 
-      addUser: (data) =>
-        set((state) => ({
-          users: [
-            {
-              ...data,
-              id: `u-${Date.now()}`,
-              createdAt: new Date().toISOString().split("T")[0],
-              lastLogin: null,
-            },
-            ...state.users,
-          ],
-        })),
+      fetchUsers: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const users = await userService.fetchUsers();
+          set({ users, isLoading: false });
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || "Gagal memuat data user.", isLoading: false });
+        }
+      },
+
+      addUser: async (data) => {
+        set({ isLoading: true, error: null });
+        try {
+          await userService.register({
+            username: data.username,
+            fullName: data.fullName,
+            email: data.email,
+            password: data.password,
+            role: data.role,
+          });
+          // Refresh list after adding
+          await get().fetchUsers();
+        } catch (err: any) {
+          const msg = err.response?.data?.message || "Gagal menambahkan user.";
+          set({ error: msg, isLoading: false });
+          throw new Error(msg);
+        }
+      },
 
       updateUser: (id, data) =>
         set((state) => ({

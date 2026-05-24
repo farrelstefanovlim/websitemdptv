@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Icon from "@/components/ui/Icon";
 import { useKegiatanStore, type Kegiatan, type ProposalFile } from "@/stores/kegiatan.store";
+import { toast } from "@/stores/toast.store";
 import Button from "@/components/ui/Button";
 import { formatSize, formatDate } from "./utils";
 
@@ -14,7 +15,7 @@ export default function ProposalUploader({ kegiatan }: { kegiatan: Kegiatan }) {
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { alert("Ukuran file maksimal 5MB"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Ukuran file maksimal 5MB"); return; }
 
     setUploading(true);
     const reader = new FileReader();
@@ -36,7 +37,7 @@ export default function ProposalUploader({ kegiatan }: { kegiatan: Kegiatan }) {
   const downloadFile = () => {
     if (!kegiatan.proposal) return;
     const a = document.createElement("a");
-    a.href = kegiatan.proposal.data;
+    a.href = kegiatan.proposal.url || kegiatan.proposal.data || "";
     a.download = kegiatan.proposal.name;
     a.click();
   };
@@ -52,7 +53,7 @@ export default function ProposalUploader({ kegiatan }: { kegiatan: Kegiatan }) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-primary truncate">{kegiatan.proposal.name}</p>
-            <p className="text-[10px] text-on-surface-variant/50">{formatSize(kegiatan.proposal.size)} • {formatDate(kegiatan.proposal.uploadedAt)}</p>
+            <p className="text-[10px] text-on-surface-variant/50">{formatSize(kegiatan.proposal.size)} • {kegiatan.proposal.uploadedAt ? formatDate(kegiatan.proposal.uploadedAt) : "Baru saja"}</p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <Button variant="icon" size="icon" onClick={downloadFile} title="Download">

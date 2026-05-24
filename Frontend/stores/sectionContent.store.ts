@@ -17,6 +17,8 @@ import type {
 
 export type * from "@/components/feature/content/types/content.type";
 
+import { cmsService } from "@/services/cms.service";
+
 /* ── Full Store ───────────────────────────────────── */
 export interface SectionContentState {
   hero: HeroContent;
@@ -25,16 +27,18 @@ export interface SectionContentState {
   documentation: DocumentationContent;
   faq: FaqContent;
   cta: CtaContent;
-  updateHero: (data: Partial<HeroContent>) => void;
-  updateAbout: (data: Partial<AboutContent>) => void;
-  updateDivisions: (data: Partial<DivisionsContent>) => void;
-  updateDocumentation: (data: Partial<DocumentationContent>) => void;
-  updateFaq: (data: Partial<FaqContent>) => void;
-  updateCta: (data: Partial<CtaContent>) => void;
-  addGalleryItem: (item: GalleryItem) => void;
-  removeGalleryItem: (index: number) => void;
-  toggleFeatured: (index: number) => void;
-  resetSection: (section: "hero" | "about" | "divisions" | "documentation" | "faq" | "cta") => void;
+  isLoading: boolean;
+  error: string | null;
+  fetchSections: () => Promise<void>;
+  updateHero: (data: Partial<HeroContent>) => Promise<void>;
+  updateAbout: (data: Partial<AboutContent>) => Promise<void>;
+  updateDivisions: (data: Partial<DivisionsContent>) => Promise<void>;
+  updateDocumentation: (data: Partial<DocumentationContent>) => Promise<void>;
+  updateFaq: (data: Partial<FaqContent>) => Promise<void>;
+  updateCta: (data: Partial<CtaContent>) => Promise<void>;
+  updateSection: (section: keyof typeof DEFAULTS, data: any) => Promise<void>;
+  uploadImage: (file: File) => Promise<string>;
+  resetSection: (section: keyof typeof DEFAULTS) => void;
   resetAll: () => void;
 }
 
@@ -53,7 +57,7 @@ const DEFAULT_HERO: HeroContent = {
     { value: "120+", label: "Projects" },
     { value: "3+", label: "Divisions" },
   ],
-  image: "https://i.pinimg.com/1200x/65/0e/80/650e807f610ffe0df4b057f1e0dbb5f6.jpg",
+  image: "",
 };
 
 const DEFAULT_ABOUT: AboutContent = {
@@ -67,7 +71,7 @@ const DEFAULT_ABOUT: AboutContent = {
     { icon: "groups", title: "Kolaborasi Lintas Disiplin", description: "Menyatukan berbagai bakat dari fotografi hingga IT." },
     { icon: "verified", title: "Standar Studio Profesional", description: "Hasil karya dengan kualitas yang diakui industri." },
   ],
-  image: "https://i.pinimg.com/736x/75/57/f1/7557f1e58b18c5dcb21efd283e0bb48a.jpg",
+  image: "",
 };
 
 const DEFAULT_DIVISIONS: DivisionsContent = {
@@ -80,21 +84,21 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       title: "Photography & Videography",
       subtitle: "VISUAL STORYTELLING",
       description: "Menangkap momen dan merangkai narasi visual melalui lensa dengan standar sinematografi tinggi. Kami berfokus pada teknik pengambilan gambar profesional dan penceritaan visual yang kuat.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBiZlRZqqTnnWd0G44h6NFUk5MZGCEAqOaUbt9PCh8jFMcZ6KyYekvNTyqqayhnaZRLlYlLEzzYs_i83CH34eFfVqaaYFCtxJipqRHoqlDwmyKBxXLVzubaTNdsIUfMQ_Be7LXj4BfW2NsIh6DGyfOxdb5AzUrneAo_Zr0Rx-Jm2lASh-eCVARMh-RLvUwDK1W7XojLUXsSlrf_hcIp71PAbebvbtDmwr5ar5NATyPIGidnt88RIDuoaxygn89cxF8hqw7veqkl-LBN",
+      image: "",
       features: ["Studio Production", "Field Documentation", "Post-Processing Mastery"],
     },
     {
       title: "Graphic Design",
       subtitle: "IDENTITY & LAYOUT",
       description: "Eksplorasi identitas visual, tipografi modern, dan desain user interface yang intuitif dan estetik. Kami menciptakan bahasa visual yang bermakna dan memikat audiens.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBvAlHRGFnEg-9VzjA5IdT1TvIpNSpd9Y4yq7xzeIXwmdvi6Q437GAAz7SVCQ4Ry5I8IhfJ8dFw66Gx2zZneSMDFmpQy0Knlj9imau-ZzucMtjHC6r1dkEUSnpexdBO6Nvy1YQxeJbIm1Cc4GiLy4uCkJ3_TeRrPaYk3v1DzCHNInLiYTGqVm8PK94Zyh6RwJU0vDCGNlllGw-jo_UNloy8DTBjBK8pqb8rbAFzaexqiVwqUrWl84Pcik4pETRVWL4qDql-aSndO0HD",
+      image: "",
       features: ["Branding & Identity", "Digital Illustration", "UI/UX Design"],
     },
     {
       title: "Kominfo",
       subtitle: "INFORMATION HUB",
       description: "Menjembatani informasi dan teknologi komunikasi untuk memperkuat jangkauan digital organisasi. Kami mengelola aliran informasi dan infrastruktur digital komunitas.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3YPirtyYQqUulGH_4ce37GHXSDyI5GIagMVsb7mGo-LhxxvOXh1HxHinJd0jdRWIDhrfWsKDuRsXsdOa91QHqsOjSLvyv2wU6gErgwTk4vKvRke7qmUDoiExVzhmqhJilOwWrhlo_vpgJQW76zI5qRjdppZg_O-nQm6gLvF0Z_SkQ0_5rX7zH-ZDN_x78ayUaBFcsnZnFyASb0IuGer9h-YMxwE2gp5elbv2yBQMSNC_QYDSf8jV5cQWWmopcpTCCLag8aTdBKwSy",
+      image: "",
       features: ["Social Media Management", "Public Relations", "Digital Networking"],
     },
   ],
@@ -106,12 +110,6 @@ const DEFAULT_DOCUMENTATION: DocumentationContent = {
   headingItalic: "Kegiatan",
   description: "Intip perjalanan kreatif kami melalui berbagai acara dan proyek kolaboratif yang telah kami lalui bersama.",
   buttonText: "LIHAT GALERI LENGKAP",
-  galleryItems: [
-    { label: "Workshop 2024", title: "Cinematography Masterclass", uploadedAt: "2024-11-15", featured: true, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCT1yV35d9nsrY8CI0e6KlG3Lhsd2XIaIUkjZLMSHB6-RjTRDEddHtXmGy_CxdWdLgeY3pskCBVet-KedyyEm1Wdyfo309oSKCR7ikmwk2EG3Hnyqa1RKTcVGqQL-pjrGMqE5yrfaRXq4P1XUZwCKkiThLhi11RiVKGX0vOJ5wkTGnWJ1GCVdY6LjX417bNXFmQpp5RYHC9J3fbbjM3htXjZiIAHgw6Xz-egs37JV2D4wUTjr84YxESDggM4klyqQujssYBhrEKmrd-" },
-    { label: "Media Talk", title: "The Future of AI in Media", uploadedAt: "2024-12-20", featured: true, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCaK6_CuKFM2pBZaSBCMWonlmoH4Dyvi0uTBOsHw_SPaYhEjP1o4m8rRXzI75dvQDYcsTq3QdUVEJChdKQQe6n8R06FDh5q2QxZX7kK1Uf-7mM6zoNfAZ_6wU_8EVd8029wPsCIko3z8QzwDOWD0aGw774MYb5CD6k8hDFaRdcwvr8VJHqss8j0GIv4eun4QAZXYnB0oWXYl_37xb7QIWQadYYvnpd3CQAsAzxlwjEJ-nY2nwuLBse-gGLnnBKfUTuEKujO4hGgFw3e" },
-    { label: "Event", title: "Annual Showcase", uploadedAt: "2025-03-10", featured: true, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCAqgCOScpoKgRqQFUxx5VAlzknvyt8kuDloL28mr_cr1mCDSWD9OrNZFp1RA6Sd1aEr6wRUkOE1K5RUA6mMaxl8yeUl7a8QmJ24X8ztgQlNSxokmEPYd5ZpyhyOT2NzKaBMUC76elLP9kNcQ3E7de2va-TJ0eSXi9jPe_EiuSEgAPgIZ8C_0HWsoFZLpf83NrmmYwp7_bI-dTvB_TX3gKqZrdywOghM7EzSkWSt8nlQcsuwAIsFIU4Et_S-kzzNy8O0UHvuK4vJu_P" },
-    { label: "Collaboration", title: "Team Workshop", uploadedAt: "2025-03-10", featured: true, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBmV9ZjlIKadI2aYLUhRvaAnC0CTCC7uXK6uBWg9AreAohyL3wPF589W2FFcfB7peMMH8Av865VVUa2c4D8rJUhe8Mz3pNYfHENcINXdRQu9mAGARTeBTqgqwwTJFXjzot-HK1Mj-NKM3XhyXaPAqNWE47Pe4FyfNFJw9qPvU4yJBry981uegiFl1pMZzRn8fCGBEawTUcEhdR3-ghzsR0Su3CDK9pKsy_2RaVGdGLqd11650tHT1C8QfMHsAl3Kusre8I5SM9XkJD7" },
-  ],
 };
 
 const DEFAULT_FAQ: FaqContent = {
@@ -147,42 +145,101 @@ export const DEFAULTS = {
   cta: DEFAULT_CTA,
 };
 
+/* ── Section key mapping ─────────────────────────── */
+const SECTION_KEYS = ["hero", "about", "divisions", "documentation", "faq", "cta"] as const;
+
 export const useSectionContentStore = create<SectionContentState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...DEFAULTS,
+      isLoading: false,
+      error: null,
 
-      updateHero: (data) => set((s) => ({ hero: { ...s.hero, ...data } })),
-      updateAbout: (data) => set((s) => ({ about: { ...s.about, ...data } })),
-      updateDivisions: (data) => set((s) => ({ divisions: { ...s.divisions, ...data } })),
-      updateDocumentation: (data) => set((s) => ({ documentation: { ...s.documentation, ...data } })),
-      updateFaq: (data) => set((s) => ({ faq: { ...s.faq, ...data } })),
-      updateCta: (data) => set((s) => ({ cta: { ...s.cta, ...data } })),
+      fetchSections: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const sections = await cmsService.fetchSectionContents();
 
-      addGalleryItem: (item) => set((s) => ({
-        documentation: {
-          ...s.documentation,
-          galleryItems: [item, ...s.documentation.galleryItems],
-        },
-      })),
-      removeGalleryItem: (index) => set((s) => ({
-        documentation: {
-          ...s.documentation,
-          galleryItems: s.documentation.galleryItems.filter((_, i) => i !== index),
-        },
-      })),
-      toggleFeatured: (index) => set((s) => ({
-        documentation: {
-          ...s.documentation,
-          galleryItems: s.documentation.galleryItems.map((item, i) =>
-            i === index ? { ...item, featured: !item.featured } : item
-          ),
-        },
-      })),
+          const updates: Partial<Record<string, unknown>> = {};
+          for (const s of sections) {
+            if (s.content && SECTION_KEYS.includes(s.section_key)) {
+              updates[s.section_key] = { ...DEFAULTS[s.section_key as keyof typeof DEFAULTS], ...s.content };
+            }
+          }
+
+          if (Object.keys(updates).length > 0) {
+            set({ ...updates, isLoading: false } as any);
+          } else {
+            set({ isLoading: false });
+          }
+        } catch {
+          // Fallback to defaults if API is unavailable
+          set({ isLoading: false });
+        }
+      },
+
+      updateHero: async (data) => {
+        set((s) => ({ hero: { ...s.hero, ...data } }));
+        try {
+          await cmsService.updateSection("hero", { ...get().hero, ...data });
+        } catch { /* optimistic update, ignore API error */ }
+      },
+      updateAbout: async (data) => {
+        set((s) => ({ about: { ...s.about, ...data } }));
+        try {
+          await cmsService.updateSection("about", { ...get().about, ...data });
+        } catch { /* optimistic update */ }
+      },
+      updateDivisions: async (data) => {
+        set((s) => ({ divisions: { ...s.divisions, ...data } }));
+        try {
+          await cmsService.updateSection("divisions", { ...get().divisions, ...data });
+        } catch { /* optimistic update */ }
+      },
+      updateDocumentation: async (data) => {
+        set((s) => ({ documentation: { ...s.documentation, ...data } }));
+        try {
+          await cmsService.updateSection("documentation", { ...get().documentation, ...data });
+        } catch { /* optimistic update */ }
+      },
+      updateFaq: async (data) => {
+        set((s) => ({ faq: { ...s.faq, ...data } }));
+        try {
+          await cmsService.updateSection("faq", { ...get().faq, ...data });
+        } catch { /* optimistic update */ }
+      },
+      updateCta: async (data) => {
+        set((s) => ({ cta: { ...s.cta, ...data } }));
+        try {
+          await cmsService.updateSection("cta", { ...get().cta, ...data });
+        } catch { /* optimistic update */ }
+      },
+
+      updateSection: async (section, data) => { // Generic updater
+        set((s: any) => ({ [section]: { ...s[section], ...data } }));
+        try {
+          await cmsService.updateSection(section, { ...(get() as any)[section], ...data });
+        } catch { /* optimistic update */ }
+      },
+
+      uploadImage: async (file: File) => {
+        return await cmsService.uploadImage(file);
+      },
 
       resetSection: (section) => set({ [section]: DEFAULTS[section] }),
       resetAll: () => set(DEFAULTS),
     }),
-    { name: "mdptv-section-content" }
+    {
+      name: "mdptv-section-content",
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2) {
+           if (persistedState?.documentation?.galleryItems) {
+               delete persistedState.documentation.galleryItems;
+           }
+        }
+        return persistedState;
+      }
+    }
   )
 );

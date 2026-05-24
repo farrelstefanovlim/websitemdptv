@@ -26,10 +26,10 @@ export default function StepMotivasi({ form, set, inputCls }: Props) {
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Motivasi Bergabung *</label>
           <textarea value={form.motivation} onChange={(e) => set("motivation", e.target.value)}
             rows={6} className={`${inputCls} resize-none`}
-            placeholder="Ceritakan pengalaman, skill, atau alasan kamu ingin bergabung dengan MDPTV... (minimal 20 karakter)" />
+            placeholder="Ceritakan pengalaman, skill, atau alasan kamu ingin bergabung dengan MDPTV... (minimal 10 karakter)" />
           <div className="flex justify-between mt-1.5">
-            <span className={`text-[10px] ${form.motivation.length >= 20 ? "text-green-500" : "text-on-surface-variant/30"}`}>
-              {form.motivation.length >= 20 ? "✓ Cukup" : `Minimal 20 karakter`}
+            <span className={`text-[10px] ${form.motivation.length >= 10 ? "text-green-500" : "text-on-surface-variant/30"}`}>
+              {form.motivation.length >= 10 ? "✓ Cukup" : `Minimal 10 karakter`}
             </span>
             <span className="text-[10px] text-on-surface-variant/30">{form.motivation.length} karakter</span>
           </div>

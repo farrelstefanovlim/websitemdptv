@@ -4,6 +4,7 @@ export interface Member {
   id: string;
   name: string;
   division: string;
+  angkatan: number;
 }
 
 export interface AttendanceRecord {

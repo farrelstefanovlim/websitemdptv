@@ -1,13 +1,15 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import UserModal from "@/components/feature/users/UserModal";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import ActionMenu from "@/components/ui/ActionMenu";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "@/hooks/usePortalTarget";
 import { useUserStore, type AppUser, type UserRole, ROLE_CONFIG } from "@/stores/user.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel } from "@/lib/excel";
+import { toast } from "@/stores/toast.store";
 
 const ALL_ROLES: UserRole[] = ["superadmin", "admin"];
 
@@ -24,7 +26,7 @@ const USER_COLUMNS = [
 /* ── Main Page ─────────────────────────────────────── */
 
 export default function UserManagementPage() {
-  const { users, addUser, updateUser, removeUser, toggleActive } = useUserStore();
+  const { users, addUser, updateUser, removeUser, toggleActive, fetchUsers } = useUserStore();
   const hydrated = useHydrated();
   const portalTarget = usePortalTarget("mobile-topbar-actions");
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
@@ -32,6 +34,11 @@ export default function UserManagementPage() {
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [search, setSearch] = useState("");
   const importRef = useRef<HTMLInputElement>(null);
+
+  // Fetch data dari API saat mount
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleExport = () => {
     const exportData = users.map((u) => ({ ...u, isActive: u.isActive ? "Ya" : "Tidak", lastLogin: u.lastLogin || "-" }));
@@ -57,8 +64,8 @@ export default function UserManagementPage() {
         });
         imported++;
       }
-      alert(`Berhasil import ${imported} user (password default: default123)`);
-    } catch { alert("Gagal membaca file Excel"); }
+      toast.success(`Berhasil import ${imported} user (password default: default123)`);
+    } catch { toast.error("Gagal membaca file Excel"); }
     e.target.value = "";
   };
 
@@ -80,20 +87,6 @@ export default function UserManagementPage() {
     ...ALL_ROLES.reduce((acc, r) => ({ ...acc, [r]: users.filter((u) => u.role === r).length }), {} as Record<UserRole, number>),
   };
 
-  const mobileActions = (
-    <>
-      <Button variant="success" size="none" onClick={handleExport} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="download" size="sm" />
-      </Button>
-      <Button variant="outline" size="none" onClick={() => importRef.current?.click()} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="upload" size="sm" />
-      </Button>
-      <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
-      <Button variant="primary" size="none" onClick={() => setModal({ mode: "add", user: null })} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="person_add" size="sm" />
-      </Button>
-    </>
-  );
 
   const mobileTitle = (
     <div className="min-w-0 pr-2">
@@ -108,26 +101,13 @@ export default function UserManagementPage() {
 
   return (
     <>
-      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
       {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
-          <div>
+      <header className="sticky top-[68px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+        <div className="flex items-center justify-start lg:justify-between overflow-x-auto hide-scrollbar px-4 sm:px-8 py-3 lg:py-4">
+          <div className="hidden lg:block shrink-0">
             <h2 className="text-base sm:text-xl font-bold text-primary">Manajemen User</h2>
             <p className="text-[10px] sm:text-xs text-on-surface-variant/50">Kelola akun pengguna & hak akses</p>
-          </div>
-          <div className="hidden lg:flex items-center gap-1.5 sm:gap-2">
-            <Button size="sm" variant="success" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs" title="Export ke Excel">
-              <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => importRef.current?.click()} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs" title="Import dari Excel">
-              <Icon name="upload" size="sm" /> <span className="hidden sm:inline">Import</span>
-            </Button>
-            <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
-            <Button size="sm" variant="primary" onClick={() => setModal({ mode: "add", user: null })} className="px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs">
-              <Icon name="person_add" size="sm" /> <span className="hidden sm:inline">Tambah</span>
-            </Button>
           </div>
         </div>
       </header>
@@ -135,49 +115,83 @@ export default function UserManagementPage() {
       <div className="p-3 sm:p-8">
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
-          <div className="p-3 sm:p-4 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest">
-            <Icon name="groups" filled className="text-secondary !text-lg mb-1" />
-            <div className="text-xl sm:text-2xl font-black text-primary">{counts.total}</div>
-            <div className="text-[9px] uppercase tracking-widest font-bold text-on-surface-variant/40">Total User</div>
+          <div className="group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border bg-surface-container-low border-outline-variant/20 hover:scale-[1.01] hover:shadow-sm transition-all duration-300">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors bg-surface-container-highest group-hover:bg-white/50">
+                <Icon name="groups" filled className="text-secondary !text-base sm:!text-xl" />
+              </div>
+              <span className="text-[9px] sm:text-[11px] uppercase tracking-widest font-bold text-on-surface-variant/50">Total User</span>
+            </div>
+            <div className="text-2xl sm:text-4xl font-black text-primary">{counts.total}</div>
           </div>
-          <div className="p-3 sm:p-4 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest">
-            <Icon name="check_circle" filled className="text-green-500 !text-lg mb-1" />
-            <div className="text-xl sm:text-2xl font-black text-primary">{counts.active}</div>
-            <div className="text-[9px] uppercase tracking-widest font-bold text-on-surface-variant/40">Aktif</div>
+
+          <div className="group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border bg-green-50/50 border-green-200/50 hover:scale-[1.01] hover:shadow-sm transition-all duration-300">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors bg-green-50 group-hover:bg-white/50">
+                <Icon name="check_circle" filled className="text-green-500 !text-base sm:!text-xl" />
+              </div>
+              <span className="text-[9px] sm:text-[11px] uppercase tracking-widest font-bold text-green-600/70">Aktif</span>
+            </div>
+            <div className="text-2xl sm:text-4xl font-black text-primary">{counts.active}</div>
           </div>
+
           {ALL_ROLES.map((r) => {
             const cfg = ROLE_CONFIG[r];
+            const isActive = roleFilter === r;
             return (
-              <Button key={r} size="none" variant="ghost" onClick={() => setRoleFilter(roleFilter === r ? "all" : r)}
-                className={`p-3 sm:p-4 rounded-2xl border text-left transition-all justify-start items-start flex-col ${roleFilter === r ? "border-secondary/30 bg-secondary/5 shadow-sm" : "border-outline-variant/15 bg-surface-container-lowest hover:border-outline-variant/30"}`}>
-                <Icon name={cfg.icon} filled className={`${cfg.color} !text-lg mb-1`} />
-                <div className="text-xl sm:text-2xl font-black text-primary">{(counts as Record<string, number>)[r] || 0}</div>
-                <div className="text-[9px] uppercase tracking-widest font-bold text-on-surface-variant/40">{cfg.label}</div>
-              </Button>
+              <div key={r}
+                className={`group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border transition-all duration-300 text-left bg-surface-container-low border-outline-variant/20 hover:scale-[1.01] hover:shadow-sm`}>
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                  <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${isActive ? 'bg-white/60 shadow-sm' : `${cfg.activeBg} group-hover:bg-white/50`}`}>
+                    <Icon name={cfg.icon} size="sm" className={`${cfg.color} !text-base sm:!text-xl`} filled={isActive} />
+                  </div>
+                  <span className={`text-[9px] sm:text-[11px] uppercase tracking-widest font-bold ${isActive ? cfg.color : 'text-on-surface-variant/50'}`}>
+                    {cfg.label}
+                  </span>
+                </div>
+                <div className={`text-2xl sm:text-4xl font-black text-primary`}>
+                  {(counts as Record<string, number>)[r] || 0}
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Search */}
-        <div className="mb-4">
-          <div className="relative max-w-sm">
-            <Icon name="search" size="sm" className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/30" />
+        {/* Toolbar: Search, Filter & Actions */}
+        <div className="mb-6 flex items-center gap-2 w-full">
+          {/* Search Box */}
+          <div className="relative flex-1">
+            <Icon name="search" size="sm" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30" />
             <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
+              className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-sm focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
               placeholder="Cari nama atau username..." />
           </div>
-        </div>
 
-        {/* Filter indicator */}
-        {roleFilter !== "all" && (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-xs text-on-surface-variant/50">Filter:</span>
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${ROLE_CONFIG[roleFilter].bg} ${ROLE_CONFIG[roleFilter].color}`}>
-              {ROLE_CONFIG[roleFilter].label}
-            </span>
-            <Button size="none" variant="ghost" onClick={() => setRoleFilter("all")} className="text-[10px] text-secondary font-bold hover:underline ml-1">Clear</Button>
+          {/* Menus */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Filter Menu */}
+            <ActionMenu 
+              triggerIcon="filter_list" 
+              title="Saring Role"
+              actions={[
+                { label: "Semua Role", icon: "list", active: roleFilter === "all", onClick: () => setRoleFilter("all") },
+                ...ALL_ROLES.map(r => ({
+                  label: ROLE_CONFIG[r].label,
+                  icon: ROLE_CONFIG[r].icon,
+                  active: roleFilter === r,
+                  onClick: () => setRoleFilter(r)
+                }))
+            ]} />
+
+            {/* Actions Menu */}
+            <ActionMenu actions={[
+              { label: "Tambah User", icon: "person_add", onClick: () => setModal({ mode: "add", user: null }) },
+              { label: "Import Excel", icon: "upload", onClick: () => importRef.current?.click() },
+              { label: "Export Excel", icon: "download", onClick: handleExport, variant: "success" },
+            ]} />
+            <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
           </div>
-        )}
+        </div>
 
         {/* User List */}
         <div className="flex flex-col gap-2">
@@ -194,7 +208,7 @@ export default function UserManagementPage() {
               <div key={u.id}
                 className="p-4 sm:p-5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest flex items-center gap-3 sm:gap-4 hover:border-outline-variant/30 transition-all">
                 {/* Avatar */}
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${roleCfg.bg} flex items-center justify-center shrink-0 relative`}>
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${roleCfg.activeBg} border ${roleCfg.border} flex items-center justify-center shrink-0 relative`}>
                   <Icon name={roleCfg.icon} filled className={`${roleCfg.color} !text-lg sm:!text-xl`} />
                   {!u.isActive && (
                     <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-white flex items-center justify-center">
@@ -207,7 +221,7 @@ export default function UserManagementPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-sm font-semibold text-primary truncate">{u.fullName}</h3>
-                    <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${roleCfg.bg} ${roleCfg.color}`}>
+                    <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${roleCfg.activeBg} ${roleCfg.border} ${roleCfg.color}`}>
                       {roleCfg.label}
                     </span>
                     {!u.isActive && (
@@ -251,11 +265,11 @@ export default function UserManagementPage() {
         <UserModal
           user={modal.user}
           onClose={() => setModal(null)}
-          onSave={(data) => {
+          onSave={async (data) => {
             if (modal.mode === "edit" && modal.user) {
               updateUser(modal.user.id, data);
             } else {
-              addUser(data as Omit<AppUser, "id" | "createdAt" | "lastLogin">);
+              await addUser(data as Omit<AppUser, "id" | "createdAt" | "lastLogin">);
             }
             setModal(null);
           }}

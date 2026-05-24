@@ -6,49 +6,73 @@ import type {
   AttendanceStatus,
 } from "@/components/feature/absensi/types/attendance.type";
 
-const DEFAULT_MEMBERS: Member[] = [
-  { id: "m1", name: "Ahmad Rizky", division: "Photography & Videography" },
-  { id: "m2", name: "Siti Nurhaliza", division: "Photography & Videography" },
-  { id: "m3", name: "Budi Santoso", division: "Photography & Videography" },
-  { id: "m4", name: "Dewi Lestari", division: "Graphic Design" },
-  { id: "m5", name: "Farhan Maulana", division: "Graphic Design" },
-  { id: "m6", name: "Gita Savitri", division: "Graphic Design" },
-  { id: "m7", name: "Hendra Wijaya", division: "Kominfo" },
-  { id: "m8", name: "Indah Permata", division: "Kominfo" },
-  { id: "m9", name: "Joko Prasetyo", division: "Kominfo" },
-  { id: "m10", name: "Kartika Sari", division: "Photography & Videography" },
-  { id: "m11", name: "Lukman Hakim", division: "Graphic Design" },
-  { id: "m12", name: "Maya Angelina", division: "Kominfo" },
-];
+import { attendanceService } from "@/services/attendance.service";
+import { userService } from "@/services/user.service";
 
 interface AttendanceState {
   members: Member[];
   records: AttendanceRecord[];
-  setAttendance: (memberId: string, date: string, status: AttendanceStatus) => void;
+  lockedDates: string[];
+  isLoading: boolean;
+  error: string | null;
+  fetchMembers: () => Promise<void>;
+  fetchRecords: (params?: { month?: string; year?: string; user_id?: string }) => Promise<void>;
+  setAttendance: (memberId: string, date: string, status: AttendanceStatus) => Promise<void>;
   markAllPresent: (date: string) => void;
   clearDate: (date: string) => void;
   getRecordsByDate: (date: string) => AttendanceRecord[];
   getMemberStatus: (memberId: string, date: string) => AttendanceStatus | null;
+  toggleLockDate: (date: string) => void;
+  isDateLocked: (date: string) => boolean;
 }
 
 export const useAttendanceStore = create<AttendanceState>()(
   persist(
     (set, get) => ({
-      members: DEFAULT_MEMBERS,
+      members: [],
       records: [],
+      lockedDates: [],
+      isLoading: false,
+      error: null,
 
-      setAttendance: (memberId, date, status) =>
-        set((state) => {
-          const existingIndex = state.records.findIndex(
-            (r) => r.memberId === memberId && r.date === date
-          );
-          if (existingIndex >= 0) {
-            const newRecords = [...state.records];
-            newRecords[existingIndex] = { memberId, date, status };
-            return { records: newRecords };
-          }
-          return { records: [...state.records, { memberId, date, status }] };
-        }),
+      fetchMembers: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const members = await attendanceService.fetchMembers();
+          set({ members, isLoading: false });
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || "Gagal memuat data anggota.", isLoading: false });
+        }
+      },
+
+      fetchRecords: async (params) => {
+        set({ isLoading: true, error: null });
+        try {
+          const records = await attendanceService.fetchRecords(params);
+          set({ records, isLoading: false });
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || "Gagal memuat data absensi.", isLoading: false });
+        }
+      },
+
+      setAttendance: async (memberId, date, status) => {
+        try {
+          await attendanceService.checkIn(memberId, status, date);
+          set((state) => {
+            const existingIndex = state.records.findIndex(
+              (r) => r.memberId === memberId && r.date === date
+            );
+            if (existingIndex >= 0) {
+              const newRecords = [...state.records];
+              newRecords[existingIndex] = { memberId, date, status };
+              return { records: newRecords };
+            }
+            return { records: [...state.records, { memberId, date, status }] };
+          });
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || "Gagal mencatat absensi." });
+        }
+      },
 
       markAllPresent: (date) =>
         set((state) => {
@@ -75,6 +99,15 @@ export const useAttendanceStore = create<AttendanceState>()(
         );
         return record?.status ?? null;
       },
+
+      toggleLockDate: (date) =>
+        set((state) => ({
+          lockedDates: state.lockedDates.includes(date)
+            ? state.lockedDates.filter((d) => d !== date)
+            : [...state.lockedDates, date],
+        })),
+
+      isDateLocked: (date) => get().lockedDates.includes(date),
     }),
     { name: "mdptv-attendance" }
   )
