@@ -1,17 +1,41 @@
 import express, { Express } from "express";
+import path from "path";
 import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
 import { createApiRouter, AppControllers } from "./routes";
 import { errorHandler } from "./middlewares/errorHandler";
 
 export function createExpressApp(controllers: AppControllers): Express {
   const app = express();
 
-  // Middleware bawaan
-  app.use(cors());
-  app.use(express.json());
+  // Helmet - Proteksi Web Vulnerability Standard
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
 
-  // Registrasikan router utama dengan prefix /api
-  app.use("/api", createApiRouter(controllers));
+  // Middleware bawaan
+  app.use(cors({
+    origin: process.env.CORS_ORIGIN || "*",
+    credentials: true,
+  }));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(cookieParser());
+
+  // Serve uploaded files statically
+  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+  // Rate limiting (Global)
+  const globalLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 menit
+    max: 100, // 100 req per IP
+    message: "Terlalu banyak permintaan dari IP ini, coba lagi nanti.",
+  });
+  app.use(globalLimiter);
+
+  // Registrasikan router utama dengan prefix /api/v1
+  app.use("/api/v1", createApiRouter(controllers));
 
   // Tangani Endpoint yang tidak ditemukan (404)
   app.use((_req, res) => {

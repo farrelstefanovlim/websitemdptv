@@ -9,6 +9,7 @@ import AnimateOnScroll, {
 } from "@/components/ui/AnimateOnScroll";
 import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
+import { getImageUrl } from "@/lib/image";
 
 export default function AboutSection() {
   const about = useSectionContentStore((s) => s.about);
@@ -33,11 +34,13 @@ export default function AboutSection() {
             <div className="relative">
               <div className="absolute -top-4 -left-4 w-full h-full border-2 border-secondary/15 rounded-[32px] md:rounded-[48px] -z-10" />
               <div className="aspect-[4/5] rounded-[32px] md:rounded-[48px] overflow-hidden shadow-2xl relative z-10 bg-surface-container-highest">
-                <img
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  alt="University students collaborating"
-                  src={a.image || "https://i.pinimg.com/736x/75/57/f1/7557f1e58b18c5dcb21efd283e0bb48a.jpg"}
-                />
+                {a.image && (
+                  <img
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    alt="University students collaborating"
+                    src={getImageUrl(a.image)}
+                  />
+                )}
                 {/* Subtle permanent overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
               </div>

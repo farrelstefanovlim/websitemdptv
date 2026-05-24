@@ -1,20 +1,28 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
-import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
+import { useGalleryStore } from "@/stores/gallery.store";
 import { useHydrated } from "@/hooks/useHydrated";
+import { getImageUrl } from "@/lib/image";
+import type { GalleryItem } from "@/components/feature/content/types/content.type";
 
 export default function GaleriPage() {
   const doc = useSectionContentStore((s) => s.documentation);
   const hydrated = useHydrated();
-  const d = hydrated ? doc : useSectionContentStore.getState().documentation;
+  const d = hydrated ? doc : DEFAULTS.documentation;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const { items: storeItems, isLoading, fetchGallery } = useGalleryStore();
 
-  const items = d.galleryItems.filter((item) => item.image);
+  useEffect(() => {
+    fetchGallery();
+  }, [fetchGallery]);
+
+  const items = storeItems.filter((item) => item.image);
 
   // Group by uploadedAt date, sorted newest first
   const grouped = useMemo(() => {
@@ -143,7 +151,7 @@ export default function GaleriPage() {
                       >
                         <div className="rounded-2xl sm:rounded-3xl overflow-hidden relative border border-outline-variant/15 bg-surface-container-low hover:border-secondary/30 transition-all duration-500 shadow-sm hover:shadow-xl hover:-translate-y-1">
                           <img
-                            src={item.image}
+                            src={getImageUrl(item.image)}
                             alt={item.title || `Dokumentasi ${i + 1}`}
                             className="w-full object-cover group-hover:scale-105 transition-transform duration-700"
                           />
@@ -212,7 +220,7 @@ export default function GaleriPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={items[selectedIndex].image}
+                src={getImageUrl(items[selectedIndex].image)}
                 alt={items[selectedIndex].title || `Dokumentasi ${selectedIndex + 1}`}
                 className="max-w-full max-h-[80vh] object-contain rounded-2xl"
               />

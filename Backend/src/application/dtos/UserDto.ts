@@ -1,27 +1,36 @@
-import { User } from "@domain/entities/User";
+import { User, Role } from "@domain/entities/User";
 
 export interface RegisterUserRequest {
-  name: string;
+  username: string;
+  fullName: string;
   email: string;
   password: string;
+  role: Role;
+  divisionId?: string;
 }
 
 export interface UserResponse {
   id: string;
-  name: string;
+  username: string;
+  fullName: string;
   email: string;
+  role: Role;
+  isActive: boolean;
+  divisionId: string | null;
   createdAt: string;
-  updatedAt: string;
 }
 
 export class UserMapper {
   public static toResponse(user: User): UserResponse {
     return {
       id: user.getId(),
-      name: user.getName(),
+      username: user.getUsername(),
+      fullName: user.getFullName(),
       email: user.getEmail().getValue(),
+      role: user.getRole(),
+      isActive: user.getIsActive(),
+      divisionId: user.getDivisionId(),
       createdAt: user.getCreatedAt().toISOString(),
-      updatedAt: user.getUpdatedAt().toISOString(),
     };
   }
 

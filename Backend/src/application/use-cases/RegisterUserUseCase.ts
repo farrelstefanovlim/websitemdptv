@@ -12,33 +12,27 @@ export class RegisterUserUseCase {
   ) {}
 
   public async execute(request: RegisterUserRequest): Promise<UserResponse> {
-    // 1. Validasi format email menggunakan Value Object
     const email = Email.create(request.email);
 
-    // 2. Cek apakah email sudah terdaftar
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new DomainException("Email sudah terdaftar.");
     }
 
-    // 3. Hash password menggunakan hash service abstraction
     const hashedPassword = await this.hashService.hash(request.password);
-
-    // 4. Generate ID unik (kita gunakan crypto.randomUUID() bawaan Bun/Node)
     const userId = crypto.randomUUID();
 
-    // 5. Buat Entity User (aturan bisnis akan otomatis divalidasi di sini)
     const user = User.create({
       id: userId,
-      name: request.name,
+      username: request.username,
+      fullName: request.fullName,
       email: email,
-      password: hashedPassword,
+      role: request.role,
+      passwordHash: hashedPassword,
+      divisionId: request.divisionId
     });
 
-    // 6. Simpan user ke database via repository
     await this.userRepository.save(user);
-
-    // 7. Kembalikan data dalam bentuk DTO
     return UserMapper.toResponse(user);
   }
 }

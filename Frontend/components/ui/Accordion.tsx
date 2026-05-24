@@ -144,11 +144,13 @@ export default function Accordion({ items }: AccordionProps) {
                   </ul>
                 </div>
                 <div className="rounded-xl sm:rounded-2xl overflow-hidden aspect-video shadow-xl border border-outline-variant/20">
-                  <img
-                    alt={item.title}
-                    className={`w-full h-full object-cover transition-transform duration-700 ${isOpen ? "scale-105" : "scale-100"}`}
-                    src={item.image}
-                  />
+                  {item.image && (
+                    <img
+                      alt={item.title}
+                      className={`w-full h-full object-cover transition-transform duration-700 ${isOpen ? "scale-105" : "scale-100"}`}
+                      src={item.image}
+                    />
+                  )}
                 </div>
               </div>
             </div>

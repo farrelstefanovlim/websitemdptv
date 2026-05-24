@@ -1,0 +1,202 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  superadmin
+  admin
+}
+
+enum ApplicantStatus {
+  pending
+  interview
+  accepted
+  rejected
+}
+
+enum AttendanceStatus {
+  present
+  absent
+  late
+  excused
+}
+
+enum KegiatanStatus {
+  draft
+  diajukan
+  disetujui
+  ditolak
+  selesai
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  username       String    @unique @db.VarChar(50)
+  full_name      String    @db.VarChar(100)
+  email          String    @unique @db.VarChar(255)
+  role           Role
+  password_hash  String    @db.VarChar(255)
+  is_active      Boolean   @default(true)
+  division_id    String?   @db.Uuid
+  created_at     DateTime  @default(now())
+  last_login     DateTime?
+
+  division           Division?          @relation(fields: [division_id], references: [id])
+  reviewed_applicants Applicant[]       @relation("AdminReviewer")
+  kegiatan_pic       Kegiatan[]         @relation("KegiatanPIC")
+
+  @@map("users")
+}
+
+model Division {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(100)
+  subtitle    String?  @db.VarChar(100)
+  description String?  @db.Text
+  image_url   String?  @db.VarChar(500)
+  features    Json?
+  order       Int      @default(0)
+
+  users      User[]
+  members    Member[]
+  applicants Applicant[]
+  kegiatans  Kegiatan[]
+
+  @@map("divisions")
+}
+
+model Applicant {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String         @db.VarChar(100)
+  nim         String         @unique @db.VarChar(20)
+  email       String         @db.VarChar(255)
+  phone       String?        @db.VarChar(20)
+  division_id String         @db.Uuid
+  motivation  String         @db.Text
+  status      ApplicantStatus @default(pending)
+  admin_note  String?        @db.Text
+  reviewed_by String?        @db.Uuid
+  applied_at  DateTime       @default(now())
+
+  division Division @relation(fields: [division_id], references: [id])
+  reviewer User?    @relation("AdminReviewer", fields: [reviewed_by], references: [id])
+
+  @@map("applicants")
+}
+
+model Member {
+  id          String   @id @default(uuid()) @db.Uuid
+  full_name   String   @db.VarChar(100)
+  division_id String?  @db.Uuid
+  angkatan    Int
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+
+  division    Division?          @relation(fields: [division_id], references: [id])
+  attendances AttendanceRecord[]
+
+  @@map("members")
+}
+
+model AttendanceRecord {
+  id         String           @id @default(uuid()) @db.Uuid
+  member_id  String           @db.Uuid
+  date       DateTime         @db.Date
+  status     AttendanceStatus
+  created_at DateTime         @default(now())
+
+  member     Member           @relation(fields: [member_id], references: [id])
+
+  @@unique([member_id, date])
+  @@map("attendance_records")
+}
+
+model Kegiatan {
+  id          String         @id @default(uuid()) @db.Uuid
+  title       String         @db.VarChar(200)
+  description String?        @db.Text
+  division_id String?        @db.Uuid
+  event_date  DateTime       @db.Date
+  location    String?        @db.VarChar(200)
+  status      KegiatanStatus @default(draft)
+  pic_id      String?        @db.Uuid
+  budget      String?        @db.VarChar(50)
+  notes       String?        @db.Text
+  created_at  DateTime       @default(now())
+
+  division      Division?     @relation(fields: [division_id], references: [id])
+  pic           User?         @relation("KegiatanPIC", fields: [pic_id], references: [id])
+  proposal_file ProposalFile?
+
+  @@map("kegiatan")
+}
+
+model ProposalFile {
+  id          String   @id @default(uuid()) @db.Uuid
+  kegiatan_id String   @unique @db.Uuid
+  file_name   String   @db.VarChar(255)
+  file_type   String?  @db.VarChar(50)
+  file_size   Int?
+  file_url    String   @db.VarChar(500)
+  uploaded_at DateTime @default(now())
+
+  kegiatan Kegiatan @relation(fields: [kegiatan_id], references: [id])
+
+  @@map("proposal_files")
+}
+
+model LayoutSection {
+  id          String  @id @default(uuid()) @db.Uuid
+  section_key String  @unique @db.VarChar(30)
+  label       String? @db.VarChar(50)
+  icon        String? @db.VarChar(50)
+  visible     Boolean @default(true)
+  order       Int
+
+  content SectionContent?
+
+  @@map("layout_sections")
+}
+
+model SectionContent {
+  id          String   @id @default(uuid()) @db.Uuid
+  section_key String   @unique @db.VarChar(30)
+  content     Json
+  updated_at  DateTime @default(now()) @updatedAt
+
+  layout_section LayoutSection  @relation(fields: [section_key], references: [section_key])
+  gallery_images GalleryImage[]
+
+  @@map("section_contents")
+}
+
+model GalleryImage {
+  id          String   @id @default(uuid()) @db.Uuid
+  section_key String   @default("documentation") @db.VarChar(30)
+  label       String?  @db.VarChar(100)
+  title       String?  @db.VarChar(200)
+  image_url   String   @db.VarChar(500)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  uploaded_at DateTime @default(now())
+
+  section SectionContent @relation(fields: [section_key], references: [section_key])
+
+  @@map("gallery_images")
+}
+
+model SiteSetting {
+  key        String   @id @db.VarChar(50)
+  value      Json
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("site_settings")
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "@/hooks/usePortalTarget";
 import Icon from "@/components/ui/Icon";
@@ -40,10 +40,15 @@ const EDITORS: Record<SectionKey, React.FC> = {
 
 export default function ContentEditorPage() {
   const [openSection, setOpenSection] = useState<SectionKey | null>("hero");
-  const { resetSection, resetAll } = useSectionContentStore();
+  const { resetSection, resetAll, fetchSections } = useSectionContentStore();
   const hydrated = useHydrated();
   const portalTarget = usePortalTarget("mobile-topbar-actions");
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
+
+  // Fetch data dari API saat mount
+  useEffect(() => {
+    fetchSections();
+  }, [fetchSections]);
 
   if (!hydrated) {
     return (
@@ -56,11 +61,11 @@ export default function ContentEditorPage() {
   const mobileActions = (
     <>
       <Button variant="none" size="none" onClick={resetAll}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all shrink-0">
+        className="w-9 h-9 flex items-center justify-center rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300 shrink-0">
         <Icon name="restart_alt" size="sm" />
       </Button>
       <a href="/" target="_blank" rel="noopener noreferrer"
-        className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary text-on-secondary hover:brightness-110 transition-all shrink-0">
+        className="w-9 h-9 flex items-center justify-center rounded-xl bg-secondary text-on-secondary hover:brightness-110 transition-all duration-300 shadow-sm shadow-secondary/20 shrink-0">
         <Icon name="open_in_new" size="sm" />
       </a>
     </>
@@ -94,7 +99,7 @@ export default function ContentEditorPage() {
               <Icon name="restart_alt" size="sm" /> Reset All
             </Button>
             <a href="/" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl bg-secondary text-on-secondary hover:brightness-110 transition-all duration-300">
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl bg-secondary text-on-secondary hover:brightness-110 shadow-sm shadow-secondary/20 transition-all duration-300">
               <Icon name="open_in_new" size="sm" /> <span className="hidden sm:inline">Preview</span>
             </a>
           </div>

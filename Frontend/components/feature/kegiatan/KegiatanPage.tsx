@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "@/hooks/usePortalTarget";
 import Icon from "@/components/ui/Icon";
 import { useKegiatanStore, type Kegiatan, type KegiatanStatus } from "@/stores/kegiatan.store";
 import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel, KEGIATAN_COLUMNS } from "@/lib/excel";
+import { toast } from "@/stores/toast.store";
 import Button from "@/components/ui/Button";
 import KegiatanModal from "./KegiatanModal";
 import ProposalUploader from "./ProposalUploader";
+import ActionMenu from "@/components/ui/ActionMenu";
 import { STATUS_CONFIG, ALL_STATUSES, formatDate } from "./utils";
 
 /* ── Add/Edit Modal ───────────────────────────────── */
@@ -19,14 +21,20 @@ import { STATUS_CONFIG, ALL_STATUSES, formatDate } from "./utils";
 /* ── Main Page ─────────────────────────────────────── */
 
 export default function KegiatanPage() {
-  const { items, addKegiatan, updateKegiatan, removeKegiatan } = useKegiatanStore();
+  const { items, addKegiatan, updateKegiatan, removeKegiatan, fetchKegiatan } = useKegiatanStore();
   const hydrated = useHydrated();
   const portalTarget = usePortalTarget("mobile-topbar-actions");
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const [statusFilter, setStatusFilter] = useState<KegiatanStatus | "all">("all");
+  const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [modal, setModal] = useState<{ mode: "add" | "edit"; kegiatan: Kegiatan | null } | null>(null);
   const excelImportRef = useRef<HTMLInputElement>(null);
+
+  // Fetch data dari API saat mount
+  useEffect(() => {
+    fetchKegiatan();
+  }, [fetchKegiatan]);
 
   const handleExport = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,8 +66,8 @@ export default function KegiatanPage() {
         });
         imported++;
       }
-      alert(`Berhasil import ${imported} kegiatan`);
-    } catch { alert("Gagal membaca file Excel"); }
+      toast.success(`Berhasil import ${imported} kegiatan`);
+    } catch { toast.error("Gagal membaca file Excel"); }
     e.target.value = "";
   };
 
@@ -71,23 +79,15 @@ export default function KegiatanPage() {
     );
   }
 
-  const filtered = statusFilter === "all" ? items : items.filter((k) => k.status === statusFilter);
   const counts = ALL_STATUSES.reduce((acc, s) => ({ ...acc, [s]: items.filter((k) => k.status === s).length }), {} as Record<KegiatanStatus, number>);
 
-  const mobileActions = (
-    <>
-      <Button variant="success" size="none" onClick={handleExport} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="download" size="sm" />
-      </Button>
-      <Button variant="outline" size="none" onClick={() => excelImportRef.current?.click()} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="upload" size="sm" />
-      </Button>
-      <input ref={excelImportRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
-      <Button variant="primary" size="none" onClick={() => setModal({ mode: "add", kegiatan: null })} className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
-        <Icon name="add" size="sm" />
-      </Button>
-    </>
-  );
+  const filtered = items.filter((k) => {
+    const matchesFilter = statusFilter === "all" || k.status === statusFilter;
+    const s = search.toLowerCase();
+    const matchesSearch = k.title.toLowerCase().includes(s) || k.division.toLowerCase().includes(s);
+    return matchesFilter && matchesSearch;
+  });
+
 
   const mobileTitle = (
     <div className="min-w-0 pr-2">
@@ -102,26 +102,13 @@ export default function KegiatanPage() {
 
   return (
     <>
-      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
       {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
       {/* Top Bar */}
-      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
-          <div>
+      <header className="sticky top-[68px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
+        <div className="flex items-center justify-start lg:justify-between overflow-x-auto hide-scrollbar px-4 sm:px-8 py-3 lg:py-4">
+          <div className="hidden lg:block shrink-0">
             <h2 className="text-base sm:text-xl font-bold text-primary">Kegiatan</h2>
             <p className="text-[10px] sm:text-xs text-on-surface-variant/50">Kelola kegiatan & upload proposal</p>
-          </div>
-          <div className="hidden lg:flex items-center gap-1.5 sm:gap-2">
-            <Button size="sm" variant="success" onClick={handleExport} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
-              <Icon name="download" size="sm" /> <span className="hidden sm:inline">Export</span>
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => excelImportRef.current?.click()} className="px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs">
-              <Icon name="upload" size="sm" /> <span className="hidden sm:inline">Import</span>
-            </Button>
-            <input ref={excelImportRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
-            <Button size="sm" variant="primary" onClick={() => setModal({ mode: "add", kegiatan: null })} className="px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs">
-              <Icon name="add" size="sm" /> <span className="hidden sm:inline">Tambah</span>
-            </Button>
           </div>
         </div>
       </header>
@@ -132,26 +119,58 @@ export default function KegiatanPage() {
           {ALL_STATUSES.map((s) => {
             const cfg = STATUS_CONFIG[s];
             return (
-              <Button key={s} size="none" variant="ghost" onClick={() => setStatusFilter(statusFilter === s ? "all" : s)}
-                className={`p-3 sm:p-4 rounded-2xl border text-left transition-all justify-start items-start flex-col ${statusFilter === s ? "border-secondary/30 bg-secondary/5 shadow-sm" : "border-outline-variant/15 bg-surface-container-lowest hover:border-outline-variant/30"}`}>
-                <Icon name={cfg.icon} filled className={`${cfg.color} !text-lg mb-1`} />
-                <div className="text-xl sm:text-2xl font-black text-primary">{counts[s]}</div>
-                <div className="text-[9px] uppercase tracking-widest font-bold text-on-surface-variant/40">{cfg.label}</div>
-              </Button>
+              <div key={s}
+                className={`group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border ${cfg.bg} ${cfg.border} hover:scale-[1.02] hover:shadow-sm transition-all duration-300`}>
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors bg-white/40 group-hover:bg-white/70">
+                    <Icon name={cfg.icon} size="sm" className={`${cfg.color} !text-base sm:!text-xl`} />
+                  </div>
+                  <span className={`text-[9px] sm:text-[11px] uppercase tracking-widest font-bold ${cfg.color}`}>
+                    {cfg.label}
+                  </span>
+                </div>
+                <div className="text-2xl sm:text-4xl font-black text-primary">
+                  {counts[s]}
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Filter indicator */}
-        {statusFilter !== "all" && (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-xs text-on-surface-variant/50">Filter:</span>
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${STATUS_CONFIG[statusFilter].bg} ${STATUS_CONFIG[statusFilter].color}`}>
-              {STATUS_CONFIG[statusFilter].label}
-            </span>
-            <Button size="none" variant="ghost" onClick={() => setStatusFilter("all")} className="text-[10px] text-secondary font-bold hover:underline ml-1">Clear</Button>
+        {/* Toolbar: Search, Filter & Actions */}
+        <div className="mb-6 flex items-center gap-2 w-full">
+          {/* Search Box */}
+          <div className="relative flex-1">
+            <Icon name="search" size="sm" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30" />
+            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-sm focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
+              placeholder="Cari kegiatan..." />
           </div>
-        )}
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Filter Menu */}
+            <ActionMenu 
+              triggerIcon="filter_list" 
+              title="Saring Kegiatan"
+              actions={[
+              { label: "Semua", icon: "list", active: statusFilter === "all", onClick: () => setStatusFilter("all") },
+              ...ALL_STATUSES.map(s => ({
+                label: STATUS_CONFIG[s].label,
+                icon: STATUS_CONFIG[s].icon,
+                active: statusFilter === s,
+                onClick: () => setStatusFilter(s)
+              }))
+            ]} />
+            
+            {/* Actions Menu */}
+            <ActionMenu actions={[
+              { label: "Tambah Kegiatan", icon: "add", onClick: () => setModal({ mode: "add", kegiatan: null }) },
+              { label: "Import Excel", icon: "upload", onClick: () => excelImportRef.current?.click() },
+              { label: "Export Excel", icon: "download", onClick: handleExport, variant: "success" },
+            ]} />
+            <input ref={excelImportRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+          </div>
+        </div>
 
         {/* Kegiatan List */}
         <div className="flex flex-col gap-3">
@@ -172,7 +191,7 @@ export default function KegiatanPage() {
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedId(isExpanded ? null : k.id); } }}
                   className="p-4 sm:p-5 bg-surface-container-lowest flex items-start sm:items-center gap-3 cursor-pointer select-none">
                   {/* Icon */}
-                  <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0`}>
+                  <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${cfg.activeBg} border ${cfg.border} flex items-center justify-center shrink-0`}>
                     <Icon name={cfg.icon} filled className={`${cfg.color} !text-lg`} />
                   </div>
                   {/* Info */}
@@ -191,7 +210,7 @@ export default function KegiatanPage() {
                   </div>
                   {/* Status badge + chevron */}
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${cfg.bg} ${cfg.color}`}>
+                    <span className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${cfg.activeBg} ${cfg.color} ${cfg.border}`}>
                       <Icon name={cfg.icon} size="sm" className="!text-xs" /> {cfg.label}
                     </span>
                     <Icon name={isExpanded ? "expand_less" : "expand_more"} size="sm" className="text-on-surface-variant/30" />
@@ -204,7 +223,7 @@ export default function KegiatanPage() {
                     <div className="pt-4 grid gap-3">
                       {/* Mobile status badge */}
                       <div className="sm:hidden">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${cfg.bg} ${cfg.color}`}>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${cfg.activeBg} ${cfg.color} ${cfg.border}`}>
                           <Icon name={cfg.icon} size="sm" className="!text-xs" /> {cfg.label}
                         </span>
                       </div>

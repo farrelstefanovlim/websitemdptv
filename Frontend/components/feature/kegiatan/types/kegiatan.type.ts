@@ -5,21 +5,23 @@ export interface ProposalFile {
   size: number;
   type: string;
   /** base64-encoded file content (for localStorage demo) */
-  data: string;
-  uploadedAt: string;
+  data?: string;
+  /** URL to the file (from API) */
+  url?: string;
+  uploadedAt?: string;
 }
 
 export interface Kegiatan {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   division: string;
   date: string;
-  location: string;
+  location?: string;
   status: KegiatanStatus;
   pic: string;
-  budget: string;
-  proposal: ProposalFile | null;
-  notes: string;
+  budget?: string;
+  proposal?: ProposalFile | null;
+  notes?: string;
   createdAt: string;
 }

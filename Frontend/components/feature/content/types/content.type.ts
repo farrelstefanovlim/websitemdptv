@@ -11,7 +11,7 @@ export interface HeroContent {
   description: string;
   buttonPrimary: string;
   buttonSecondary: string;
-  image?: string;
+  image: string;
   stats: HeroStat[];
 }
 
@@ -27,7 +27,7 @@ export interface AboutContent {
   headingLine1: string;
   headingLine2: string;
   description: string;
-  image?: string;
+  image: string;
   features: AboutFeature[];
 }
 
@@ -36,7 +36,7 @@ export interface DivisionItem {
   title: string;
   subtitle: string;
   description: string;
-  image?: string;
+  image: string;
   features: string[];
 }
 
@@ -50,6 +50,7 @@ export interface DivisionsContent {
 
 /* ── Documentation ────────────────────────────────── */
 export interface GalleryItem {
+  id?: string;
   label: string;
   title: string;
   image: string;
@@ -63,7 +64,6 @@ export interface DocumentationContent {
   headingItalic: string;
   description: string;
   buttonText: string;
-  galleryItems: GalleryItem[];
 }
 
 /* ── FAQ ──────────────────────────────────────────── */

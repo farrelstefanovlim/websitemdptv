@@ -5,8 +5,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const envSchema = z.object({
-  PORT: z.coerce.number().default(5000),
+  PORT: z.coerce.number(),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  DATABASE_URL: z.string(),
+  JWT_SECRET: z.string(),
+  JWT_REFRESH_SECRET: z.string(),
+  CORS_ORIGIN: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

@@ -1,16 +1,26 @@
 import { env } from "@infrastructure/config/env";
 import { createExpressApp } from "@presentation/http/app";
-import { InMemoryUserRepository } from "@infrastructure/database/InMemoryUserRepository";
+import { PrismaUserRepository } from "@infrastructure/database/PrismaUserRepository";
 import { BunHashService } from "@infrastructure/services/BunHashService";
 import { RegisterUserUseCase } from "@application/use-cases/RegisterUserUseCase";
 import { GetAllUsersUseCase } from "@application/use-cases/GetAllUsersUseCase";
 import { UserController } from "@presentation/http/controllers/UserController";
+import { AuthController } from "@presentation/http/controllers/AuthController";
+import { CmsController } from "@presentation/http/controllers/CmsController";
+import { RecruitmentController } from "@presentation/http/controllers/RecruitmentController";
+import { KegiatanController } from "@presentation/http/controllers/KegiatanController";
+import { AttendanceController } from "@presentation/http/controllers/AttendanceController";
+import { UploadController } from "@presentation/http/controllers/UploadController";
+import { MemberController } from "@presentation/http/controllers/MemberController";
+import { DivisionController } from "@presentation/http/controllers/DivisionController";
+import { DashboardController } from "@presentation/http/controllers/DashboardController";
+import { GetDashboardMetricsUseCase } from "@application/use-cases/GetDashboardMetricsUseCase";
 
 async function bootstrap() {
   console.log("🚀 Memulai inisialisasi server...");
 
   // 1. Inisialisasi Database / Repositories (Infrastructure Layer)
-  const userRepository = new InMemoryUserRepository();
+  const userRepository = new PrismaUserRepository();
 
   // 2. Inisialisasi Services (Infrastructure Layer)
   const hashService = new BunHashService();
@@ -18,13 +28,32 @@ async function bootstrap() {
   // 3. Inisialisasi Use Cases (Application Layer) dengan Dependency Injection (DI)
   const registerUserUseCase = new RegisterUserUseCase(userRepository, hashService);
   const getAllUsersUseCase = new GetAllUsersUseCase(userRepository);
+  const getDashboardMetricsUseCase = new GetDashboardMetricsUseCase();
 
   // 4. Inisialisasi Controllers (Presentation Layer)
   const userController = new UserController(registerUserUseCase, getAllUsersUseCase);
+  const authController = new AuthController();
+  const cmsController = new CmsController();
+  const recruitmentController = new RecruitmentController();
+  const kegiatanController = new KegiatanController();
+  const attendanceController = new AttendanceController();
+  const uploadController = new UploadController();
+  const memberController = new MemberController();
+  const divisionController = new DivisionController();
+  const dashboardController = new DashboardController(getDashboardMetricsUseCase);
 
   // 5. Inisialisasi Express App dengan Controllers
   const app = createExpressApp({
     userController,
+    authController,
+    cmsController,
+    recruitmentController,
+    kegiatanController,
+    attendanceController,
+    uploadController,
+    memberController,
+    divisionController,
+    dashboardController,
   });
 
   // 6. Jalankan Server
@@ -33,7 +62,7 @@ async function bootstrap() {
     console.log(`✨ Server berhasil berjalan di Port: ${env.PORT}`);
     console.log(`🚀 Lingkungan: ${env.NODE_ENV}`);
     console.log(`⚡ Didukung oleh Bun v${Bun.version}`);
-    console.log(`👉 Cek Kesehatan: http://localhost:${env.PORT}/api/health`);
+    console.log(`👉 Cek Kesehatan: http://localhost:${env.PORT}/api/v1/health`);
     console.log(`======================================================\n`);
   });
 }

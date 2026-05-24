@@ -3,12 +3,14 @@ import Icon from "@/components/ui/Icon";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { id: "layout", label: "Layout Editor", icon: "dashboard_customize", href: "/admin/dashboard" },
+  { id: "dashboard", label: "Dashboard", icon: "space_dashboard", href: "/admin/dashboard" },
+  { id: "layout", label: "Layout Editor", icon: "dashboard_customize", href: "/admin/layout" },
   { id: "absensi", label: "Absensi", icon: "checklist", href: "/admin/absensi" },
   { id: "penerimaan", label: "Penerimaan", icon: "person_add", href: "/admin/penerimaan" },
   { id: "kegiatan", label: "Kegiatan", icon: "event", href: "/admin/kegiatan" },
   { id: "content", label: "Content", icon: "edit_note", href: "/admin/content" },
   { id: "galeri", label: "Galeri", icon: "photo_library", href: "/admin/galeri" },
+  { id: "members", label: "Data Anggota", icon: "badge", href: "/admin/members" },
   { id: "users", label: "Users", icon: "manage_accounts", href: "/admin/users" }
 ];
 

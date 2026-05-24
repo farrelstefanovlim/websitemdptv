@@ -12,7 +12,9 @@ import AnimateOnScroll, {
 } from "@/components/ui/AnimateOnScroll";
 import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
-
+import { getImageUrl } from "@/lib/image";
+import { useEffect } from "react";
+import { useGalleryStore } from "@/stores/gallery.store";
 /* Layout config — visual properties only, images come from the store */
 const galleryLayout = [
   {
@@ -45,6 +47,12 @@ export default function DocumentationSection() {
   const doc = useSectionContentStore((s) => s.documentation);
   const hydrated = useHydrated();
   const d = hydrated ? doc : DEFAULTS.documentation;
+  
+  const { items: galleryItems, fetchGallery } = useGalleryStore();
+
+  useEffect(() => {
+    fetchGallery();
+  }, [fetchGallery]);
 
   return (
     <section className="py-20 sm:py-28 md:py-[160px] relative" id="documentation">
@@ -93,7 +101,7 @@ export default function DocumentationSection() {
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 h-auto md:h-[800px]"
           staggerDelay={0.12}
         >
-          {d.galleryItems.filter((c) => c.featured && c.image).map((content, index) => {
+          {galleryItems.filter((c) => c.featured && c.image).slice(0, 4).map((content, index) => {
             const layout = galleryLayout[index] || galleryLayout[galleryLayout.length - 1];
             return (
               <StaggerItem
@@ -109,7 +117,7 @@ export default function DocumentationSection() {
                   <img
                     className={`w-full h-full object-cover transition-all duration-700 ${index >= 2 ? "group-hover:scale-110" : "group-hover:scale-105"}`}
                     alt={content.title || `Gallery ${index + 1}`}
-                    src={content.image}
+                    src={getImageUrl(content.image)}
                   />
                 ) : (
                   <div className="w-full h-full bg-surface-container-high flex items-center justify-center">

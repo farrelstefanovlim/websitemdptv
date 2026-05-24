@@ -6,12 +6,12 @@ import Container from "@/components/layout/Container";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
+import { getImageUrl } from "@/lib/image";
 
 /* Visual styling per division (not editable, purely decorative) */
 const divisionStyles = [
   {
     icon: "photo_camera",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBiZlRZqqTnnWd0G44h6NFUk5MZGCEAqOaUbt9PCh8jFMcZ6KyYekvNTyqqayhnaZRLlYlLEzzYs_i83CH34eFfVqaaYFCtxJipqRHoqlDwmyKBxXLVzubaTNdsIUfMQ_Be7LXj4BfW2NsIh6DGyfOxdb5AzUrneAo_Zr0Rx-Jm2lASh-eCVARMh-RLvUwDK1W7XojLUXsSlrf_hcIp71PAbebvbtDmwr5ar5NATyPIGidnt88RIDuoaxygn89cxF8hqw7veqkl-LBN",
     iconBg: "bg-secondary-fixed",
     iconColor: "border-secondary/10 text-secondary",
     dotColor: "bg-secondary",
@@ -19,7 +19,6 @@ const divisionStyles = [
   },
   {
     icon: "palette",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBvAlHRGFnEg-9VzjA5IdT1TvIpNSpd9Y4yq7xzeIXwmdvi6Q437GAAz7SVCQ4Ry5I8IhfJ8dFw66Gx2zZneSMDFmpQy0Knlj9imau-ZzucMtjHC6r1dkEUSnpexdBO6Nvy1YQxeJbIm1Cc4GiLy4uCkJ3_TeRrPaYk3v1DzCHNInLiYTGqVm8PK94Zyh6RwJU0vDCGNlllGw-jo_UNloy8DTBjBK8pqb8rbAFzaexqiVwqUrWl84Pcik4pETRVWL4qDql-aSndO0HD",
     iconBg: "bg-tertiary-fixed",
     iconColor: "border-on-tertiary-fixed/10 text-on-tertiary-fixed",
     dotColor: "bg-tertiary",
@@ -27,7 +26,6 @@ const divisionStyles = [
   },
   {
     icon: "hub",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3YPirtyYQqUulGH_4ce37GHXSDyI5GIagMVsb7mGo-LhxxvOXh1HxHinJd0jdRWIDhrfWsKDuRsXsdOa91QHqsOjSLvyv2wU6gErgwTk4vKvRke7qmUDoiExVzhmqhJilOwWrhlo_vpgJQW76zI5qRjdppZg_O-nQm6gLvF0Z_SkQ0_5rX7zH-ZDN_x78ayUaBFcsnZnFyASb0IuGer9h-YMxwE2gp5elbv2yBQMSNC_QYDSf8jV5cQWWmopcpTCCLag8aTdBKwSy",
     iconBg: "bg-primary-fixed",
     iconColor: "border-on-primary-fixed/10 text-on-primary-fixed",
     dotColor: "bg-primary",
@@ -43,7 +41,7 @@ export default function DivisionsSection() {
   // Merge editable content with visual styles
   const divisionsData = d.divisions.map((div, i) => ({
     ...divisionStyles[i],
-    image: div.image || divisionStyles[i].image,
+    image: div.image ? getImageUrl(div.image) : "",
     number: String(i + 1).padStart(2, "0"),
     title: div.title,
     subtitle: div.subtitle,
