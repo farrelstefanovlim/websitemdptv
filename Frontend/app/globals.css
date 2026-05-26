@@ -187,6 +187,8 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-tint) var(--background);
 }
 
 body {
@@ -434,4 +436,27 @@ body {
 
 .accordion-item {
   transition: all 0.3s ease;
+}
+
+/* ========================================
+   Custom Scrollbar
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-tint);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--background); /* Creates a padded effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
 }

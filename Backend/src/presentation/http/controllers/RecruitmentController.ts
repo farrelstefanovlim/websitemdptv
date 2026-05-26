@@ -126,4 +126,61 @@ export class RecruitmentController {
       next(error);
     }
   };
+
+  public getAnnouncement = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const setting = await prisma.siteSetting.findUnique({
+        where: { key: "announcement_open" }
+      });
+
+      const isOpen = setting ? (setting.value as any)?.isOpen === true : false;
+      
+      if (!isOpen) {
+        res.status(200).json({ status: "success", data: { isOpen: false, accepted: [] } });
+        return;
+      }
+
+      const accepted = await prisma.applicant.findMany({
+        where: { status: "accepted" },
+        include: { division: true },
+        orderBy: { name: "asc" }
+      });
+
+      // Filter only safe fields to public interface
+      const sanitized = accepted.map(a => ({
+        name: a.name,
+        divisionName: a.division.name,
+        nim: a.nim.substring(0, 4) + "****" // Mask sensitive part of NIM just to be safe
+      }));
+
+      res.status(200).json({ status: "success", data: { isOpen: true, accepted: sanitized } });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public toggleAnnouncement = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { isOpen } = req.body;
+
+      if (typeof isOpen !== "boolean") {
+        res.status(400).json({ status: "error", message: "Parameter isOpen harus berupa boolean." });
+        return;
+      }
+
+      const updated = await prisma.siteSetting.upsert({
+        where: { key: "announcement_open" },
+        update: { value: { isOpen } },
+        create: { key: "announcement_open", value: { isOpen } }
+      });
+
+      res.status(200).json({ 
+        status: "success", 
+        message: isOpen ? "Pengumuman berhasil dibuka." : "Pengumuman berhasil ditutup.",
+        data: { isOpen: (updated.value as any)?.isOpen }
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

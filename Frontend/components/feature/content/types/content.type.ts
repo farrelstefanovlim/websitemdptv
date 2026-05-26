@@ -89,3 +89,12 @@ export interface CtaContent {
   buttonPrimary: string;
   buttonSecondary: string;
 }
+
+/* ── Footer ───────────────────────────────────────── */
+export interface FooterContent {
+  instagram: string;
+  youtube: string;
+  tiktok: string;
+  email: string;
+  whatsapp: string;
+}
