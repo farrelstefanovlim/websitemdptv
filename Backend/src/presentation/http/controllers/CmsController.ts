@@ -29,6 +29,19 @@ export class CmsController {
       const { key } = req.params;
       const content = req.body;
 
+      // Ensure LayoutSection exists before upserting SectionContent to avoid Foreign Key violations
+      await prisma.layoutSection.upsert({
+        where: { section_key: key },
+        update: {},
+        create: {
+          section_key: key,
+          label: key.charAt(0).toUpperCase() + key.slice(1),
+          icon: "settings",
+          order: 99,
+          visible: true
+        }
+      });
+
       await prisma.sectionContent.upsert({
         where: { section_key: key },
         update: { content },

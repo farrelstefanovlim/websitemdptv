@@ -41,4 +41,14 @@ export const recruitmentService = {
   /* Raw calls */
   getApplicants: (params?: { search?: string; status?: string; page?: number }) =>
     api.get("/recruitment/applicants", { params }),
+
+  getAnnouncement: async () => {
+    const res = await api.get("/recruitment/announcement");
+    return res.data;
+  },
+
+  toggleAnnouncement: async (isOpen: boolean) => {
+    const res = await api.patch("/recruitment/announcement/toggle", { isOpen });
+    return res.data;
+  },
 };

@@ -7,6 +7,10 @@ import { motion } from "framer-motion";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 
+import { useLayoutConfigStore } from "@/stores/layoutConfig.store";
+import { useSectionContentStore } from "@/stores/sectionContent.store";
+import { useHydrated } from "@/hooks/useHydrated";
+
 const navLinks = [
   { label: "HOME", href: "#home" },
   { label: "DIVISIONS", href: "#divisions" },
@@ -20,12 +24,43 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
 
+  const isLayoutLoading = useLayoutConfigStore((s) => s.isLoading);
+  const isContentLoading = useSectionContentStore((s) => s.isLoading);
+  const hydrated = useHydrated();
+  const isFetchingAPI = isLayoutLoading || isContentLoading || !hydrated;
+
   useEffect(() => {
     const handleHashChange = () =>
       setActiveHash(window.location.hash || "#home");
     window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
+
+    if (isFetchingAPI) return; // Wait until sections are rendered
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveHash(`#${entry.target.id}`);
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -40% 0px" } // Triggers closer to the center of the viewport
+    );
+
+
+    const elements = navLinks
+      .map((link) => link.href.startsWith("#") ? document.getElementById(link.href.substring(1)) : null)
+      .filter(Boolean);
+      
+    elements.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+      observer.disconnect();
+    };
+  }, [isFetchingAPI]);
 
   useEffect(() => {
     const handleScroll = () => {

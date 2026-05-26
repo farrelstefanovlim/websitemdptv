@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import Badge from "@/components/ui/Badge";
@@ -6,29 +8,36 @@ import AnimateOnScroll, {
   StaggerItem,
 } from "@/components/ui/AnimateOnScroll";
 
-const footerLinks = {
-  Navigation: [
-    { label: "Home", href: "#home" },
-    { label: "About", href: "#about" },
-    { label: "Divisions", href: "#divisions" },
-  ],
-  Categories: [
-    { label: "Visual Arts", href: "#" },
-    { label: "Digital Media", href: "#" },
-    { label: "Production", href: "#" },
-  ],
-  Social: [
-    { label: "Instagram", href: "#" },
-    { label: "YouTube", href: "#" },
-    { label: "Behance", href: "#" },
-  ],
-  Contact: [
-    { label: "Email Us", href: "#" },
-    { label: "WhatsApp", href: "#" },
-  ],
-};
+import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
+import { useHydrated } from "@/hooks/useHydrated";
 
 export default function Footer() {
+  const storeFooter = useSectionContentStore((s) => s.footer);
+  const hydrated = useHydrated();
+  const f = hydrated ? storeFooter : DEFAULTS.footer;
+
+  const footerLinks = {
+    Navigation: [
+      { label: "Home", href: "/" },
+      { label: "About", href: "/#about" },
+      { label: "Divisions", href: "/#divisions" },
+      { label: "Documentation", href: "/#documentation" },
+    ],
+    Halaman: [
+      { label: "Galeri", href: "/galeri" },
+      { label: "Daftar Anggota", href: "/daftar" },
+      { label: "Login Admin", href: "/login" },
+    ],
+    Sosial: [
+      { label: "Instagram", href: f.instagram },
+      { label: "YouTube", href: f.youtube },
+      { label: "TikTok", href: f.tiktok },
+    ],
+    Kontak: [
+      { label: "Email Kami", href: f.email },
+      { label: "WhatsApp", href: f.whatsapp },
+    ],
+  };
   return (
     <footer className="bg-white py-12 sm:py-16 md:py-20 border-t border-outline-variant/20 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full grid-pattern opacity-[0.03] -z-10" />
@@ -88,13 +97,13 @@ export default function Footer() {
         <div className="pt-8 sm:pt-10 border-t border-outline-variant/15 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
             <Link
-              href="#"
+              href="/privacy-policy"
               className="text-xs text-on-surface-variant/40 hover:text-primary transition-colors duration-300 uppercase tracking-widest"
             >
               Privacy Policy
             </Link>
             <Link
-              href="#"
+              href="/terms-of-service"
               className="text-xs text-on-surface-variant/40 hover:text-primary transition-colors duration-300 uppercase tracking-widest"
             >
               Terms of Service
@@ -102,13 +111,13 @@ export default function Footer() {
           </div>
           <div className="flex gap-3">
             <Link
-              href="#"
+              href={f.instagram}
               className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-outline-variant/20 flex items-center justify-center text-on-surface-variant/50 hover:bg-secondary hover:border-secondary hover:text-white transition-all duration-300"
             >
               <Icon name="share" size="md" />
             </Link>
             <Link
-              href="#"
+              href={f.email}
               className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-outline-variant/20 flex items-center justify-center text-on-surface-variant/50 hover:bg-secondary hover:border-secondary hover:text-white transition-all duration-300"
             >
               <Icon name="alternate_email" size="md" />

@@ -15,8 +15,10 @@ export function createRecruitmentRoutes(recruitmentController: RecruitmentContro
 
   // Public
   router.post("/apply", applyLimiter, recruitmentController.apply);
+  router.get("/announcement", recruitmentController.getAnnouncement);
 
   // Protected (Admin/Superadmin)
+  router.patch("/announcement/toggle", authMiddleware, recruitmentController.toggleAnnouncement);
   router.get("/applicants", authMiddleware, recruitmentController.getApplicants);
   router.patch("/applicants/:id/status", authMiddleware, recruitmentController.updateStatus);
 

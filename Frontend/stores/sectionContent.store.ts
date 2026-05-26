@@ -13,6 +13,7 @@ import type {
   FaqItem,
   FaqContent,
   CtaContent,
+  FooterContent,
 } from "@/components/feature/content/types/content.type";
 
 export type * from "@/components/feature/content/types/content.type";
@@ -27,6 +28,7 @@ export interface SectionContentState {
   documentation: DocumentationContent;
   faq: FaqContent;
   cta: CtaContent;
+  footer: FooterContent;
   isLoading: boolean;
   error: string | null;
   fetchSections: () => Promise<void>;
@@ -36,6 +38,7 @@ export interface SectionContentState {
   updateDocumentation: (data: Partial<DocumentationContent>) => Promise<void>;
   updateFaq: (data: Partial<FaqContent>) => Promise<void>;
   updateCta: (data: Partial<CtaContent>) => Promise<void>;
+  updateFooter: (data: Partial<FooterContent>) => Promise<void>;
   updateSection: (section: keyof typeof DEFAULTS, data: any) => Promise<void>;
   uploadImage: (file: File) => Promise<string>;
   resetSection: (section: keyof typeof DEFAULTS) => void;
@@ -136,6 +139,14 @@ const DEFAULT_CTA: CtaContent = {
   buttonSecondary: "Hubungi Kami",
 };
 
+const DEFAULT_FOOTER: FooterContent = {
+  instagram: "https://instagram.com/mdptv",
+  youtube: "https://youtube.com/@mdptv",
+  tiktok: "https://tiktok.com/@mdptv",
+  email: "mailto:mdptv@mdp.ac.id",
+  whatsapp: "#",
+};
+
 export const DEFAULTS = {
   hero: DEFAULT_HERO,
   about: DEFAULT_ABOUT,
@@ -143,10 +154,11 @@ export const DEFAULTS = {
   documentation: DEFAULT_DOCUMENTATION,
   faq: DEFAULT_FAQ,
   cta: DEFAULT_CTA,
+  footer: DEFAULT_FOOTER,
 };
 
 /* ── Section key mapping ─────────────────────────── */
-const SECTION_KEYS = ["hero", "about", "divisions", "documentation", "faq", "cta"] as const;
+const SECTION_KEYS = ["hero", "about", "divisions", "documentation", "faq", "cta", "footer"] as const;
 
 export const useSectionContentStore = create<SectionContentState>()(
   persist(
@@ -212,6 +224,12 @@ export const useSectionContentStore = create<SectionContentState>()(
         set((s) => ({ cta: { ...s.cta, ...data } }));
         try {
           await cmsService.updateSection("cta", { ...get().cta, ...data });
+        } catch { /* optimistic update */ }
+      },
+      updateFooter: async (data) => {
+        set((s) => ({ footer: { ...s.footer, ...data } }));
+        try {
+          await cmsService.updateSection("footer", { ...get().footer, ...data });
         } catch { /* optimistic update */ }
       },
 

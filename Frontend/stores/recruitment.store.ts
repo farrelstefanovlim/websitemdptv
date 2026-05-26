@@ -9,6 +9,7 @@ import { recruitmentService } from "@/services/recruitment.service";
 
 interface RecruitmentState {
   registrationOpen: boolean;
+  announcementOpen: boolean;
   groupLink: string;
   applicants: Applicant[];
   isLoading: boolean;
@@ -20,12 +21,15 @@ interface RecruitmentState {
   addApplicant: (data: Omit<Applicant, "id" | "status" | "adminNote" | "appliedAt">) => Promise<boolean>;
   updateStatus: (id: string, status: RecruitmentStatus) => Promise<void>;
   updateNote: (id: string, note: string) => Promise<void>;
+  fetchAnnouncementState: () => Promise<void>;
+  toggleAnnouncement: () => Promise<void>;
 }
 
 export const useRecruitmentStore = create<RecruitmentState>()(
   persist(
     (set, get) => ({
       registrationOpen: true,
+      announcementOpen: false,
       groupLink: "",
       applicants: [],
       isLoading: false,
@@ -89,6 +93,26 @@ export const useRecruitmentStore = create<RecruitmentState>()(
           }));
         } catch (err: any) {
           set({ error: err.response?.data?.message || "Gagal mengubah catatan." });
+        }
+      },
+
+      fetchAnnouncementState: async () => {
+        try {
+          const { data } = await recruitmentService.getAnnouncement();
+          set({ announcementOpen: data.isOpen });
+        } catch(err) {
+          console.error("Gagal memuat state pengumuman", err);
+        }
+      },
+
+      toggleAnnouncement: async () => {
+        try {
+          const currentState = get().announcementOpen;
+          const { data } = await recruitmentService.toggleAnnouncement(!currentState);
+          set({ announcementOpen: data.isOpen });
+        } catch(err: any) {
+          console.error("Gagal update state pengumuman", err);
+          set({ error: "Gagal mengubah state pengumuman" });
         }
       },
     }),

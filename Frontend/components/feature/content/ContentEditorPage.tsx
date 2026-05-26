@@ -12,7 +12,7 @@ import type {
   DocumentationContent, FaqContent, CtaContent,
 } from "@/stores/sectionContent.store";
 
-type SectionKey = "hero" | "about" | "divisions" | "documentation" | "faq";
+type SectionKey = "hero" | "about" | "divisions" | "documentation" | "faq" | "footer";
 
 const sectionMeta: { id: SectionKey; label: string; icon: string }[] = [
   { id: "hero", label: "Hero Section", icon: "rocket_launch" },
@@ -20,6 +20,7 @@ const sectionMeta: { id: SectionKey; label: string; icon: string }[] = [
   { id: "divisions", label: "Divisions Section", icon: "diversity_3" },
   { id: "documentation", label: "Documentation Section", icon: "photo_library" },
   { id: "faq", label: "FAQ Section", icon: "help" },
+  { id: "footer", label: "Footer Links", icon: "link" },
 ];
 
 import HeroEditor from "./editors/HeroEditor";
@@ -27,6 +28,7 @@ import AboutEditor from "./editors/AboutEditor";
 import DivisionsEditor from "./editors/DivisionsEditor";
 import DocumentationEditor from "./editors/DocumentationEditor";
 import FaqEditor from "./editors/FaqEditor";
+import FooterEditor from "./editors/FooterEditor";
 
 const EDITORS: Record<SectionKey, React.FC> = {
   hero: HeroEditor,
@@ -34,6 +36,7 @@ const EDITORS: Record<SectionKey, React.FC> = {
   divisions: DivisionsEditor,
   documentation: DocumentationEditor,
   faq: FaqEditor,
+  footer: FooterEditor,
 };
 
 /* ── Main Page ─────────────────────────────────────── */
