@@ -23,4 +23,5 @@ yarn-error.log*
 bun.lockb
 
 /generated/prisma
-/uploads
+/uploads/*
+!/uploads/.gitkeep

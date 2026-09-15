@@ -31,6 +31,20 @@ const divisionStyles = [
     dotColor: "bg-primary",
     accentColor: "bg-primary",
   },
+  {
+    icon: "badge",
+    iconBg: "bg-amber-500/20",
+    iconColor: "border-amber-500/20 text-amber-600",
+    dotColor: "bg-amber-500",
+    accentColor: "bg-amber-500",
+  },
+  {
+    icon: "campaign",
+    iconBg: "bg-cyan-500/20",
+    iconColor: "border-cyan-500/20 text-cyan-600",
+    dotColor: "bg-cyan-500",
+    accentColor: "bg-cyan-500",
+  },
 ];
 
 export default function DivisionsSection() {
@@ -40,7 +54,7 @@ export default function DivisionsSection() {
 
   // Merge editable content with visual styles
   const divisionsData = d.divisions.map((div, i) => ({
-    ...divisionStyles[i],
+    ...(divisionStyles[i % divisionStyles.length] || divisionStyles[0]),
     image: div.image ? getImageUrl(div.image) : "",
     number: String(i + 1).padStart(2, "0"),
     title: div.title,

@@ -56,6 +56,8 @@ export default function OverviewDashboard() {
   const divGraphDesign = metrics.members.byDivision.find((m: any) => m.name === "Graphic Design")?.count || 0;
   const divPhotoVideo = metrics.members.byDivision.find((m: any) => m.name === "Photography & Videography")?.count || 0;
   const divKominfo = metrics.members.byDivision.find((m: any) => m.name === "Kominfo")?.count || 0;
+  const divPsdm = metrics.members.byDivision.find((m: any) => m.name === "Pengelola Sumber Daya Manusia")?.count || 0;
+  const divHumas = metrics.members.byDivision.find((m: any) => m.name === "Hubungan Masyarakat")?.count || 0;
 
   const totalApplicants = metrics.applicants.total;
   const acceptedApplicants = metrics.applicants.byStatus.find((f: any) => f.status === "accepted")?.count || 0;
@@ -75,7 +77,7 @@ export default function OverviewDashboard() {
       {/* Top Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard 
-          title="Total Anggota" value={totalMembers} subtitle={`${divPhotoVideo} Video, ${divGraphDesign} Design, ${divKominfo} IT`}
+          title="Total Anggota" value={totalMembers} subtitle={`${divPhotoVideo} Video, ${divGraphDesign} Design, ${divKominfo} IT, ${divPsdm} PSDM, ${divHumas} Humas`}
           icon="groups" colorClass="bg-blue-500" iconBgClass="bg-blue-500/10"
         />
         <StatCard 
@@ -190,6 +192,8 @@ export default function OverviewDashboard() {
               { id: "pv", title: "Photography & Videography", count: divPhotoVideo, icon: "camera", colorStr: "bg-blue-500", textStr: "text-blue-500", lightBg: "bg-blue-500/10" },
               { id: "gd", title: "Graphic Design", count: divGraphDesign, icon: "brush", colorStr: "bg-pink-500", textStr: "text-pink-500", lightBg: "bg-pink-500/10" },
               { id: "ki", title: "Kominfo", count: divKominfo, icon: "terminal", colorStr: "bg-emerald-500", textStr: "text-emerald-500", lightBg: "bg-emerald-500/10" },
+              { id: "psdm", title: "Pengelola Sumber Daya Manusia", count: divPsdm, icon: "badge", colorStr: "bg-amber-500", textStr: "text-amber-500", lightBg: "bg-amber-500/10" },
+              { id: "humas", title: "Hubungan Masyarakat", count: divHumas, icon: "campaign", colorStr: "bg-cyan-500", textStr: "text-cyan-500", lightBg: "bg-cyan-500/10" },
             ].map((div) => {
               const percentage = totalMembers > 0 ? Math.round((div.count / totalMembers) * 100) : 0;
               return (

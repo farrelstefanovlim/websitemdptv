@@ -58,7 +58,7 @@ const DEFAULT_HERO: HeroContent = {
   stats: [
     { value: "50+", label: "Active Members" },
     { value: "120+", label: "Projects" },
-    { value: "3+", label: "Divisions" },
+    { value: "5+", label: "Divisions" },
   ],
   image: "",
 };
@@ -81,7 +81,7 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
   label: "Our Expertise",
   headingBold: "Divisi",
   headingItalic: "Spesialisasi",
-  description: "Tiga pilar utama yang membentuk ekosistem kreatif di MDPTV.",
+  description: "Lima pilar utama yang membentuk ekosistem kreatif dan tata kelola di MDPTV.",
   divisions: [
     {
       title: "Photography & Videography",
@@ -102,7 +102,21 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       subtitle: "INFORMATION HUB",
       description: "Menjembatani informasi dan teknologi komunikasi untuk memperkuat jangkauan digital organisasi. Kami mengelola aliran informasi dan infrastruktur digital komunitas.",
       image: "",
-      features: ["Social Media Management", "Public Relations", "Digital Networking"],
+      features: ["Social Media Management", "Digital Publishing", "IT Infrastructure"],
+    },
+    {
+      title: "Pengelola Sumber Daya Manusia",
+      subtitle: "HUMAN RESOURCES & TALENT DEVELOPMENT",
+      description: "Mengembangkan potensi anggota, membina kaderisasi berkualitas, dan merawat dinamika serta keharmonisan internal organisasi.",
+      image: "",
+      features: ["Talent Development", "Kaderisasi & Orientasi", "Internal Engagement"],
+    },
+    {
+      title: "Hubungan Masyarakat",
+      subtitle: "PUBLIC RELATIONS & PARTNERSHIPS",
+      description: "Membangun relasi strategis, memperluas kemitraan eksternal, dan menjaga citra positif MDPTV di lingkup kampus dan publik.",
+      image: "",
+      features: ["Media Partnership", "External Relations", "Event Sponsorship"],
     },
   ],
 };

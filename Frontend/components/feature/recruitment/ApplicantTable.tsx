@@ -14,12 +14,21 @@ import ApplicantCard from "./ApplicantCard";
 import ActionMenu from "@/components/ui/ActionMenu";
 
 const allStatuses: RecruitmentStatus[] = ["pending", "interview", "accepted", "rejected"];
-const divisions = ["Semua", "Photography & Videography", "Graphic Design", "Kominfo"];
+const divisions = [
+  "Semua",
+  "Photography & Videography",
+  "Graphic Design",
+  "Kominfo",
+  "Pengelola Sumber Daya Manusia",
+  "Hubungan Masyarakat",
+];
 const divisionShort: Record<string, string> = {
   "Semua": "Semua",
   "Photography & Videography": "Photo & Video",
   "Graphic Design": "Design",
   "Kominfo": "Kominfo",
+  "Pengelola Sumber Daya Manusia": "PSDM",
+  "Hubungan Masyarakat": "Humas",
 };
 
 export default function ApplicantTable({ actions }: { actions?: React.ReactNode }) {
