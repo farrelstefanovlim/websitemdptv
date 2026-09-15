@@ -59,6 +59,8 @@ export default function KegiatanModal({ kegiatan, onClose, onSave }: KegiatanMod
                 { label: "Photography & Videography", value: "Photography & Videography" },
                 { label: "Graphic Design", value: "Graphic Design" },
                 { label: "Kominfo", value: "Kominfo" },
+                { label: "Pengelola Sumber Daya Manusia", value: "Pengelola Sumber Daya Manusia" },
+                { label: "Hubungan Masyarakat", value: "Hubungan Masyarakat" },
                 { label: "All Division", value: "All Division" },
               ]}
             />
