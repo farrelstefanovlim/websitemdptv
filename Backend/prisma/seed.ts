@@ -26,35 +26,21 @@ async function main() {
   });
 
   // 2. Divisions
-  await prisma.division.upsert({
-    where: { name: 'Public Relations' },
-    update: {},
-    create: {
-      name: 'Public Relations',
-      subtitle: 'COMMUNICATION & BRANDING',
-      order: 1
-    }
-  });
+  const initialDivisions = [
+    { name: 'Photography & Videography', subtitle: 'VISUAL STORYTELLING', order: 1 },
+    { name: 'Graphic Design', subtitle: 'IDENTITY & LAYOUT', order: 2 },
+    { name: 'Kominfo', subtitle: 'INFORMATION HUB', order: 3 },
+    { name: 'Pengelola Sumber Daya Manusia', subtitle: 'HUMAN RESOURCES & TALENT DEVELOPMENT', order: 4 },
+    { name: 'Hubungan Masyarakat', subtitle: 'PUBLIC RELATIONS & PARTNERSHIPS', order: 5 },
+  ];
 
-  await prisma.division.upsert({
-    where: { name: 'Photography & Videography' },
-    update: {},
-    create: {
-      name: 'Photography & Videography',
-      subtitle: 'VISUAL STORYTELLING',
-      order: 2
-    }
-  });
-
-  await prisma.division.upsert({
-    where: { name: 'Journalism' },
-    update: {},
-    create: {
-      name: 'Journalism',
-      subtitle: 'NEWS & ARTICLES',
-      order: 3
-    }
-  });
+  for (const div of initialDivisions) {
+    await prisma.division.upsert({
+      where: { name: div.name },
+      update: { subtitle: div.subtitle, order: div.order },
+      create: div,
+    });
+  }
 
   // 3. Superadmin User
   const passwordHash = await hashService.hash('superadmin123');
@@ -87,7 +73,7 @@ async function main() {
         stats: [
           { value: "50+", label: "Active Members" },
           { value: "120+", label: "Projects" },
-          { value: "3+", label: "Divisions" },
+          { value: "5+", label: "Divisions" },
         ],
         image: "https://i.pinimg.com/1200x/65/0e/80/650e807f610ffe0df4b057f1e0dbb5f6.jpg"
       }
@@ -117,13 +103,14 @@ async function main() {
         label: "Our Expertise",
         headingBold: "Divisi",
         headingItalic: "Spesialisasi",
-        description: "Tiga pilar utama yang membentuk ekosistem kreatif di MDPTV.",
+        description: "Lima pilar utama yang membentuk ekosistem kreatif dan tata kelola di MDPTV.",
         divisions: [
           {
             title: "Photography & Videography",
             subtitle: "VISUAL STORYTELLING",
             description: "Menangkap momen dan merangkai narasi visual melalui lensa dengan standar sinematografi tinggi.",
             image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBiZlRZqqTnnWd0G44h6NFUk5MZGCEAqOaUbt9PCh8jFMcZ6KyYekvNTyqqayhnaZRLlYlLEzzYs_i83CH34eFfVqaaYFCtxJipqRHoqlDwmyKBxXLVzubaTNdsIUfMQ_Be7LXj4BfW2NsIh6DGyfOxdb5AzUrneAo_Zr0Rx-Jm2lASh-eCVARMh-RLvUwDK1W7XojLUXsSlrf_hcIp71PAbebvbtDmwr5ar5NATyPIGidnt88RIDuoaxygn89cxF8hqw7veqkl-LBN",
+            icon: "photo_camera",
             features: ["Studio Production", "Field Documentation", "Post-Processing"]
           },
           {
@@ -131,6 +118,7 @@ async function main() {
             subtitle: "IDENTITY & LAYOUT",
             description: "Eksplorasi identitas visual, tipografi modern, dan desain user interface.",
             image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBvAlHRGFnEg-9VzjA5IdT1TvIpNSpd9Y4yq7xzeIXwmdvi6Q437GAAz7SVCQ4Ry5I8IhfJ8dFw66Gx2zZneSMDFmpQy0Knlj9imau-ZzucMtjHC6r1dkEUSnpexdBO6Nvy1YQxeJbIm1Cc4GiLy4uCkJ3_TeRrPaYk3v1DzCHNInLiYTGqVm8PK94Zyh6RwJU0vDCGNlllGw-jo_UNloy8DTBjBK8pqb8rbAFzaexqiVwqUrWl84Pcik4pETRVWL4qDql-aSndO0HD",
+            icon: "palette",
             features: ["Branding", "Digital Illustration", "UI/UX Design"]
           },
           {
@@ -138,7 +126,24 @@ async function main() {
             subtitle: "INFORMATION HUB",
             description: "Menjembatani informasi dan teknologi komunikasi untuk memperkuat jangkauan digital.",
             image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3YPirtyYQqUulGH_4ce37GHXSDyI5GIagMVsb7mGo-LhxxvOXh1HxHinJd0jdRWIDhrfWsKDuRsXsdOa91QHqsOjSLvyv2wU6gErgwTk4vKvRke7qmUDoiExVzhmqhJilOwWrhlo_vpgJQW76zI5qRjdppZg_O-nQm6gLvF0Z_SkQ0_5rX7zH-ZDN_x78ayUaBFcsnZnFyASb0IuGer9h-YMxwE2gp5elbv2yBQMSNC_QYDSf8jV5cQWWmopcpTCCLag8aTdBKwSy",
-            features: ["Social Media", "Public Relations", "Digital Networking"]
+            icon: "hub",
+            features: ["Social Media", "Digital Publishing", "IT Infrastructure"]
+          },
+          {
+            title: "Pengelola Sumber Daya Manusia",
+            subtitle: "HUMAN RESOURCES & TALENT DEVELOPMENT",
+            description: "Mengembangkan potensi anggota, membina kaderisasi berkualitas, dan merawat dinamika internal organisasi.",
+            image: "",
+            icon: "badge",
+            features: ["Talent Development", "Kaderisasi & Orientasi", "Internal Engagement"]
+          },
+          {
+            title: "Hubungan Masyarakat",
+            subtitle: "PUBLIC RELATIONS & PARTNERSHIPS",
+            description: "Membangun relasi strategis, memperluas jaringan kemitraan eksternal, dan menjaga citra positif MDPTV.",
+            image: "",
+            icon: "campaign",
+            features: ["Media Partnership", "External Relations", "Event Sponsorship"]
           }
         ]
       }

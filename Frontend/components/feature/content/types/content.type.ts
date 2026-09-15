@@ -38,6 +38,7 @@ export interface DivisionItem {
   description: string;
   image: string;
   features: string[];
+  icon?: string;
 }
 
 export interface DivisionsContent {

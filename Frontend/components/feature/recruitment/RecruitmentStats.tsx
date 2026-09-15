@@ -100,7 +100,13 @@ export default function RecruitmentStats() {
           Per Divisi
         </h4>
         <div className="flex flex-col gap-2">
-          {["Photography & Videography", "Graphic Design", "Kominfo"].map((div) => {
+          {[
+            "Photography & Videography",
+            "Graphic Design",
+            "Kominfo",
+            "Pengelola Sumber Daya Manusia",
+            "Hubungan Masyarakat",
+          ].map((div) => {
             const divApplicants = applicants.filter((a) => a.division === div);
             const divAccepted = divApplicants.filter((a) => a.status === "accepted").length;
             return (

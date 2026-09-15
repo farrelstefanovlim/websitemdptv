@@ -5,11 +5,36 @@ import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 
 // [PERBAIKAN]: Menambahkan divisi PSDM dan Humas lengkap dengan deskripsi dan gayanya
 const DIVISIONS = [
-  { value: "Photography & Videography", icon: "photo_camera", color: "bg-secondary/10 border-secondary/20 text-secondary", desc: "Fotografi, videografi, sinematografi" },
-  { value: "Graphic Design", icon: "palette", color: "bg-tertiary-fixed/30 border-on-tertiary-fixed/10 text-on-tertiary-fixed", desc: "Desain grafis, branding, UI/UX" },
-  { value: "Kominfo", icon: "hub", color: "bg-primary-fixed/30 border-on-primary-fixed/10 text-on-primary-fixed", desc: "Media sosial, public relations, IT" },
-  { value: "PSDM", icon: "groups", color: "bg-orange-500/10 border-orange-500/20 text-orange-600", desc: "Pengembangan organisasi, event, dan HR" },
-  { value: "Humas", icon: "campaign", color: "bg-purple-500/10 border-purple-500/20 text-purple-600", desc: "Partnership, komunikasi eksternal, MC" },
+  {
+    value: "Photography & Videography",
+    icon: "photo_camera",
+    color: "bg-secondary/10 border-secondary/20 text-secondary",
+    description: "Fotografi, videografi, sinematografi",
+  },
+  {
+    value: "Graphic Design",
+    icon: "palette",
+    color: "bg-tertiary-fixed/30 border-on-tertiary-fixed/10 text-on-tertiary-fixed",
+    description: "Desain grafis, branding, UI/UX",
+  },
+  {
+    value: "Kominfo",
+    icon: "hub",
+    color: "bg-primary-fixed/30 border-on-primary-fixed/10 text-on-primary-fixed",
+    description: "Media sosial, publikasi digital, IT",
+  },
+  {
+    value: "Pengelola Sumber Daya Manusia",
+    icon: "badge",
+    color: "bg-amber-500/10 border-amber-500/20 text-amber-600",
+    description: "Pengembangan bakat, kaderisasi, manajemen anggota",
+  },
+  {
+    value: "Hubungan Masyarakat",
+    icon: "campaign",
+    color: "bg-cyan-500/10 border-cyan-500/20 text-cyan-600",
+    description: "Kemitraan, media partner, sponsorship & relasi publik",
+  },
 ];
 
 interface Props {
@@ -39,7 +64,9 @@ export default function StepPilihDivisi({ selectedDivision, set }: Props) {
               </div>
               <div className="flex-1">
                 <span className="text-sm font-bold text-primary block">{div.value}</span>
-                <span className="text-[10px] text-on-surface-variant/50">{div.desc}</span>
+                <span className="text-[10px] text-on-surface-variant/50">
+                  {div.description}
+                </span>
               </div>
               <div className={`w-6 h-6 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
                 selected ? "border-secondary bg-secondary" : "border-outline-variant/25"

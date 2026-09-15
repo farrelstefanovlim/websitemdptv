@@ -6,11 +6,43 @@ import { useSectionContentStore } from "@/stores/sectionContent.store";
 import Field from "./Field";
 import ImageUploadField from "./ImageUploadField";
 
+const PRESET_ICONS = [
+  "photo_camera",
+  "palette",
+  "hub",
+  "badge",
+  "campaign",
+  "groups",
+  "handshake",
+  "diversity_3",
+  "terminal",
+  "article",
+  "movie",
+  "design_services",
+];
+
 export default function DivisionsEditor() {
   const { divisions, updateDivisions } = useSectionContentStore();
 
-  const addDivision = () => updateDivisions({ divisions: [...divisions.divisions, { title: "", subtitle: "", description: "", image: "", features: [] }] });
-  const removeDivision = (i: number) => updateDivisions({ divisions: divisions.divisions.filter((_, idx) => idx !== i) });
+  const addDivision = () =>
+    updateDivisions({
+      divisions: [
+        ...divisions.divisions,
+        {
+          title: "",
+          subtitle: "",
+          description: "",
+          image: "",
+          icon: "diversity_3",
+          features: [],
+        },
+      ],
+    });
+
+  const removeDivision = (i: number) =>
+    updateDivisions({
+      divisions: divisions.divisions.filter((_, idx) => idx !== i),
+    });
   
   const addFeature = (divIndex: number) => {
     const d = [...divisions.divisions];
@@ -43,16 +75,67 @@ export default function DivisionsEditor() {
           {divisions.divisions.map((div, i) => (
             <div key={i} className="p-3 rounded-xl border border-outline-variant/15 bg-surface-container-low/50 grid gap-2">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[9px] uppercase tracking-widest font-bold text-secondary">
-                  Divisi {i + 1}
-                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
+                    <Icon name={div.icon || "diversity_3"} size="sm" filled />
+                  </div>
+                  <span className="text-[9px] uppercase tracking-widest font-bold text-secondary">
+                    Divisi {i + 1}
+                  </span>
+                </div>
                 <Button variant="none" size="none" onClick={() => removeDivision(i)} className="text-error/60 hover:text-error transition-colors">
                   <Icon name="delete" size="sm" className="!text-sm" />
                 </Button>
               </div>
 
               <ImageUploadField label="Cover Image" value={div.image} onChange={(v) => { const d = [...divisions.divisions]; d[i] = { ...d[i], image: v }; updateDivisions({ divisions: d }); }} />
-              <div className="grid sm:grid-cols-2 gap-2">
+              
+              {/* Icon Selector */}
+              <div>
+                <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1">
+                  Icon (Material Symbol)
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center text-secondary shrink-0">
+                    <Icon name={div.icon || "diversity_3"} size="sm" filled />
+                  </div>
+                  <input
+                    type="text"
+                    value={div.icon || ""}
+                    onChange={(e) => {
+                      const d = [...divisions.divisions];
+                      d[i] = { ...d[i], icon: e.target.value };
+                      updateDivisions({ divisions: d });
+                    }}
+                    className="flex-1 px-3 py-2 rounded-lg border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary/40 transition-all"
+                    placeholder="Contoh: photo_camera, palette, badge, campaign"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[9px] text-on-surface-variant/40 font-bold uppercase mr-1">Preset:</span>
+                  {PRESET_ICONS.map((pIcon) => (
+                    <button
+                      key={pIcon}
+                      type="button"
+                      onClick={() => {
+                        const d = [...divisions.divisions];
+                        d[i] = { ...d[i], icon: pIcon };
+                        updateDivisions({ divisions: d });
+                      }}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border transition-all ${
+                        div.icon === pIcon
+                          ? "bg-secondary text-white border-secondary shadow-sm"
+                          : "bg-surface-container-lowest text-on-surface-variant/60 border-outline-variant/15 hover:border-secondary/40 hover:text-primary"
+                      }`}
+                    >
+                      <Icon name={pIcon} size="sm" className="!text-xs" />
+                      {pIcon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-2 mt-1">
                 <input type="text" value={div.title} onChange={(e) => { const d = [...divisions.divisions]; d[i] = { ...d[i], title: e.target.value }; updateDivisions({ divisions: d }); }}
                   className="px-3 py-2 rounded-lg border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary/40 transition-all" placeholder="Title" />
                 <input type="text" value={div.subtitle} onChange={(e) => { const d = [...divisions.divisions]; d[i] = { ...d[i], subtitle: e.target.value }; updateDivisions({ divisions: d }); }}

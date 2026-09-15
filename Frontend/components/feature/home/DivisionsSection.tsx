@@ -31,6 +31,20 @@ const divisionStyles = [
     dotColor: "bg-primary",
     accentColor: "bg-primary",
   },
+  {
+    icon: "badge",
+    iconBg: "bg-amber-500/20",
+    iconColor: "border-amber-500/20 text-amber-600",
+    dotColor: "bg-amber-500",
+    accentColor: "bg-amber-500",
+  },
+  {
+    icon: "campaign",
+    iconBg: "bg-cyan-500/20",
+    iconColor: "border-cyan-500/20 text-cyan-600",
+    dotColor: "bg-cyan-500",
+    accentColor: "bg-cyan-500",
+  },
 ];
 
 export default function DivisionsSection() {
@@ -39,15 +53,19 @@ export default function DivisionsSection() {
   const d = hydrated ? divs : DEFAULTS.divisions;
 
   // Merge editable content with visual styles
-  const divisionsData = d.divisions.map((div, i) => ({
-    ...divisionStyles[i],
-    image: div.image ? getImageUrl(div.image) : "",
-    number: String(i + 1).padStart(2, "0"),
-    title: div.title,
-    subtitle: div.subtitle,
-    description: div.description,
-    features: div.features,
-  }));
+  const divisionsData = d.divisions.map((div, i) => {
+    const style = divisionStyles[i % divisionStyles.length] || divisionStyles[0];
+    return {
+      ...style,
+      icon: div.icon?.trim() ? div.icon.trim() : style.icon,
+      image: div.image ? getImageUrl(div.image) : "",
+      number: String(i + 1).padStart(2, "0"),
+      title: div.title,
+      subtitle: div.subtitle,
+      description: div.description,
+      features: div.features,
+    };
+  });
 
   return (
     <section
