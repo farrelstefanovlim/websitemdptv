@@ -17,7 +17,7 @@ import { usePortalTarget } from "@/hooks/usePortalTarget";
 export default function RecruitmentPage() {
   const portalTarget = usePortalTarget("mobile-topbar-actions");
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
-  const { applicants, addApplicant, registrationOpen, toggleRegistration, announcementOpen, toggleAnnouncement, fetchAnnouncementState, fetchApplicants, groupLink, setGroupLink } = useRecruitmentStore();
+  const { applicants, addApplicant, registrationOpen, toggleRegistration, announcementOpen, toggleAnnouncement, fetchAnnouncementState, fetchApplicants, groupLink, setGroupLink, fetchGroupLink, saveGroupLinkToDb, isLoading } = useRecruitmentStore();
   const pendingCount = applicants.filter((a) => a.status === "pending").length;
   const hydrated = useHydrated();
   const importRef = useRef<HTMLInputElement>(null);
@@ -26,7 +26,8 @@ export default function RecruitmentPage() {
   useEffect(() => {
     fetchApplicants();
     fetchAnnouncementState();
-  }, [fetchApplicants, fetchAnnouncementState]);
+    fetchGroupLink();
+  }, [fetchApplicants, fetchAnnouncementState, fetchGroupLink]);
 
   const handleExport = () => {
     exportToExcel(applicants, RECRUITMENT_COLUMNS, "penerimaan_anggota", "Pendaftar");
@@ -146,9 +147,28 @@ export default function RecruitmentPage() {
               <label className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 mb-1.5 flex items-center gap-1.5">
                 <Icon name="link" size="sm" /> Link WhatsApp
               </label>
-              <input type="text" value={groupLink} onChange={(e) => setGroupLink(e.target.value)} placeholder="https://chat.whatsapp.com/..." className="w-full text-xs sm:text-sm py-1.5 px-3 border border-outline-variant/20 rounded-lg focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none transition-all placeholder:text-on-surface-variant/30 text-primary bg-background" />
+              {/* Perubahan: Menambahkan pembungkus div dan tombol simpan */}
+              <div className="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  value={groupLink} 
+                  onChange={(e) => setGroupLink(e.target.value)} 
+                  placeholder="https://chat.whatsapp.com/..." 
+                  className="flex-1 w-full text-xs sm:text-sm py-2 px-3 border border-outline-variant/20 rounded-lg focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none transition-all placeholder:text-on-surface-variant/30 text-primary bg-background" 
+                />
+                <Button 
+                  variant="primary" 
+                  onClick={async () => {
+                    const success = await saveGroupLinkToDb(groupLink);
+                    if (success) toast.success("Link berhasil disimpan!");
+                  }}
+                  disabled={isLoading}
+                  className="!py-2 !px-4" // Menyesuaikan tinggi dengan input
+                >
+                  {isLoading ? "Menyimpan..." : "Simpan"}
+                </Button>
+              </div>
             </div>
-
           </div>
         </div>
         <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-8">
@@ -158,7 +178,7 @@ export default function RecruitmentPage() {
               <RecruitmentStats />
             </div>
           </div>
-
+          
           {/* Table */}
           <div className="lg:col-span-3 lg:order-1">
             <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 p-3 sm:p-6">

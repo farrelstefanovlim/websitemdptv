@@ -16,7 +16,7 @@ import StepPilihDivisi from "./form/StepPilihDivisi";
 import StepMotivasi from "./form/StepMotivasi";
 
 export default function DaftarPage() {
-  const { addApplicant, registrationOpen } = useRecruitmentStore();
+  const { addApplicant, registrationOpen, hasRegistered } = useRecruitmentStore();
   const [step, setStep] = useState<Step>(1);
   const [submitted, setSubmitted] = useState(false);
   const [errorMSG, setErrorMSG] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export default function DaftarPage() {
     if (step === 1) {
       if (!form.name.trim()) return setErrorMSG("Nama Lengkap harus diisi!");
       if (!form.nim.trim() || !/^\d+$/.test(form.nim)) return setErrorMSG("NIM harus diisi dengan angka yang valid!");
-      if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return setErrorMSG("Format email tidak valid!");
+      if (!form.email.trim() || !/^[^\s@]+@[^\s@]+@mhs\.mdp\.ac\.id$/.test(form.email)) return setErrorMSG("Gunakan email kampus yang valid!");
       if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone)) return setErrorMSG("Nomor WhatsApp harus diisi dengan angka (minimal 10 digit)!");
       setStep(2);
     } else if (step === 2) {
@@ -46,14 +46,18 @@ export default function DaftarPage() {
     }
   };
 
-  const attemptSubmit = () => {
+  const attemptSubmit = async () => {
     setErrorMSG(null);
     if (form.motivation.trim().length < 10) return setErrorMSG("Motivasi harus diisi minimal 10 karakter!");
-    addApplicant(form);
-    setSubmitted(true);
+    const success = await addApplicant(form);
+    if (success) {
+      setSubmitted(true);
+    }
   };
 
   const inputCls = "w-full px-4 py-3 rounded-2xl border border-outline-variant/20 bg-white text-sm text-primary focus:outline-none focus:border-secondary/50 focus:ring-3 focus:ring-secondary/10 transition-all placeholder:text-on-surface-variant/30";
+
+  if (hasRegistered) return <RegistrationSuccess />;
 
   /* Registration closed */
   if (!registrationOpen) return <RegistrationClosed />;
@@ -117,9 +121,9 @@ export default function DaftarPage() {
                 {errorMSG}
               </Alert>
             )}
-            {step === 1 && <StepDataDiri form={form} set={set} inputCls={inputCls} />}
+            {step === 1 && <StepDataDiri form={form} set={set} inputCls={inputCls} onEnter={handleNext} />}
             {step === 2 && <StepPilihDivisi selectedDivision={form.division} set={set} />}
-            {step === 3 && <StepMotivasi form={form} set={set} inputCls={inputCls} />}
+            {step === 3 && <StepMotivasi form={form} set={set} inputCls={inputCls} onEnter={attemptSubmit} />}
 
             {/* Navigation */}
             <div className="flex gap-3 mt-8">

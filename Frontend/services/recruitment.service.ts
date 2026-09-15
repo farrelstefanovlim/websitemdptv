@@ -51,4 +51,17 @@ export const recruitmentService = {
     const res = await api.patch("/recruitment/announcement/toggle", { isOpen });
     return res.data;
   },
+
+  // ==========================================
+  // FITUR BARU: WHATSAPP GROUP LINK
+  // ==========================================
+  getWhatsAppLink: async () => {
+    const res = await api.get("/recruitment/whatsapp-link");
+    return res.data;
+  },
+
+  updateWhatsAppLink: async (link: string) => {
+    const res = await api.put("/recruitment/whatsapp-link", { link });
+    return res.data;
+  },
 };

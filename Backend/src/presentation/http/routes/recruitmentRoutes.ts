@@ -17,10 +17,16 @@ export function createRecruitmentRoutes(recruitmentController: RecruitmentContro
   router.post("/apply", applyLimiter, recruitmentController.apply);
   router.get("/announcement", recruitmentController.getAnnouncement);
 
+  // Endpoint baru: Mengambil link WhatsApp di halaman RegistrationSuccess
+  router.get("/whatsapp-link", recruitmentController.getWhatsAppLink);
+
   // Protected (Admin/Superadmin)
   router.patch("/announcement/toggle", authMiddleware, recruitmentController.toggleAnnouncement);
   router.get("/applicants", authMiddleware, recruitmentController.getApplicants);
   router.patch("/applicants/:id/status", authMiddleware, recruitmentController.updateStatus);
 
+  // Endpoint baru: Admin menyimpan link WhatsApp dari dashboard
+  router.put("/whatsapp-link", authMiddleware, recruitmentController.updateWhatsAppLink);
+  
   return router;
 }

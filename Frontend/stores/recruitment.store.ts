@@ -17,12 +17,16 @@ interface RecruitmentState {
   meta: { page: number; limit: number; total: number; totalPages: number } | null;
   toggleRegistration: () => void;
   setGroupLink: (link: string) => void;
+  fetchGroupLink: () => Promise<void>;
+  saveGroupLinkToDb: (link:string) => Promise<boolean>;
   fetchApplicants: (params?: { search?: string; status?: string; page?: number }) => Promise<void>;
   addApplicant: (data: Omit<Applicant, "id" | "status" | "adminNote" | "appliedAt">) => Promise<boolean>;
   updateStatus: (id: string, status: RecruitmentStatus) => Promise<void>;
   updateNote: (id: string, note: string) => Promise<void>;
   fetchAnnouncementState: () => Promise<void>;
   toggleAnnouncement: () => Promise<void>;
+  hasRegistered: boolean;
+  setHasRegistered: (val:boolean) => void;
 }
 
 export const useRecruitmentStore = create<RecruitmentState>()(
@@ -35,11 +39,40 @@ export const useRecruitmentStore = create<RecruitmentState>()(
       isLoading: false,
       error: null,
       meta: null,
+      hasRegistered: false,
+      setHasRegistered: (val) => set({ hasRegistered: val}),
 
       toggleRegistration: () =>
         set((state) => ({ registrationOpen: !state.registrationOpen })),
 
       setGroupLink: (link: string) => set({ groupLink: link }),
+
+      // ==========================================
+      // FITUR BARU: Ambil & Simpan Link WA
+      // ==========================================
+      fetchGroupLink: async () => {
+        try {
+          const { data } = await recruitmentService.getWhatsAppLink();
+          // data berisi link string dari backend
+          set({ groupLink: data });
+        } catch (err) {
+          console.error("Gagal memuat link WhatsApp", err);
+        }
+      },
+
+      saveGroupLinkToDb: async (link: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { data } = await recruitmentService.updateWhatsAppLink(link);
+          set({ groupLink: data, isLoading: false });
+          return true; // Berhasil menyimpan
+        } catch (err: any) {
+          console.error("Gagal menyimpan link WhatsApp", err);
+          set({ error: err.response?.data?.message || "Gagal menyimpan link WhatsApp", isLoading: false });
+          return false; // Gagal menyimpan
+        }
+      },
+      // ==========================================
 
       fetchApplicants: async (params) => {
         set({ isLoading: true, error: null });
@@ -62,7 +95,7 @@ export const useRecruitmentStore = create<RecruitmentState>()(
             division_id: data.division,
             motivation: data.motivation,
           });
-          set({ isLoading: false });
+          set({ isLoading: false, hasRegistered: true });
           return true;
         } catch (err: any) {
           set({ error: err.response?.data?.message || "Gagal mendaftar.", isLoading: false });

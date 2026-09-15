@@ -3,18 +3,22 @@
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import Alert from "@/components/ui/Alert";
 
+// [PERBAIKAN]: Interface sudah dirapikan agar TypeScript tidak error
 interface Props {
-  form: {
-    name: string;
-    nim: string;
-    email: string;
-    phone: string;
-  };
+  form: any;
   set: (field: string, value: string) => void;
   inputCls: string;
+  onEnter?: () => void;
 }
 
-export default function StepDataDiri({ form, set, inputCls }: Props) {
+export default function StepDataDiri({ form, set, inputCls, onEnter }: Props) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && onEnter) {
+      e.preventDefault();
+      onEnter();
+    }
+  };
+
   return (
     <AnimateOnScroll variant="fadeUp">
       <div className="mb-6 sm:mb-8 text-center sm:text-left">
@@ -29,19 +33,20 @@ export default function StepDataDiri({ form, set, inputCls }: Props) {
       <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Nama Lengkap *</label>
-          <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Masukkan nama lengkap" />
+          <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Masukkan nama lengkap" onKeyDown={handleKeyDown} />
         </div>
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">NIM *</label>
-          <input type="text" value={form.nim} onChange={(e) => set("nim", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" />
+          <input type="text" value={form.nim} onChange={(e) => set("nim", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" onKeyDown={handleKeyDown} />
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Email *</label>
-          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} placeholder="nama@students.mdp.ac.id" />
+          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Email Kampus *</label>
+          {/* [PERBAIKAN]: Placeholder diubah untuk menegaskan aturan email kampus */}
+          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} placeholder="nama@mhs.mdp.ac.id" onKeyDown={handleKeyDown} />
         </div>
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">No. WhatsApp *</label>
-          <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} placeholder="08xxxxxxxxxx" />
+          <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} placeholder="08xxxxxxxxxx" onKeyDown={handleKeyDown} />
         </div>
       </div>
     </AnimateOnScroll>

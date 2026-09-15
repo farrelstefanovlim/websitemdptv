@@ -1,12 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import Icon from "@/components/ui/Icon";
 import Alert from "@/components/ui/Alert";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import { useRecruitmentStore } from "@/stores/recruitment.store";
 
 export default function RegistrationSuccess() {
-  const { groupLink } = useRecruitmentStore();
+  const { groupLink, fetchGroupLink } = useRecruitmentStore();
+
+  useEffect(() => {
+    fetchGroupLink();
+  }, [fetchGroupLink]);
+  
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
       <div className="fixed inset-0 noise-bg z-[1]" />
@@ -21,7 +27,7 @@ export default function RegistrationSuccess() {
             Terima kasih telah mendaftar di MDPTV. Tim kami akan menghubungi kamu melalui email untuk proses selanjutnya.
           </p>
           <Alert variant="info" title="Status: Pending Review" className="text-left mb-8">
-            <span className="text-[10px] text-on-surface-variant/70">Kamu akan dihubungi dalam 3-5 hari kerja</span>
+            <span className="text-[10px] text-on-surface-variant/70">Penutupan Pendaftaran 2 Oktober 2026</span>
           </Alert>
 
           {groupLink && (

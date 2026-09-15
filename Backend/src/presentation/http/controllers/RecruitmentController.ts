@@ -5,7 +5,7 @@ import { z } from "zod";
 const applicantSchema = z.object({
   name: z.string().min(1, "Nama wajib diisi."),
   nim: z.string().min(1, "NIM wajib diisi."),
-  email: z.string().email("Format email tidak valid."),
+  email: z.string().email("Format email tidak valid.").regex(/@mhs\.mdp\.ac\.id$/, "Gunakan email kampus (@mhs.mdp.ac.id)."),
   phone: z.string().optional(),
   division_id: z.string().min(1, "Divisi wajib diisi."),
   motivation: z.string().min(10, "Motivasi minimal 10 karakter."),
@@ -24,9 +24,9 @@ export class RecruitmentController {
       const { name, nim, email, phone, division_id, motivation } = validation.data;
 
       // Cek NIM duplikat
-      const existing = await prisma.applicant.findUnique({ where: { nim } });
+      const existing = await prisma.applicant.findFirst({ where: { OR: [{ nim }, { email }] }});
       if (existing) {
-        res.status(409).json({ status: "error", message: "NIM sudah terdaftar sebagai pendaftar." });
+        res.status(409).json({ status: "error", message: "NPM atau Email sudah terdaftar." });
         return;
       }
 
@@ -178,6 +178,48 @@ export class RecruitmentController {
         status: "success", 
         message: isOpen ? "Pengumuman berhasil dibuka." : "Pengumuman berhasil ditutup.",
         data: { isOpen: (updated.value as any)?.isOpen }
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ==========================================
+  // FITUR BARU: WHATSAPP GROUP LINK
+  // ==========================================
+  public getWhatsAppLink = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const setting = await prisma.siteSetting.findUnique({
+        where: { key: "whatsapp_group_link" }
+      });
+
+      const link = setting ? (setting.value as any)?.link || "" : "";
+      
+      res.status(200).json({ status: "success", data: link });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateWhatsAppLink = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { link } = req.body;
+
+      if (typeof link !== "string") {
+        res.status(400).json({ status: "error", message: "Parameter link wajib diisi dan harus berupa string." });
+        return;
+      }
+
+      const updated = await prisma.siteSetting.upsert({
+        where: { key: "whatsapp_group_link" },
+        update: { value: { link } },
+        create: { key: "whatsapp_group_link", value: { link } }
+      });
+
+      res.status(200).json({ 
+        status: "success", 
+        message: "Link WhatsApp berhasil diperbarui.",
+        data: (updated.value as any)?.link
       });
     } catch (error) {
       next(error);
