@@ -88,6 +88,7 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       subtitle: "VISUAL STORYTELLING",
       description: "Menangkap momen dan merangkai narasi visual melalui lensa dengan standar sinematografi tinggi. Kami berfokus pada teknik pengambilan gambar profesional dan penceritaan visual yang kuat.",
       image: "",
+      icon: "photo_camera",
       features: ["Studio Production", "Field Documentation", "Post-Processing Mastery"],
     },
     {
@@ -95,6 +96,7 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       subtitle: "IDENTITY & LAYOUT",
       description: "Eksplorasi identitas visual, tipografi modern, dan desain user interface yang intuitif dan estetik. Kami menciptakan bahasa visual yang bermakna dan memikat audiens.",
       image: "",
+      icon: "palette",
       features: ["Branding & Identity", "Digital Illustration", "UI/UX Design"],
     },
     {
@@ -102,6 +104,7 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       subtitle: "INFORMATION HUB",
       description: "Menjembatani informasi dan teknologi komunikasi untuk memperkuat jangkauan digital organisasi. Kami mengelola aliran informasi dan infrastruktur digital komunitas.",
       image: "",
+      icon: "hub",
       features: ["Social Media Management", "Digital Publishing", "IT Infrastructure"],
     },
     {
@@ -109,6 +112,7 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       subtitle: "HUMAN RESOURCES & TALENT DEVELOPMENT",
       description: "Mengembangkan potensi anggota, membina kaderisasi berkualitas, dan merawat dinamika serta keharmonisan internal organisasi.",
       image: "",
+      icon: "badge",
       features: ["Talent Development", "Kaderisasi & Orientasi", "Internal Engagement"],
     },
     {
@@ -116,6 +120,7 @@ const DEFAULT_DIVISIONS: DivisionsContent = {
       subtitle: "PUBLIC RELATIONS & PARTNERSHIPS",
       description: "Membangun relasi strategis, memperluas kemitraan eksternal, dan menjaga citra positif MDPTV di lingkup kampus dan publik.",
       image: "",
+      icon: "campaign",
       features: ["Media Partnership", "External Relations", "Event Sponsorship"],
     },
   ],

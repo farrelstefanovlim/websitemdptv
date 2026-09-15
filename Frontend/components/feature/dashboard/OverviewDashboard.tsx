@@ -23,6 +23,31 @@ function StatCard({ title, value, subtitle, icon, colorClass, iconBgClass }: any
   );
 }
 
+const DIVISION_META: Record<string, { icon: string; colorStr: string; textStr: string; lightBg: string }> = {
+  "Photography & Videography": { icon: "photo_camera", colorStr: "bg-blue-500", textStr: "text-blue-500", lightBg: "bg-blue-500/10" },
+  "Graphic Design": { icon: "palette", colorStr: "bg-pink-500", textStr: "text-pink-500", lightBg: "bg-pink-500/10" },
+  "Kominfo": { icon: "hub", colorStr: "bg-emerald-500", textStr: "text-emerald-500", lightBg: "bg-emerald-500/10" },
+  "Pengelola Sumber Daya Manusia": { icon: "badge", colorStr: "bg-amber-500", textStr: "text-amber-500", lightBg: "bg-amber-500/10" },
+  "Hubungan Masyarakat": { icon: "campaign", colorStr: "bg-cyan-500", textStr: "text-cyan-500", lightBg: "bg-cyan-500/10" },
+  "Public Relations": { icon: "campaign", colorStr: "bg-cyan-500", textStr: "text-cyan-500", lightBg: "bg-cyan-500/10" },
+  "Journalism": { icon: "article", colorStr: "bg-violet-500", textStr: "text-violet-500", lightBg: "bg-violet-500/10" },
+};
+
+const DEFAULT_DIVISIONS_LIST = [
+  "Photography & Videography",
+  "Graphic Design",
+  "Kominfo",
+  "Pengelola Sumber Daya Manusia",
+  "Hubungan Masyarakat",
+];
+
+const FALLBACK_PALETTES = [
+  { icon: "diversity_3", colorStr: "bg-indigo-500", textStr: "text-indigo-500", lightBg: "bg-indigo-500/10" },
+  { icon: "groups", colorStr: "bg-teal-500", textStr: "text-teal-500", lightBg: "bg-teal-500/10" },
+  { icon: "handshake", colorStr: "bg-rose-500", textStr: "text-rose-500", lightBg: "bg-rose-500/10" },
+  { icon: "work", colorStr: "bg-amber-600", textStr: "text-amber-600", lightBg: "bg-amber-600/10" },
+];
+
 export default function OverviewDashboard() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,11 +78,23 @@ export default function OverviewDashboard() {
   const operatorCount = metrics.users.find((u: any) => u.role === "operator")?.count || 0;
 
   const totalMembers = metrics.members.total;
-  const divGraphDesign = metrics.members.byDivision.find((m: any) => m.name === "Graphic Design")?.count || 0;
-  const divPhotoVideo = metrics.members.byDivision.find((m: any) => m.name === "Photography & Videography")?.count || 0;
-  const divKominfo = metrics.members.byDivision.find((m: any) => m.name === "Kominfo")?.count || 0;
-  const divPsdm = metrics.members.byDivision.find((m: any) => m.name === "Pengelola Sumber Daya Manusia")?.count || 0;
-  const divHumas = metrics.members.byDivision.find((m: any) => m.name === "Hubungan Masyarakat")?.count || 0;
+  const rawByDivision = metrics.members.byDivision || [];
+  const divisionNamesFromApi = rawByDivision.map((d: any) => d.name);
+  const combinedDivisionNames = Array.from(new Set([...DEFAULT_DIVISIONS_LIST, ...divisionNamesFromApi]));
+
+  const divisionList = combinedDivisionNames.map((name, idx) => {
+    const meta = DIVISION_META[name] || FALLBACK_PALETTES[idx % FALLBACK_PALETTES.length];
+    const found = rawByDivision.find((d: any) => d.name === name);
+    return {
+      id: name,
+      title: name,
+      count: found ? found.count : 0,
+      icon: meta.icon,
+      colorStr: meta.colorStr,
+      textStr: meta.textStr,
+      lightBg: meta.lightBg,
+    };
+  });
 
   const totalApplicants = metrics.applicants.total;
   const acceptedApplicants = metrics.applicants.byStatus.find((f: any) => f.status === "accepted")?.count || 0;
@@ -77,7 +114,7 @@ export default function OverviewDashboard() {
       {/* Top Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard 
-          title="Total Anggota" value={totalMembers} subtitle={`${divPhotoVideo} Video, ${divGraphDesign} Design, ${divKominfo} IT, ${divPsdm} PSDM, ${divHumas} Humas`}
+          title="Total Anggota" value={totalMembers} subtitle={`${divisionList.length} Divisi Terdaftar`}
           icon="groups" colorClass="bg-blue-500" iconBgClass="bg-blue-500/10"
         />
         <StatCard 
@@ -188,13 +225,7 @@ export default function OverviewDashboard() {
           </div>
 
           <div className="flex flex-col gap-5 mt-2 justify-center flex-1">
-            {[
-              { id: "pv", title: "Photography & Videography", count: divPhotoVideo, icon: "camera", colorStr: "bg-blue-500", textStr: "text-blue-500", lightBg: "bg-blue-500/10" },
-              { id: "gd", title: "Graphic Design", count: divGraphDesign, icon: "brush", colorStr: "bg-pink-500", textStr: "text-pink-500", lightBg: "bg-pink-500/10" },
-              { id: "ki", title: "Kominfo", count: divKominfo, icon: "terminal", colorStr: "bg-emerald-500", textStr: "text-emerald-500", lightBg: "bg-emerald-500/10" },
-              { id: "psdm", title: "Pengelola Sumber Daya Manusia", count: divPsdm, icon: "badge", colorStr: "bg-amber-500", textStr: "text-amber-500", lightBg: "bg-amber-500/10" },
-              { id: "humas", title: "Hubungan Masyarakat", count: divHumas, icon: "campaign", colorStr: "bg-cyan-500", textStr: "text-cyan-500", lightBg: "bg-cyan-500/10" },
-            ].map((div) => {
+            {divisionList.map((div) => {
               const percentage = totalMembers > 0 ? Math.round((div.count / totalMembers) * 100) : 0;
               return (
                 <div key={div.id} className="flex items-center gap-4 group">

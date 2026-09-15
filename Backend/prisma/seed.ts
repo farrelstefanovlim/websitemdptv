@@ -110,6 +110,7 @@ async function main() {
             subtitle: "VISUAL STORYTELLING",
             description: "Menangkap momen dan merangkai narasi visual melalui lensa dengan standar sinematografi tinggi.",
             image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBiZlRZqqTnnWd0G44h6NFUk5MZGCEAqOaUbt9PCh8jFMcZ6KyYekvNTyqqayhnaZRLlYlLEzzYs_i83CH34eFfVqaaYFCtxJipqRHoqlDwmyKBxXLVzubaTNdsIUfMQ_Be7LXj4BfW2NsIh6DGyfOxdb5AzUrneAo_Zr0Rx-Jm2lASh-eCVARMh-RLvUwDK1W7XojLUXsSlrf_hcIp71PAbebvbtDmwr5ar5NATyPIGidnt88RIDuoaxygn89cxF8hqw7veqkl-LBN",
+            icon: "photo_camera",
             features: ["Studio Production", "Field Documentation", "Post-Processing"]
           },
           {
@@ -117,6 +118,7 @@ async function main() {
             subtitle: "IDENTITY & LAYOUT",
             description: "Eksplorasi identitas visual, tipografi modern, dan desain user interface.",
             image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBvAlHRGFnEg-9VzjA5IdT1TvIpNSpd9Y4yq7xzeIXwmdvi6Q437GAAz7SVCQ4Ry5I8IhfJ8dFw66Gx2zZneSMDFmpQy0Knlj9imau-ZzucMtjHC6r1dkEUSnpexdBO6Nvy1YQxeJbIm1Cc4GiLy4uCkJ3_TeRrPaYk3v1DzCHNInLiYTGqVm8PK94Zyh6RwJU0vDCGNlllGw-jo_UNloy8DTBjBK8pqb8rbAFzaexqiVwqUrWl84Pcik4pETRVWL4qDql-aSndO0HD",
+            icon: "palette",
             features: ["Branding", "Digital Illustration", "UI/UX Design"]
           },
           {
@@ -124,6 +126,7 @@ async function main() {
             subtitle: "INFORMATION HUB",
             description: "Menjembatani informasi dan teknologi komunikasi untuk memperkuat jangkauan digital.",
             image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3YPirtyYQqUulGH_4ce37GHXSDyI5GIagMVsb7mGo-LhxxvOXh1HxHinJd0jdRWIDhrfWsKDuRsXsdOa91QHqsOjSLvyv2wU6gErgwTk4vKvRke7qmUDoiExVzhmqhJilOwWrhlo_vpgJQW76zI5qRjdppZg_O-nQm6gLvF0Z_SkQ0_5rX7zH-ZDN_x78ayUaBFcsnZnFyASb0IuGer9h-YMxwE2gp5elbv2yBQMSNC_QYDSf8jV5cQWWmopcpTCCLag8aTdBKwSy",
+            icon: "hub",
             features: ["Social Media", "Digital Publishing", "IT Infrastructure"]
           },
           {
@@ -131,6 +134,7 @@ async function main() {
             subtitle: "HUMAN RESOURCES & TALENT DEVELOPMENT",
             description: "Mengembangkan potensi anggota, membina kaderisasi berkualitas, dan merawat dinamika internal organisasi.",
             image: "",
+            icon: "badge",
             features: ["Talent Development", "Kaderisasi & Orientasi", "Internal Engagement"]
           },
           {
@@ -138,6 +142,7 @@ async function main() {
             subtitle: "PUBLIC RELATIONS & PARTNERSHIPS",
             description: "Membangun relasi strategis, memperluas jaringan kemitraan eksternal, dan menjaga citra positif MDPTV.",
             image: "",
+            icon: "campaign",
             features: ["Media Partnership", "External Relations", "Event Sponsorship"]
           }
         ]

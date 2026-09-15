@@ -53,15 +53,19 @@ export default function DivisionsSection() {
   const d = hydrated ? divs : DEFAULTS.divisions;
 
   // Merge editable content with visual styles
-  const divisionsData = d.divisions.map((div, i) => ({
-    ...(divisionStyles[i % divisionStyles.length] || divisionStyles[0]),
-    image: div.image ? getImageUrl(div.image) : "",
-    number: String(i + 1).padStart(2, "0"),
-    title: div.title,
-    subtitle: div.subtitle,
-    description: div.description,
-    features: div.features,
-  }));
+  const divisionsData = d.divisions.map((div, i) => {
+    const style = divisionStyles[i % divisionStyles.length] || divisionStyles[0];
+    return {
+      ...style,
+      icon: div.icon?.trim() ? div.icon.trim() : style.icon,
+      image: div.image ? getImageUrl(div.image) : "",
+      number: String(i + 1).padStart(2, "0"),
+      title: div.title,
+      subtitle: div.subtitle,
+      description: div.description,
+      features: div.features,
+    };
+  });
 
   return (
     <section
