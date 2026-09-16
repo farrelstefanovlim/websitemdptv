@@ -171,7 +171,7 @@ export default function WawancaraJawabanPage() {
   const filteredCandidates = interviewCandidates.filter(
     (c) =>
       c.name.toLowerCase().includes(candidateName.toLowerCase()) ||
-      c.nim.toLowerCase().includes(candidateName.toLowerCase()) ||
+      c.npm.toLowerCase().includes(candidateName.toLowerCase()) ||
       c.division.toLowerCase().includes(candidateName.toLowerCase())
   );
 
@@ -306,7 +306,7 @@ export default function WawancaraJawabanPage() {
                             {c.name}
                           </p>
                           <p className="text-[10px] text-on-surface-variant/60">
-                            NPM: {c.nim} | Divisi: {c.division}
+                            NPM: {c.npm} | Divisi: {c.division}
                           </p>
                         </div>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 font-bold border border-purple-500/20 shrink-0">
