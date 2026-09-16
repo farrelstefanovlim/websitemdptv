@@ -2,25 +2,26 @@
 
 import { useEffect } from "react";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
-import Alert from "@/components/ui/Alert";
+import Icon from "@/components/ui/Icon";
 
-// [PERBAIKAN]: Interface sudah dirapikan agar TypeScript tidak error
 interface Props {
-  form: any;
+  form: {
+    name: string;
+    nim: string;
+    email: string;
+    phone: string;
+  };
   set: (field: string, value: string) => void;
-  inputCls: string;
+  inputCls?: string;
   onEnter?: () => void;
 }
 
-export default function StepDataDiri({ form, set, inputCls, onEnter }: Props) {
-  // [PERBAIKAN]: Menambahkan deteksi tombol Enter global agar berfungsi meski input tidak sedang diklik
+export default function StepDataDiri({ form, set, onEnter }: Props) {
   useEffect(() => {
     const handleGlobalEnter = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         const target = e.target as HTMLElement;
-        // Hindari klik ganda jika user sedang menyeleksi tombol menggunakan keyboard
         if (target.tagName === "BUTTON" || target.getAttribute("role") === "button") return;
-        
         e.preventDefault();
         if (onEnter) onEnter();
       }
@@ -30,34 +31,129 @@ export default function StepDataDiri({ form, set, inputCls, onEnter }: Props) {
     return () => window.removeEventListener("keydown", handleGlobalEnter);
   }, [onEnter]);
 
+  const fieldWrapperCls =
+    "w-full pl-11 pr-4 py-3 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10 transition-all placeholder:text-on-surface-variant/30";
+
   return (
     <AnimateOnScroll variant="fadeUp">
-      <div className="mb-6 sm:mb-8 text-center sm:text-left">
-        <h2 className="text-headline-md text-2xl sm:text-3xl font-black text-primary mb-2">Data Diri</h2>
-        <p className="text-sm text-on-surface-variant/60">Lengkapi formulir di bawah ini dengan data yang valid.</p>
+      <div className="mb-6 text-left">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold uppercase tracking-wider mb-2">
+          <Icon name="badge" size="sm" className="!text-xs" />
+          Langkah 1 dari 3
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-primary font-display mb-1">
+          Identitas Diri
+        </h2>
+        <p className="text-xs sm:text-sm text-on-surface-variant/60">
+          Masukkan data diri resmi sesuai Kartu Tanda Mahasiswa (KTM) MDP.
+        </p>
       </div>
 
+<<<<<<< HEAD
       <Alert variant="info" className="mb-6 text-left">
         Penting: Pastikan <strong>Nama Lengkap</strong> dan <strong>NPM</strong> yang diinput sesuai dengan Kartu Tanda Mahasiswa (KTM) yang terdaftar.
       </Alert>
+=======
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-secondary/5 border border-secondary/15 flex items-start gap-3 mb-6">
+        <Icon name="info" className="text-secondary shrink-0 mt-0.5" size="sm" filled />
+        <p className="text-xs text-on-surface-variant/80 leading-relaxed">
+          Pastikan <strong>Nama Lengkap</strong>, <strong>NIM</strong>, dan <strong>Email Kampus</strong> yang digunakan adalah milik pribadi yang aktif untuk proses verifikasi.
+        </p>
+      </div>
+>>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
 
-      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* Nama Lengkap */}
         <div>
-          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Nama Lengkap *</label>
-          <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Masukkan nama lengkap" autoComplete="name"/>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
+            Nama Lengkap *
+          </label>
+          <div className="relative">
+            <Icon
+              name="person"
+              size="sm"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
+            />
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+              className={fieldWrapperCls}
+              placeholder="Contoh: Ahmad Rizki"
+              autoComplete="name"
+            />
+          </div>
         </div>
+
+        {/* NIM */}
         <div>
+<<<<<<< HEAD
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">NPM *</label>
           <input type="text" value={form.npm} onChange={(e) => set("npm", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" autoComplete="off"/>
+=======
+          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
+            NIM Mahasiswa *
+          </label>
+          <div className="relative">
+            <Icon
+              name="tag"
+              size="sm"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
+            />
+            <input
+              type="text"
+              value={form.nim}
+              onChange={(e) => set("nim", e.target.value)}
+              className={fieldWrapperCls}
+              placeholder="Contoh: 2428240153"
+              autoComplete="off"
+            />
+          </div>
+>>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
         </div>
+
+        {/* Email Kampus */}
         <div>
-          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Email Kampus *</label>
-          {/* [PERBAIKAN]: Placeholder diubah untuk menegaskan aturan email kampus */}
-          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} placeholder="nama@mhs.mdp.ac.id" autoComplete="email"/>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
+            Email Kampus (@mhs.mdp.ac.id) *
+          </label>
+          <div className="relative">
+            <Icon
+              name="mail"
+              size="sm"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
+            />
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+              className={fieldWrapperCls}
+              placeholder="nama_nim@mhs.mdp.ac.id"
+              autoComplete="email"
+            />
+          </div>
         </div>
+
+        {/* Nomor WhatsApp */}
         <div>
-          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">No. WhatsApp *</label>
-          <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} placeholder="08xxxxxxxxxx" autoComplete="tel"/>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
+            Nomor WhatsApp *
+          </label>
+          <div className="relative">
+            <Icon
+              name="call"
+              size="sm"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
+            />
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={(e) => set("phone", e.target.value)}
+              className={fieldWrapperCls}
+              placeholder="081234567890"
+              autoComplete="tel"
+            />
+          </div>
         </div>
       </div>
     </AnimateOnScroll>

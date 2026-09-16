@@ -97,6 +97,7 @@ model Member {
   full_name   String   @db.VarChar(100)
   division_id String?  @db.Uuid
   angkatan    Int
+  is_core     Boolean  @default(false)
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())
 

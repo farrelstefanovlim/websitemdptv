@@ -78,6 +78,7 @@ export function importFromExcel(
 export const MEMBERS_COLUMNS: Column[] = [
   { key: "name", header: "Nama Lengkap" },
   { key: "division", header: "Divisi" },
+  { key: "category", header: "Kategori (Inti/Biasa)" },
   { key: "angkatan", header: "Angkatan" },
   { key: "is_active", header: "Status Aktif" },
 ];

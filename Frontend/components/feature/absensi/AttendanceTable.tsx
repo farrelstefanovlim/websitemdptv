@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 import { useAttendanceStore } from "@/stores/attendance.store";
 import type { AttendanceStatus } from "@/components/feature/absensi/types/attendance.type";
 import { STATUS_LABELS, STATUS_ICONS } from "@/components/feature/absensi/types/attendance.type";
-
 import ActionMenu from "@/components/ui/ActionMenu";
+import api from "@/lib/axios";
 
 interface AttendanceTableProps {
   selectedDate: string;
@@ -33,29 +33,37 @@ const statusStyles: Record<AttendanceStatus, { active: string; ring: string }> =
   },
 };
 
-const divisions = [
-  "Semua",
+const DEFAULT_DIVISIONS = [
   "Photography & Videography",
   "Graphic Design",
   "Kominfo",
   "Pengelola Sumber Daya Manusia",
   "Hubungan Masyarakat",
 ];
-const divisionShort: Record<string, string> = {
-  "Semua": "Semua",
-  "Photography & Videography": "Photo & Video",
-  "Graphic Design": "Design",
-  "Kominfo": "Kominfo",
-  "Pengelola Sumber Daya Manusia": "PSDM",
-  "Hubungan Masyarakat": "Humas",
-};
 
 export default function AttendanceTable({ selectedDate, actions }: AttendanceTableProps) {
   const { members, setAttendance, markAllPresent, clearDate, getMemberStatus, isDateLocked } =
     useAttendanceStore();
   const [filterDivision, setFilterDivision] = useState("Semua");
   const [search, setSearch] = useState("");
+  const [dbDivisions, setDbDivisions] = useState<string[]>([]);
   const isLocked = isDateLocked(selectedDate);
+
+  useEffect(() => {
+    api.get("/divisions")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setDbDivisions(res.data.data.map((d: any) => d.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const dynamicDivisions = useMemo(() => {
+    const fromMembers = members.map((m) => m.division).filter(Boolean);
+    const base = dbDivisions.length > 0 ? dbDivisions : DEFAULT_DIVISIONS;
+    return ["Semua", ...Array.from(new Set([...base, ...fromMembers]))];
+  }, [dbDivisions, members]);
 
   const filteredMembers = members.filter((m) => {
     const matchesDiv = filterDivision === "Semua" || m.division === filterDivision;
@@ -117,7 +125,7 @@ export default function AttendanceTable({ selectedDate, actions }: AttendanceTab
         <div className="flex items-center gap-2 shrink-0">
           {/* Filter Menu */}
           <ActionMenu triggerIcon="filter_list" title="Saring Divisi" actions={[
-            ...divisions.map(d => ({
+            ...dynamicDivisions.map(d => ({
               label: d,
               icon: "group",
               active: filterDivision === d,

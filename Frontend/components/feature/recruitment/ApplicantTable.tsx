@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Icon from "@/components/ui/Icon";
 import { useRecruitmentStore } from "@/stores/recruitment.store";
 import type { RecruitmentStatus } from "@/components/feature/recruitment/types/recruitment.type";
@@ -12,30 +12,39 @@ import {
 import Button from "@/components/ui/Button";
 import ApplicantCard from "./ApplicantCard";
 import ActionMenu from "@/components/ui/ActionMenu";
+import api from "@/lib/axios";
 
 const allStatuses: RecruitmentStatus[] = ["pending", "interview", "accepted", "rejected"];
-const divisions = [
-  "Semua",
+const DEFAULT_DIVISIONS = [
   "Photography & Videography",
   "Graphic Design",
   "Kominfo",
   "Pengelola Sumber Daya Manusia",
   "Hubungan Masyarakat",
 ];
-const divisionShort: Record<string, string> = {
-  "Semua": "Semua",
-  "Photography & Videography": "Photo & Video",
-  "Graphic Design": "Design",
-  "Kominfo": "Kominfo",
-  "Pengelola Sumber Daya Manusia": "PSDM",
-  "Hubungan Masyarakat": "Humas",
-};
 
 export default function ApplicantTable({ actions }: { actions?: React.ReactNode }) {
   const { applicants } = useRecruitmentStore();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<RecruitmentStatus | "all">("all");
   const [filterDivision, setFilterDivision] = useState("Semua");
+  const [dbDivisions, setDbDivisions] = useState<string[]>([]);
+
+  useEffect(() => {
+    api.get("/divisions")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setDbDivisions(res.data.data.map((d: any) => d.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const dynamicDivisions = useMemo(() => {
+    const fromApplicants = applicants.map((a) => a.division).filter(Boolean);
+    const base = dbDivisions.length > 0 ? dbDivisions : DEFAULT_DIVISIONS;
+    return Array.from(new Set([...base, ...fromApplicants]));
+  }, [dbDivisions, applicants]);
 
   const filtered = applicants.filter((a) => {
     if (filterStatus !== "all" && a.status !== filterStatus) return false;
@@ -80,7 +89,7 @@ export default function ApplicantTable({ actions }: { actions?: React.ReactNode 
             { type: "divider" },
             { type: "header", label: "Divisi" },
             { label: "Semua Divisi", icon: "list", active: filterDivision === "Semua", onClick: () => setFilterDivision("Semua") },
-            ...divisions.filter(d => d !== "Semua").map(d => ({
+            ...dynamicDivisions.map(d => ({
               label: d,
               icon: "group",
               active: filterDivision === d,

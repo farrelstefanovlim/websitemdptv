@@ -2,29 +2,29 @@
 
 import { useEffect } from "react";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
+import Icon from "@/components/ui/Icon";
 
 interface Props {
-  form: any;
+  form: {
+    name: string;
+    nim: string;
+    email: string;
+    phone: string;
+    division: string;
+    motivation: string;
+  };
   set: (field: string, value: string) => void;
-  inputCls: string;
+  inputCls?: string;
   onEnter?: () => void;
 }
 
-export default function StepMotivasi({ form, set, inputCls, onEnter }: Props) {
-
-// [PERBAIKAN FINAL]: Menambahkan sensor tombol Enter global yang cerdas
+export default function StepMotivasi({ form, set, onEnter }: Props) {
   useEffect(() => {
     const handleGlobalEnter = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         const target = e.target as HTMLElement;
-
-        // 1. Hindari error jika user mengklik tombol "Kembali / Kirim" menggunakan keyboard
         if (target.tagName === "BUTTON" || target.getAttribute("role") === "button") return;
-
-        // 2. Jika user sedang mengetik di dalam textarea dan menekan Shift+Enter, biarkan (untuk bikin baris baru)
         if (target.tagName === "TEXTAREA" && e.shiftKey) return;
-
-        // 3. Selain itu (tekan Enter biasa, baik di dalam maupun di luar kotak), langsung Submit!
         e.preventDefault();
         if (onEnter) onEnter();
       }
@@ -34,56 +34,127 @@ export default function StepMotivasi({ form, set, inputCls, onEnter }: Props) {
     return () => window.removeEventListener("keydown", handleGlobalEnter);
   }, [onEnter]);
 
+  const isMotivationValid = form.motivation.trim().length >= 10;
+  const charCount = form.motivation.length;
+
   return (
     <AnimateOnScroll variant="fadeUp">
-      <div className="mb-6">
-        <h2 className="text-xl font-black text-primary mb-1">Motivasi</h2>
-        <p className="text-sm text-on-surface-variant/50">Ceritakan alasanmu bergabung dengan MDPTV</p>
+      <div className="mb-6 text-left">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold uppercase tracking-wider mb-2">
+          <Icon name="description" size="sm" className="!text-xs" />
+          Langkah 3 dari 3
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-primary font-display mb-1">
+          Motivasi & Review Berkas
+        </h2>
+        <p className="text-xs sm:text-sm text-on-surface-variant/60">
+          Ceritakan alasan, pengalaman, atau tujuanmu bergabung bersama tim MDPTV.
+        </p>
       </div>
-      <div className="grid gap-4">
+
+      <div className="grid gap-5">
+        {/* Motivasi Textarea */}
         <div>
-          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Motivasi Bergabung *</label>
-          <textarea 
-            value={form.motivation} 
-            onChange={(e) => set("motivation", e.target.value)}
-            rows={6} 
-            className={`${inputCls} resize-none`}
-            placeholder="Ceritakan pengalaman, skill, atau alasan kamu ingin bergabung dengan MDPTV... (minimal 10 karakter)" 
-            onKeyDown={(e) => {
-              // [PERBAIKAN]: Enter biasa untuk Submit, Shift + Enter untuk bikin baris baru
-              if (e.key === "Enter" && !e.shiftKey && onEnter) {
-                e.preventDefault();
-                onEnter();
-              }
-            }}
-          />
-          <div className="flex justify-between mt-1.5">
-            <span className={`text-[10px] ${form.motivation.length >= 10 ? "text-green-500" : "text-on-surface-variant/30"}`}>
-              {form.motivation.length >= 10 ? "✓ Cukup" : `Minimal 10 karakter`}
+          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
+            Motivasi & Pengalaman *
+          </label>
+          <div className="relative">
+            <textarea
+              value={form.motivation}
+              onChange={(e) => set("motivation", e.target.value)}
+              rows={5}
+              className="w-full px-4 py-3 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10 transition-all resize-none placeholder:text-on-surface-variant/30 leading-relaxed"
+              placeholder="Ceritakan minatmu, portofolio singkat (jika ada), atau mengapa kamu tertarik bergabung di divisi yang kamu pilih... (minimal 10 karakter)"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && onEnter) {
+                  e.preventDefault();
+                  onEnter();
+                }
+              }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between mt-2 text-xs">
+            <div className="flex items-center gap-1.5">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  isMotivationValid ? "bg-emerald-500" : "bg-amber-500 animate-pulse"
+                }`}
+              />
+              <span
+                className={`text-[11px] font-semibold ${
+                  isMotivationValid ? "text-emerald-600" : "text-amber-600"
+                }`}
+              >
+                {isMotivationValid ? "Motivasi memenuhi syarat" : "Minimal 10 karakter"}
+              </span>
+            </div>
+            <span className="text-[11px] text-on-surface-variant/40 font-medium">
+              {charCount} karakter • <span className="text-secondary/70">Enter</span> kirim, <span className="text-on-surface-variant/50">Shift+Enter</span> baris baru
             </span>
-            <span className="text-[10px] text-on-surface-variant/30">{form.motivation.length} karakter (Tekan Enter untuk kirim, Shift+Enter untuk baris baru)</span>
           </div>
         </div>
 
-        {/* Summary */}
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10">
-          <span className="text-[9px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-3">Ringkasan Pendaftaran</span>
-          <div className="grid gap-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-on-surface-variant/50">Nama</span>
-              <span className="font-medium text-primary">{form.name}</span>
+        {/* Executive Review Card */}
+        <div className="p-4 sm:p-5 rounded-3xl bg-surface-container-low/70 border border-outline-variant/15 text-left">
+          <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-outline-variant/10">
+            <Icon name="verified_user" size="sm" className="text-secondary" />
+            <span className="text-[10px] uppercase tracking-widest font-bold text-primary">
+              Ringkasan Data Formulir
+            </span>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <span className="text-on-surface-variant/50 block text-[10px] uppercase font-bold mb-0.5">
+                Nama Lengkap
+              </span>
+              <span className="font-bold text-primary truncate block">
+                {form.name || "-"}
+              </span>
             </div>
+<<<<<<< HEAD
             <div className="flex justify-between">
               <span className="text-on-surface-variant/50">NPM</span>
               <span className="font-medium text-primary">{form.npm}</span>
+=======
+
+            <div>
+              <span className="text-on-surface-variant/50 block text-[10px] uppercase font-bold mb-0.5">
+                NIM Mahasiswa
+              </span>
+              <span className="font-bold text-primary font-display block">
+                {form.nim || "-"}
+              </span>
+>>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
             </div>
-            <div className="flex justify-between">
-              <span className="text-on-surface-variant/50">Email</span>
-              <span className="font-medium text-primary truncate ml-4">{form.email}</span>
+
+            <div>
+              <span className="text-on-surface-variant/50 block text-[10px] uppercase font-bold mb-0.5">
+                Email Kampus
+              </span>
+              <span className="font-medium text-primary truncate block">
+                {form.email || "-"}
+              </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-on-surface-variant/50">Divisi</span>
-              <span className="font-medium text-secondary">{form.division}</span>
+
+            <div>
+              <span className="text-on-surface-variant/50 block text-[10px] uppercase font-bold mb-0.5">
+                Nomor WhatsApp
+              </span>
+              <span className="font-medium text-primary block">
+                {form.phone || "-"}
+              </span>
+            </div>
+
+            <div className="sm:col-span-2 pt-1">
+              <span className="text-on-surface-variant/50 block text-[10px] uppercase font-bold mb-1">
+                Pilihan Divisi
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-secondary/10 text-secondary border border-secondary/20 text-xs font-bold">
+                <Icon name="check" size="sm" className="!text-xs" />
+                {form.division || "Belum dipilih"}
+              </span>
             </div>
           </div>
         </div>

@@ -3,8 +3,11 @@ export type AttendanceStatus = "present" | "absent" | "late" | "excused";
 export interface Member {
   id: string;
   name: string;
+  division_id?: string;
   division: string;
   angkatan: number;
+  is_core?: boolean;
+  is_active?: boolean;
 }
 
 export interface AttendanceRecord {

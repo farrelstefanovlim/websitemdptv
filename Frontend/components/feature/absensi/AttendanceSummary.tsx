@@ -9,11 +9,41 @@ interface AttendanceSummaryProps {
   selectedDate: string;
 }
 
-const statCards: { status: AttendanceStatus; icon: string; color: string; bgColor: string }[] = [
-  { status: "present", icon: "check_circle", color: "text-green-500", bgColor: "bg-green-500/10 border-green-500/15" },
-  { status: "late", icon: "schedule", color: "text-yellow-500", bgColor: "bg-yellow-500/10 border-yellow-500/15" },
-  { status: "excused", icon: "info", color: "text-secondary", bgColor: "bg-secondary/10 border-secondary/15" },
-  { status: "absent", icon: "cancel", color: "text-error", bgColor: "bg-error/10 border-error/15" },
+const statCards: {
+  status: AttendanceStatus;
+  icon: string;
+  color: string;
+  textColor: string;
+  bgColor: string;
+}[] = [
+  {
+    status: "present",
+    icon: "check_circle",
+    color: "bg-emerald-500",
+    textColor: "text-emerald-700",
+    bgColor: "bg-emerald-500/5 border-emerald-500/20",
+  },
+  {
+    status: "late",
+    icon: "schedule",
+    color: "bg-amber-500",
+    textColor: "text-amber-700",
+    bgColor: "bg-amber-500/5 border-amber-500/20",
+  },
+  {
+    status: "excused",
+    icon: "info",
+    color: "bg-blue-500",
+    textColor: "text-blue-700",
+    bgColor: "bg-blue-500/5 border-blue-500/20",
+  },
+  {
+    status: "absent",
+    icon: "cancel",
+    color: "bg-rose-500",
+    textColor: "text-rose-700",
+    bgColor: "bg-rose-500/5 border-rose-500/20",
+  },
 ];
 
 export default function AttendanceSummary({ selectedDate }: AttendanceSummaryProps) {
@@ -29,80 +59,95 @@ export default function AttendanceSummary({ selectedDate }: AttendanceSummaryPro
   dateRecords.forEach((r) => counts[r.status]++);
 
   const totalMarked = dateRecords.length;
-  const attendanceRate = totalMarked > 0
-    ? Math.round(((counts.present + counts.late) / totalMarked) * 100)
-    : 0;
+  const attendanceRate =
+    totalMarked > 0
+      ? Math.round(((counts.present + counts.late) / totalMarked) * 100)
+      : 0;
 
   return (
     <div>
-      <h3 className="text-base sm:text-lg font-bold text-primary mb-3 sm:mb-4">Rekap Hari Ini</h3>
-
-      {/* Attendance Rate */}
-      <div className="bg-surface-container-low rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-3 sm:mb-4 border border-outline-variant/10">
-        <div className="flex items-center justify-between mb-2 sm:mb-3">
-          <span className="text-[9px] sm:text-xs text-on-surface-variant/50 uppercase tracking-widest font-bold">
-            Tingkat Kehadiran
-          </span>
-          <span className="text-[10px] sm:text-xs text-on-surface-variant/40">
-            {totalMarked}/{members.length} tercatat
-          </span>
-        </div>
-        <div className="text-3xl sm:text-4xl font-black text-primary mb-2">
-          {attendanceRate}
-          <span className="text-base sm:text-lg text-on-surface-variant/30">%</span>
-        </div>
-        {/* Progress bar */}
-        <div className="h-1.5 sm:h-2 bg-surface-container-highest rounded-full overflow-hidden">
-          <div className="h-full flex rounded-full overflow-hidden">
-            {totalMarked > 0 && counts.present > 0 && (
-              <div
-                className="bg-green-500 transition-all duration-500"
-                style={{ width: `${(counts.present / totalMarked) * 100}%` }}
-              />
-            )}
-            {totalMarked > 0 && counts.late > 0 && (
-              <div
-                className="bg-yellow-500 transition-all duration-500"
-                style={{ width: `${(counts.late / totalMarked) * 100}%` }}
-              />
-            )}
-            {totalMarked > 0 && counts.excused > 0 && (
-              <div
-                className="bg-secondary transition-all duration-500"
-                style={{ width: `${(counts.excused / totalMarked) * 100}%` }}
-              />
-            )}
-            {totalMarked > 0 && counts.absent > 0 && (
-              <div
-                className="bg-error transition-all duration-500"
-                style={{ width: `${(counts.absent / totalMarked) * 100}%` }}
-              />
-            )}
-          </div>
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-outline-variant/10">
+        <div>
+          <h3 className="text-base font-bold text-primary font-display">
+            Ringkasan Kehadiran
+          </h3>
+          <p className="text-[10px] uppercase tracking-wider text-on-surface-variant/50 font-semibold">
+            Status tanggal terpilih
+          </p>
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3">
-        {statCards.map(({ status, icon, color, bgColor }) => (
+      {/* Attendance Rate Banner */}
+      <div className="bg-surface-container-low rounded-2xl p-4 sm:p-5 mb-4 border border-outline-variant/15">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/60">
+            Tingkat Kehadiran
+          </span>
+          <span className="text-xs font-semibold text-on-surface-variant/70">
+            {totalMarked}/{members.length} tercatat
+          </span>
+        </div>
+
+        <div className="flex items-baseline gap-1.5 mb-3">
+          <span className="text-3xl sm:text-4xl font-black text-primary font-display">
+            {attendanceRate}%
+          </span>
+          <span className="text-xs text-on-surface-variant/50 font-medium">
+            rasio hadir & telat
+          </span>
+        </div>
+
+        {/* Multi-segment Progress Bar */}
+        <div className="h-2.5 w-full bg-surface-container-highest rounded-full overflow-hidden flex ring-1 ring-inset ring-outline-variant/10">
+          {totalMarked > 0 ? (
+            <>
+              {counts.present > 0 && (
+                <div
+                  className="bg-emerald-500 transition-all duration-500"
+                  style={{ width: `${(counts.present / totalMarked) * 100}%` }}
+                />
+              )}
+              {counts.late > 0 && (
+                <div
+                  className="bg-amber-500 transition-all duration-500"
+                  style={{ width: `${(counts.late / totalMarked) * 100}%` }}
+                />
+              )}
+              {counts.excused > 0 && (
+                <div
+                  className="bg-blue-500 transition-all duration-500"
+                  style={{ width: `${(counts.excused / totalMarked) * 100}%` }}
+                />
+              )}
+              {counts.absent > 0 && (
+                <div
+                  className="bg-rose-500 transition-all duration-500"
+                  style={{ width: `${(counts.absent / totalMarked) * 100}%` }}
+                />
+              )}
+            </>
+          ) : (
+            <div className="w-full bg-outline-variant/15" />
+          )}
+        </div>
+      </div>
+
+      {/* Status Stat Cards */}
+      <div className="grid grid-cols-2 gap-2.5">
+        {statCards.map(({ status, icon, textColor, bgColor }) => (
           <div
             key={status}
-            className={`group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border ${bgColor} hover:scale-[1.02] hover:shadow-sm transition-all duration-300`}
+            className={`p-3 sm:p-4 rounded-2xl border transition-all ${bgColor}`}
           >
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors bg-white/40 group-hover:bg-white/70">
-                <Icon name={icon} size="sm" className={`${color} !text-base sm:!text-xl`} />
-              </div>
-              <span className={`text-[9px] sm:text-[11px] uppercase tracking-widest font-bold ${color} hidden sm:inline`}>
+            <div className="flex items-center gap-2 mb-2">
+              <Icon name={icon} size="sm" className={textColor} filled />
+              <span className={`text-[10px] sm:text-xs uppercase tracking-wider font-bold ${textColor}`}>
                 {STATUS_LABELS[status]}
               </span>
             </div>
-            <div className="text-2xl sm:text-4xl font-black text-primary text-center sm:text-left">
+            <div className="text-2xl sm:text-3xl font-black text-primary font-display">
               {counts[status]}
             </div>
-            <span className={`text-[8px] sm:text-[11px] uppercase tracking-wider font-bold ${color} sm:hidden block text-center mt-0.5`}>
-              {STATUS_LABELS[status]}
-            </span>
           </div>
         ))}
       </div>

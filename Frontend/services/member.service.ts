@@ -3,8 +3,9 @@ import type { Member } from "@/components/feature/absensi/types/attendance.type"
 
 export interface CreateMemberDto {
   full_name: string;
-  division_id: string;
+  division_id?: string;
   angkatan: number;
+  is_core?: boolean;
   is_active?: boolean;
 }
 
@@ -17,6 +18,7 @@ export const memberService = {
       division_id: u.division_id,
       division: u.division?.name || "",
       angkatan: u.angkatan,
+      is_core: u.is_core ?? false,
       is_active: u.is_active,
     }));
   },

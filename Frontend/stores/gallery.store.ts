@@ -8,7 +8,7 @@ export interface GalleryState {
   isLoading: boolean;
   error: string | null;
   fetchGallery: () => Promise<void>;
-  addGalleryImage: (item: { label?: string; title?: string; }, file: File) => Promise<void>;
+  addGalleryImage: (item: { label?: string; title?: string; featured?: boolean }, file: File) => Promise<void>;
   deleteGalleryImage: (id: string) => Promise<void>;
   toggleGalleryFeature: (id: string) => Promise<void>;
 }
@@ -19,11 +19,9 @@ export const useGalleryStore = create<GalleryState>()(
       items: [],
       isLoading: false,
       error: null,
-
       fetchGallery: async () => {
         set({ isLoading: true, error: null });
         try {
-          // Defaulting parameters to maximum coverage for client viewing
           const apiItems = await cmsService.fetchGallery(1, 100);
           set({ items: apiItems, isLoading: false });
         } catch (error: any) {
@@ -39,6 +37,7 @@ export const useGalleryStore = create<GalleryState>()(
             label: itemData.label,
             title: itemData.title,
             image_url: url,
+            featured: itemData.featured ?? false,
           };
           await cmsService.addGalleryImage(newItem);
           await get().fetchGallery();

@@ -68,44 +68,37 @@ export default function RecruitmentPage() {
   }
 
 
-  const mobileTitle = (
+  const topbarTitle = (
     <div className="min-w-0 pr-2">
-      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+      <h2 className="text-xs sm:text-sm font-bold text-primary truncate leading-tight">
         Penerimaan Anggota
       </h2>
-      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5 hidden sm:block">
         Kelola pendaftaran calon anggota MDPTV
       </p>
     </div>
   );
 
+  const topbarActions = (
+    <>
+      {pendingCount > 0 && (
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-600 shrink-0">
+          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+          <span className="text-[11px] font-bold">
+            {pendingCount} Pending
+          </span>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <>
-      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
-      {/* Top Bar */}
-      <header className="sticky top-[68px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="flex items-center justify-start lg:justify-between overflow-x-auto hide-scrollbar px-4 sm:px-8 py-3 lg:py-4">
-          <div className="hidden lg:block shrink-0">
-            <h2 className="text-base sm:text-xl font-bold text-primary">
-              Penerimaan Anggota
-            </h2>
-            <p className="text-[10px] sm:text-xs text-on-surface-variant/50">
-              Kelola pendaftaran calon anggota MDPTV
-            </p>
-          </div>
-          {pendingCount > 0 && (
-            <div className="flex items-center gap-2 shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-500/10 rounded-xl border border-orange-500/20">
-              <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              <span className="text-[10px] sm:text-xs font-medium text-orange-500">
-                {pendingCount} pending
-              </span>
-            </div>
-          )}
-        </div>
-      </header>
+      {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
+      {hydrated && portalTarget && createPortal(topbarActions, portalTarget)}
 
       {/* Content */}
-      <div className="p-3 sm:p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Registration Configs & Toolbar */}
         <div className="mb-4 sm:mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

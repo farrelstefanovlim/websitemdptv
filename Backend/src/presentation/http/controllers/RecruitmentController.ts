@@ -108,7 +108,16 @@ export class RecruitmentController {
       });
 
       if (status === "accepted") {
-        const angkatan = new Date().getFullYear();
+        // Otomatis parsing 2 digit pertama NIM menjadi tahun angkatan / tahun masuk (contoh: '24...' -> 2024)
+        let angkatan = new Date().getFullYear();
+        if (applicant.npm && applicant.npm.length >= 2) {
+          const prefix = applicant.npm.substring(0, 2);
+          const parsedPrefix = parseInt(prefix, 10);
+          if (!isNaN(parsedPrefix) && parsedPrefix >= 10 && parsedPrefix <= 99) {
+            angkatan = 2000 + parsedPrefix;
+          }
+        }
+
         const existingMember = await prisma.member.findFirst({
           where: { full_name: applicant.name, angkatan }
         });
@@ -119,6 +128,7 @@ export class RecruitmentController {
               full_name: applicant.name,
               division_id: applicant.division_id,
               angkatan,
+              is_core: false,
               is_active: true
             }
           });
@@ -151,10 +161,10 @@ export class RecruitmentController {
       });
 
       // Filter only safe fields to public interface
-      const sanitized = accepted.map(a => ({
+      const sanitized = accepted.map((a: any) => ({
         name: a.name,
-        divisionName: a.division.name,
-        npm: a.npm.substring(0, 4) + "****" // Mask sensitive part of NPM just to be safe
+        divisionName: a.division?.name || "",
+        npm: a.npm.substring(0, 4) + "****" // Mask sensitive part of NIM just to be safe
       }));
 
       res.status(200).json({ status: "success", data: { isOpen: true, accepted: sanitized } });
