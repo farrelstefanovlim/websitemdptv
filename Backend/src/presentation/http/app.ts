@@ -11,6 +11,8 @@ import { errorHandler } from "./middlewares/errorHandler";
 export function createExpressApp(controllers: AppControllers): Express {
   const app = express();
 
+  app.set("trust proxy", 1);
+
   const uploadsDir = path.join(process.cwd(), "uploads");
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -22,7 +24,7 @@ export function createExpressApp(controllers: AppControllers): Express {
   }));
 
   // Dynamic CORS Configuration
-  const rawCorsOrigin = process.env.CORS_ORIGIN || "http://localhost:3000";
+  const rawCorsOrigin = process.env.CORS_ORIGIN || "http://localhost:3000,https://websitemdptv.vercel.app";
   const allowedOrigins = rawCorsOrigin.split(",").map((o) => o.trim());
 
   app.use(
@@ -37,7 +39,8 @@ export function createExpressApp(controllers: AppControllers): Express {
         if (process.env.NODE_ENV !== "production" && origin.includes("localhost")) {
           return callback(null, true);
         }
-        return callback(null, true);
+        // Tolak tamu tak diundang (Keamanan)
+        return callback(new Error("Not allowed by CORS"));
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
