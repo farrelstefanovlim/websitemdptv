@@ -121,7 +121,7 @@ export default function WawancaraJawabanPage() {
   const handleSelectCandidate = (candidate: Applicant) => {
     setCandidateName(candidate.name);
     if (!interviewNotes) {
-      setInterviewNotes(`NPM: ${candidate.nim} | Divisi: ${candidate.division}`);
+      setInterviewNotes(`NPM: ${candidate.npm} | Divisi: ${candidate.division}`);
     }
     setIsDropdownOpen(false);
   };
