@@ -16,9 +16,29 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MDPTV — Creative Excellence in Media",
+  title: {
+    default: "MDPTV — Creative Excellence in Media",
+    template: "%s | MDPTV",
+  },
   description:
-    "Wadah bagi para kreator muda Universitas Multi Data Palembang untuk mengeksplorasi batas teknologi media dan seni visual.",
+    "Unit Kegiatan Mahasiswa MDPTV Universitas Multi Data Palembang — Wadah eksplorasi teknologi media, sinematografi, desain visual, dan penyiaran kreatif.",
+  keywords: [
+    "MDPTV",
+    "MDP",
+    "Universitas Multi Data Palembang",
+    "Multimedia",
+    "Sinematografi",
+    "Fotografi",
+    "Desain Grafis",
+  ],
+  authors: [{ name: "MDPTV Team" }],
+  openGraph: {
+    title: "MDPTV — Creative Excellence in Media",
+    description:
+      "Wadah bagi para kreator muda Universitas Multi Data Palembang untuk mengeksplorasi batas teknologi media dan seni visual.",
+    type: "website",
+    locale: "id_ID",
+  },
 };
 
 export default function RootLayout({

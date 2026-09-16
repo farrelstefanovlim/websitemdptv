@@ -21,11 +21,29 @@ export function createExpressApp(controllers: AppControllers): Express {
     crossOriginResourcePolicy: { policy: "cross-origin" }
   }));
 
-  // Middleware bawaan
-  app.use(cors({
-    origin: process.env.CORS_ORIGIN || "*",
-    credentials: true,
-  }));
+  // Dynamic CORS Configuration
+  const rawCorsOrigin = process.env.CORS_ORIGIN || "http://localhost:3000";
+  const allowedOrigins = rawCorsOrigin.split(",").map((o) => o.trim());
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        // In development, allow localhost origins smoothly
+        if (process.env.NODE_ENV !== "production" && origin.includes("localhost")) {
+          return callback(null, true);
+        }
+        return callback(null, true);
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
   app.use(express.json({ limit: "10mb" }));
   app.use(cookieParser());
 

@@ -4,21 +4,23 @@ import Icon from "@/components/ui/Icon";
 import { useLayoutConfigStore } from "@/stores/layoutConfig.store";
 
 const sectionColors: Record<string, string> = {
-  hero: "bg-primary",
-  about: "bg-secondary",
-  divisions: "bg-tertiary-fixed-dim",
-  documentation: "bg-primary-fixed-dim",
-  faq: "bg-secondary-fixed-dim",
-  cta: "bg-on-tertiary-fixed-variant",
+  hero: "bg-primary text-white",
+  about: "bg-secondary text-white",
+  divisions: "bg-blue-600 text-white",
+  documentation: "bg-emerald-600 text-white",
+  faq: "bg-purple-600 text-white",
+  cta: "bg-secondary text-white",
+  footer: "bg-neutral-900 text-white",
 };
 
 const sectionHeights: Record<string, string> = {
   hero: "h-20",
   about: "h-14",
   divisions: "h-16",
-  documentation: "h-12",
-  faq: "h-14",
+  documentation: "h-14",
+  faq: "h-12",
   cta: "h-10",
+  footer: "h-8",
 };
 
 export default function SectionPreview() {
@@ -30,103 +32,94 @@ export default function SectionPreview() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/10">
         <div>
-          <h2 className="text-xl font-bold text-primary">Live Preview</h2>
-          <p className="text-sm text-on-surface-variant mt-1">
-            Tampilan layout landing page saat ini
+          <h2 className="text-base sm:text-lg font-bold text-primary font-display">
+            Simulasi Tampilan
+          </h2>
+          <p className="text-xs text-on-surface-variant/60 mt-0.5">
+            Pratinjau struktur landing page
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-on-surface-variant/60">
-            <div className="w-2 h-2 rounded-full bg-secondary" />
-            <span>{visibleCount} aktif</span>
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+            {visibleCount} Aktif
+          </span>
           {hiddenCount > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant/40">
-              <div className="w-2 h-2 rounded-full bg-outline-variant/30" />
-              <span>{hiddenCount} hidden</span>
-            </div>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-surface-container-high text-on-surface-variant/50">
+              {hiddenCount} Tersembunyi
+            </span>
           )}
         </div>
       </div>
 
-      {/* Preview Container — Simulated Browser */}
-      <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest overflow-hidden">
-        {/* Browser Chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-surface-container-low border-b border-outline-variant/15">
+      {/* Simulated Browser Frame */}
+      <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest overflow-hidden shadow-sm">
+        {/* Browser Chrome Bar */}
+        <div className="flex items-center gap-2 px-3.5 py-2.5 bg-surface-container-low border-b border-outline-variant/15">
           <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-error/40" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
+            <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           </div>
-          <div className="flex-1 mx-3 px-3 py-1 bg-surface-container rounded-lg text-[10px] text-on-surface-variant/40 font-medium text-center truncate">
-            mdptv.vercel.app
-          </div>
-        </div>
-
-        {/* Navbar placeholder */}
-        <div className="mx-3 mt-3 h-6 rounded-lg bg-surface-container-high/60 flex items-center px-3 gap-2">
-          <div className="w-8 h-2 rounded bg-primary/15" />
-          <div className="flex-1" />
-          <div className="flex gap-2">
-            <div className="w-6 h-1.5 rounded bg-primary/10" />
-            <div className="w-6 h-1.5 rounded bg-primary/10" />
-            <div className="w-6 h-1.5 rounded bg-primary/10" />
+          <div className="flex-1 mx-2 px-2.5 py-0.5 bg-surface-container-lowest rounded-md text-[10px] text-on-surface-variant/50 font-mono text-center truncate border border-outline-variant/10">
+            mdptv.ac.id
           </div>
         </div>
 
-        {/* Sections */}
-        <div className="p-3 flex flex-col gap-1.5">
+        {/* Mini Navbar */}
+        <div className="mx-2.5 mt-2.5 h-6 rounded-lg bg-surface-container-high/70 flex items-center px-2.5 justify-between">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-secondary/80" />
+            <div className="w-8 h-1.5 rounded bg-primary/30" />
+          </div>
+          <div className="flex gap-1.5">
+            <div className="w-4 h-1 rounded bg-primary/20" />
+            <div className="w-4 h-1 rounded bg-primary/20" />
+            <div className="w-4 h-1 rounded bg-primary/20" />
+          </div>
+        </div>
+
+        {/* Section List Preview */}
+        <div className="p-2.5 flex flex-col gap-1.5">
           {sections.map((section) => (
             <div
               key={section.id}
               className={`
-                rounded-xl flex items-center gap-2 px-3 transition-all duration-500
+                rounded-xl flex items-center justify-between px-3 transition-all duration-300
                 ${sectionHeights[section.id] || "h-12"}
                 ${
                   section.visible
-                    ? `${sectionColors[section.id] || "bg-secondary"} ${
-                        section.id === "hero" ? "opacity-90" : "opacity-20"
-                      }`
-                    : "opacity-[0.04] bg-outline-variant border border-dashed border-outline-variant/30"
+                    ? `${sectionColors[section.id] || "bg-secondary text-white"} shadow-xs opacity-90`
+                    : "opacity-30 bg-surface-container-high border border-dashed border-outline-variant/30 text-on-surface-variant"
                 }
               `}
             >
-              {section.visible && (
-                <>
-                  <Icon
-                    name={section.icon}
-                    size="sm"
-                    className={`${
-                      section.id === "hero"
-                        ? "text-white/70"
-                        : "text-primary/40"
-                    }`}
-                  />
-                  <span
-                    className={`text-[9px] font-bold uppercase tracking-widest ${
-                      section.id === "hero"
-                        ? "text-white/50"
-                        : "text-primary/30"
-                    }`}
-                  >
-                    {section.label}
-                  </span>
-                </>
-              )}
-              {!section.visible && (
-                <span className="text-[9px] font-medium text-on-surface-variant/25 line-through mx-auto">
+              <div className="flex items-center gap-2">
+                <Icon
+                  name={section.icon}
+                  size="sm"
+                  className={section.visible ? "text-white/80" : "text-on-surface-variant/40"}
+                />
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider ${
+                    section.visible ? "text-white" : "text-on-surface-variant/50 line-through"
+                  }`}
+                >
                   {section.label}
                 </span>
-              )}
+              </div>
+              <span className="text-[8px] font-mono opacity-50 uppercase tracking-widest">
+                {section.id}
+              </span>
             </div>
           ))}
         </div>
 
-        {/* Footer placeholder */}
-        <div className="mx-3 mb-3 h-8 rounded-lg bg-surface-container-high/40 flex items-center justify-center">
-          <div className="w-12 h-1.5 rounded bg-primary/8" />
+        {/* Mini Footer */}
+        <div className="mx-2.5 mb-2.5 h-6 rounded-lg bg-surface-container-high/40 flex items-center justify-center">
+          <div className="w-16 h-1 rounded bg-primary/15" />
         </div>
       </div>
     </div>

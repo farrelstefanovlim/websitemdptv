@@ -4,8 +4,9 @@ import { z } from "zod";
 
 const memberSchema = z.object({
   full_name: z.string().min(2, "Nama wajib diisi"),
-  division_id: z.string().uuid("Divisi tidak valid"),
+  division_id: z.string().uuid("Divisi tidak valid").optional().nullable(),
   angkatan: z.number().int().min(2000, "Angkatan tidak valid"),
+  is_core: z.boolean().optional(),
   is_active: z.boolean().optional(),
 });
 
@@ -18,7 +19,7 @@ export class MemberController {
             select: { id: true, name: true }
           }
         },
-        orderBy: [{ is_active: 'desc' }, { created_at: 'desc' }],
+        orderBy: [{ is_core: 'desc' }, { is_active: 'desc' }, { created_at: 'desc' }],
       });
       res.json({ success: true, data: members });
     } catch (error) {
@@ -33,11 +34,12 @@ export class MemberController {
       const newMember = await prisma.member.create({
         data: {
           full_name: parsed.full_name,
-          division_id: parsed.division_id,
+          division_id: parsed.division_id || null,
           angkatan: parsed.angkatan,
+          is_core: parsed.is_core ?? false,
           is_active: parsed.is_active ?? true,
         },
-        include: { division: { select: { name: true } } }
+        include: { division: { select: { id: true, name: true } } }
       });
       res.status(201).json({ success: true, data: newMember });
     } catch (error: any) {
@@ -55,7 +57,11 @@ export class MemberController {
       
       const updated = await prisma.member.update({
         where: { id },
-        data: parsed,
+        data: {
+          ...parsed,
+          division_id: parsed.division_id === "" ? null : parsed.division_id,
+        },
+        include: { division: { select: { id: true, name: true } } }
       });
       res.json({ success: true, data: updated });
     } catch (error: any) {

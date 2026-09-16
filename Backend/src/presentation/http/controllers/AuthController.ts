@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "@infrastructure/config/env";
 import prisma from "@infrastructure/database/prismaClient";
+import { BunHashService } from "@infrastructure/services/BunHashService";
+
+const hashService = new BunHashService();
 
 export class AuthController {
   public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -19,7 +22,7 @@ export class AuthController {
         return;
       }
 
-      const isMatch = await Bun.password.verify(password, user.password_hash);
+      const isMatch = await hashService.compare(password, user.password_hash);
       if (!isMatch) {
         res.status(401).json({ status: "error", message: "Email atau password salah." });
         return;

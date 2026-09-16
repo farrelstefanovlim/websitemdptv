@@ -12,12 +12,11 @@ import { useHydrated } from "@/hooks/useHydrated";
 export default function Page() {
   const hydrated = useHydrated();
   const portalTarget = usePortalTarget("mobile-topbar-actions");
-  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
+  const topbarTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const sections = useLayoutConfigStore((s) => s.sections);
   const fetchSections = useLayoutConfigStore((s) => s.fetchSections);
   const visibleCount = sections.filter((s) => s.visible).length;
 
-  // Fetch data dari API saat mount
   useEffect(() => {
     fetchSections();
   }, [fetchSections]);
@@ -30,83 +29,54 @@ export default function Page() {
     );
   }
 
-  const mobileActions = (
-    <>
-      <div className="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low rounded-lg border border-outline-variant/10 shrink-0">
+  const topbarActions = (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low rounded-xl border border-outline-variant/10 shrink-0">
         <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-        <span className="text-[10px] font-medium text-on-surface-variant/60">
-          {visibleCount}/{sections.length} sect
+        <span className="text-[11px] font-semibold text-on-surface-variant/70">
+          {visibleCount}/{sections.length} Section Aktif
         </span>
       </div>
       <a
         href="/"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-8 h-8 rounded-lg flex items-center justify-center bg-secondary text-on-secondary hover:brightness-110 transition-all shrink-0"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary text-white text-xs font-semibold hover:brightness-110 transition-all shrink-0 shadow-sm shadow-secondary/20"
       >
-        <Icon name="open_in_new" size="sm" />
+        <Icon name="open_in_new" size="sm" className="!text-xs" />
+        <span className="hidden sm:inline">Preview</span>
       </a>
-    </>
+    </div>
   );
 
-  const mobileTitle = (
+  const topbarTitle = (
     <div className="min-w-0 pr-2">
-      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+      <h2 className="text-xs sm:text-sm font-bold text-primary truncate leading-tight">
         Layout Editor
       </h2>
-      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
-        Kelola tampilan dan urutan section
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5 hidden sm:block">
+        Kelola tampilan dan urutan section landing page
       </p>
     </div>
   );
 
   return (
     <>
-      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
-      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
-      {/* Top Bar */}
-      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
-          <div>
-            <h2 className="text-base sm:text-xl font-bold text-primary">
-              Layout Editor
-            </h2>
-            <p className="text-[10px] sm:text-xs text-on-surface-variant/50 hidden sm:block">
-              Kelola tampilan dan urutan section landing page
-            </p>
-          </div>
-          <div className="hidden lg:flex items-center gap-2 sm:gap-4">
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-xl border border-outline-variant/10">
-              <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="text-xs font-medium text-on-surface-variant/60">
-                {visibleCount}/{sections.length} sections visible
-              </span>
-            </div>
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl bg-secondary text-on-secondary hover:brightness-110 transition-all duration-300"
-            >
-              <Icon name="open_in_new" size="sm" />
-              <span className="hidden sm:inline">Preview</span>
-            </a>
-          </div>
-        </div>
-      </header>
+      {hydrated && portalTarget && createPortal(topbarActions, portalTarget)}
+      {hydrated && topbarTitlePortalTarget && createPortal(topbarTitle, topbarTitlePortalTarget)}
 
       {/* Content */}
-      <div className="p-3 sm:p-8">
-        <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-8">
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-6">
           {/* Editor */}
           <div className="lg:col-span-3">
-            <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 p-3 sm:p-6">
+            <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 p-4 sm:p-6">
               <SectionEditor />
             </div>
           </div>
           {/* Preview */}
           <div className="lg:col-span-2">
-            <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 p-3 sm:p-6 lg:sticky lg:top-24">
+            <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 p-4 sm:p-6 lg:sticky lg:top-24">
               <SectionPreview />
             </div>
           </div>
@@ -115,4 +85,3 @@ export default function Page() {
     </>
   );
 }
-

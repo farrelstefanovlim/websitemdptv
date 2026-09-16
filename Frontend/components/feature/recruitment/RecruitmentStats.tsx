@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import Icon from "@/components/ui/Icon";
 import { useRecruitmentStore } from "@/stores/recruitment.store";
 import type { RecruitmentStatus } from "@/components/feature/recruitment/types/recruitment.type";
 import { STATUS_LABELS, STATUS_COLORS } from "@/components/feature/recruitment/types/recruitment.type";
+import api from "@/lib/axios";
 
 const statItems: { status: RecruitmentStatus; icon: string }[] = [
   { status: "pending", icon: "hourglass_top" },
@@ -12,8 +14,34 @@ const statItems: { status: RecruitmentStatus; icon: string }[] = [
   { status: "rejected", icon: "cancel" },
 ];
 
+const DEFAULT_DIVISIONS = [
+  "Photography & Videography",
+  "Graphic Design",
+  "Kominfo",
+  "Pengelola Sumber Daya Manusia",
+  "Hubungan Masyarakat",
+];
+
 export default function RecruitmentStats() {
   const { applicants } = useRecruitmentStore();
+  const [dbDivisions, setDbDivisions] = useState<string[]>([]);
+
+  useEffect(() => {
+    api.get("/divisions")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setDbDivisions(res.data.data.map((d: any) => d.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const divisionList = useMemo(() => {
+    const fromApplicants = applicants.map((a) => a.division).filter(Boolean);
+    const base = dbDivisions.length > 0 ? dbDivisions : DEFAULT_DIVISIONS;
+    return Array.from(new Set([...base, ...fromApplicants]));
+  }, [dbDivisions, applicants]);
+
   const total = applicants.length;
 
   const counts: Record<RecruitmentStatus, number> = {
@@ -100,13 +128,7 @@ export default function RecruitmentStats() {
           Per Divisi
         </h4>
         <div className="flex flex-col gap-2">
-          {[
-            "Photography & Videography",
-            "Graphic Design",
-            "Kominfo",
-            "Pengelola Sumber Daya Manusia",
-            "Hubungan Masyarakat",
-          ].map((div) => {
+          {divisionList.map((div) => {
             const divApplicants = applicants.filter((a) => a.division === div);
             const divAccepted = divApplicants.filter((a) => a.status === "accepted").length;
             return (

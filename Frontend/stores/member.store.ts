@@ -8,6 +8,7 @@ export interface AppMember {
   division_id?: string;
   division: string;
   angkatan: number;
+  is_core?: boolean;
   is_active: boolean;
 }
 

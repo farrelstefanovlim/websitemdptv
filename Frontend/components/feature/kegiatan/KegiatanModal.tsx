@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/ui/Icon";
 import Select from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
 import Button from "@/components/ui/Button";
 import { type Kegiatan, type KegiatanStatus } from "@/stores/kegiatan.store";
 import { STATUS_CONFIG, ALL_STATUSES } from "./utils";
+import api from "@/lib/axios";
 
 interface KegiatanModalProps {
   kegiatan: Kegiatan | null;
@@ -15,6 +16,14 @@ interface KegiatanModalProps {
 }
 
 export default function KegiatanModal({ kegiatan, onClose, onSave }: KegiatanModalProps) {
+  const [divisionOptions, setDivisionOptions] = useState<string[]>([
+    "Photography & Videography",
+    "Graphic Design",
+    "Kominfo",
+    "Pengelola Sumber Daya Manusia",
+    "Hubungan Masyarakat",
+  ]);
+
   const [form, setForm] = useState({
     title: kegiatan?.title || "",
     description: kegiatan?.description || "",
@@ -26,6 +35,18 @@ export default function KegiatanModal({ kegiatan, onClose, onSave }: KegiatanMod
     status: kegiatan?.status || "draft" as KegiatanStatus,
     notes: kegiatan?.notes || "",
   });
+
+  useEffect(() => {
+    api.get("/divisions")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+          setDivisionOptions(res.data.data.map((d: any) => d.name));
+        }
+      })
+      .catch(() => {
+        // use default
+      });
+  }, []);
 
   const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -56,11 +77,7 @@ export default function KegiatanModal({ kegiatan, onClose, onSave }: KegiatanMod
               value={form.division}
               onChange={(e) => set("division", e.target.value)}
               options={[
-                { label: "Photography & Videography", value: "Photography & Videography" },
-                { label: "Graphic Design", value: "Graphic Design" },
-                { label: "Kominfo", value: "Kominfo" },
-                { label: "Pengelola Sumber Daya Manusia", value: "Pengelola Sumber Daya Manusia" },
-                { label: "Hubungan Masyarakat", value: "Hubungan Masyarakat" },
+                ...divisionOptions.map((name) => ({ label: name, value: name })),
                 { label: "All Division", value: "All Division" },
               ]}
             />
