@@ -19,7 +19,7 @@ import { formatDateDisplay, getToday } from "./utils";
 
 export default function AbsensiPage() {
   const portalTarget = usePortalTarget("mobile-topbar-actions");
-  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
+  const topbarTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [showRekapModal, setShowRekapModal] = useState(false);
   const { members, records, setAttendance, fetchMembers, fetchRecords, toggleLockDate, isDateLocked } = useAttendanceStore();
@@ -72,11 +72,10 @@ export default function AbsensiPage() {
     );
   }
 
-
-  const mobileTitle = (
+  const topbarTitle = (
     <div className="min-w-0 pr-2">
-      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
-        Absensi
+      <h2 className="text-xs sm:text-sm font-bold text-primary truncate leading-tight">
+        Rekap Absensi
       </h2>
       <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
         {formatDateDisplay(selectedDate)}
@@ -84,72 +83,62 @@ export default function AbsensiPage() {
     </div>
   );
 
+  const topbarActions = (
+    <div className="flex items-center gap-1 bg-surface-container-low border border-outline-variant/15 rounded-xl p-0.5 shadow-sm">
+      <Button
+        variant="none"
+        size="none"
+        onClick={() => {
+          const d = new Date(selectedDate + "T00:00:00");
+          d.setDate(d.getDate() - 1);
+          setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+        }}
+        className="w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-lowest hover:text-primary transition-colors"
+      >
+        <Icon name="chevron_left" size="sm" className="!text-xs" />
+      </Button>
+
+      <div className="w-28 sm:w-32">
+        <DatePicker
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="!py-0 !h-7 w-full !border-none !shadow-none !bg-transparent !ring-0 !justify-center gap-1 text-center font-bold text-xs"
+        />
+      </div>
+
+      <Button
+        variant="none"
+        size="none"
+        onClick={() => {
+          const d = new Date(selectedDate + "T00:00:00");
+          d.setDate(d.getDate() + 1);
+          setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+        }}
+        className="w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-lowest hover:text-primary transition-colors"
+      >
+        <Icon name="chevron_right" size="sm" className="!text-xs" />
+      </Button>
+    </div>
+  );
+
   return (
     <>
-      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
-      {/* Top Bar */}
-      <header className="sticky top-[68px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="px-4 sm:px-8 py-3 lg:py-5">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            {/* Title Row */}
-            <div className="hidden lg:block shrink-0">
-              <h2 className="text-xl font-bold text-primary leading-tight">
-                Absensi
-              </h2>
-              <p className="text-xs font-semibold text-on-surface-variant/50 mt-0.5">
-                {formatDateDisplay(selectedDate)}
-              </p>
-            </div>
-            
-            {/* Date Navigation & Actions */}
-            <div className="flex items-center gap-1 bg-surface-container-lowest border border-outline-variant/15 rounded-xl p-1 shadow-sm w-full lg:w-auto shrink-0">
-              <Button variant="none" size="none"
-                onClick={() => {
-                  const d = new Date(selectedDate + "T00:00:00");
-                  d.setDate(d.getDate() - 1);
-                  setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
-                }}
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-low hover:text-primary transition-colors shrink-0"
-              >
-                <Icon name="chevron_left" size="sm" />
-              </Button>
-              
-              <div className="flex-1 lg:w-44">
-                <DatePicker
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="!py-0 !h-9 w-full !border-none !shadow-none !bg-transparent !ring-0 !justify-center gap-2 text-center font-bold text-sm"
-                />
-              </div>
-              
-              <Button variant="none" size="none"
-                onClick={() => {
-                  const d = new Date(selectedDate + "T00:00:00");
-                  d.setDate(d.getDate() + 1);
-                  setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
-                }}
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-low hover:text-primary transition-colors shrink-0"
-              >
-                <Icon name="chevron_right" size="sm" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {hydrated && topbarTitlePortalTarget && createPortal(topbarTitle, topbarTitlePortalTarget)}
+      {hydrated && portalTarget && createPortal(topbarActions, portalTarget)}
 
       {/* Content */}
-      <div className="p-3 sm:p-8">
-        <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-8">
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-6">
           {/* Summary — shown first on mobile */}
           <div className="lg:col-span-2 lg:order-2">
-            <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 p-3 sm:p-6 lg:sticky lg:top-24">
+            <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 p-4 sm:p-6 lg:sticky lg:top-24">
               <AttendanceSummary selectedDate={selectedDate} />
             </div>
           </div>
 
           {/* Table */}
           <div className="lg:col-span-3 lg:order-1">
-            <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 p-3 sm:p-6">
+            <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 p-4 sm:p-6">
               <AttendanceTable selectedDate={selectedDate} actions={
                 <>
                   <ActionMenu actions={[

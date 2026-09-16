@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 
 export interface DashboardMetrics {
+  registrationOpen?: boolean;
   users: Array<{ role: string; count: number }>;
   members: {
     total: number;
@@ -9,9 +10,25 @@ export interface DashboardMetrics {
   applicants: {
     total: number;
     byStatus: Array<{ status: string; count: number }>;
+    recent?: Array<{
+      id: string;
+      name: string;
+      nim: string;
+      division: string;
+      status: string;
+      applied_at: string;
+    }>;
   };
   kegiatan: {
     total: number;
+    upcoming?: Array<{
+      id: string;
+      title: string;
+      date: string;
+      location: string;
+      status: string;
+      division: string;
+    }>;
   };
   attendance: {
     todayTotal: number;

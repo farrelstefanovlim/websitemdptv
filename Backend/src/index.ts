@@ -15,9 +15,13 @@ import { MemberController } from "@presentation/http/controllers/MemberControlle
 import { DivisionController } from "@presentation/http/controllers/DivisionController";
 import { DashboardController } from "@presentation/http/controllers/DashboardController";
 import { GetDashboardMetricsUseCase } from "@application/use-cases/GetDashboardMetricsUseCase";
+import { DivisionSyncService } from "@infrastructure/services/DivisionSyncService";
 
 async function bootstrap() {
   console.log("🚀 Memulai inisialisasi server...");
+
+  // 0. Sinkronisasi Data Divisi dari CMS jika diperlukan
+  await DivisionSyncService.syncFromCmsContent();
 
   // 1. Inisialisasi Database / Repositories (Infrastructure Layer)
   const userRepository = new PrismaUserRepository();
@@ -58,10 +62,11 @@ async function bootstrap() {
 
   // 6. Jalankan Server
   app.listen(env.PORT, () => {
+    const runtimeVersion = typeof Bun !== "undefined" ? `Bun v${Bun.version}` : `Node.js ${process.version}`;
     console.log(`\n======================================================`);
     console.log(`✨ Server berhasil berjalan di Port: ${env.PORT}`);
     console.log(`🚀 Lingkungan: ${env.NODE_ENV}`);
-    console.log(`⚡ Didukung oleh Bun v${Bun.version}`);
+    console.log(`⚡ Runtime: ${runtimeVersion}`);
     console.log(`👉 Cek Kesehatan: http://localhost:${env.PORT}/api/v1/health`);
     console.log(`======================================================\n`);
   });

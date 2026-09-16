@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "@infrastructure/database/prismaClient";
+import { DivisionSyncService } from "@infrastructure/services/DivisionSyncService";
 
 export class CmsController {
   public getSections = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -47,6 +48,11 @@ export class CmsController {
         update: { content },
         create: { section_key: key, content }
       });
+
+      // Synchronize division table when divisions section is updated
+      if (key === "divisions" && content && Array.isArray(content.divisions)) {
+        await DivisionSyncService.syncFromCmsContent(content.divisions);
+      }
 
       res.status(200).json({ status: "success", message: `Section ${key} berhasil diubah.` });
     } catch (error) {

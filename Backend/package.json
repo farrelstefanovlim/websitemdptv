@@ -8,6 +8,7 @@
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
     "seed": "bun prisma/seed.ts",
+    "typecheck": "tsc --noEmit",
     "build": "echo \"No build step required for Bun, just run bun src/index.ts\""
   },
   "keywords": [

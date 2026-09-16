@@ -188,7 +188,7 @@
 html {
   scroll-behavior: smooth;
   scrollbar-width: thin;
-  scrollbar-color: var(--surface-tint) var(--background);
+  scrollbar-color: color-mix(in srgb, var(--secondary) 35%, transparent) transparent;
 }
 
 body {
@@ -439,24 +439,60 @@ body {
 }
 
 /* ========================================
-   Custom Scrollbar
+   Custom Slim Scrollbar (MDPTV Theme)
    ======================================== */
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--secondary) 30%, transparent) transparent;
+}
+
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-tint);
-  border-radius: var(--radius-full);
-  border: 2px solid var(--background); /* Creates a padded effect */
+  background: color-mix(in srgb, var(--secondary) 30%, rgba(0, 0, 0, 0.12));
+  border-radius: 9999px;
+  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--secondary);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--secondary-container);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ========================================
+   Scrollbar Utilities
+   ======================================== */
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--secondary) 35%, transparent);
+  border-radius: 9999px;
 }

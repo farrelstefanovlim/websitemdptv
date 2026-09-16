@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useRef, useEffect } from "react";
 import UserModal from "@/components/feature/users/UserModal";
 import Icon from "@/components/ui/Icon";
@@ -23,8 +24,6 @@ const USER_COLUMNS = [
   { key: "lastLogin", header: "Login Terakhir" },
 ];
 
-/* ── Main Page ─────────────────────────────────────── */
-
 export default function UserManagementPage() {
   const { users, addUser, updateUser, removeUser, toggleActive, fetchUsers } = useUserStore();
   const hydrated = useHydrated();
@@ -35,14 +34,16 @@ export default function UserManagementPage() {
   const [search, setSearch] = useState("");
   const importRef = useRef<HTMLInputElement>(null);
 
-  // Fetch data dari API saat mount
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
   const handleExport = () => {
-    const exportData = users.map((u) => ({ ...u, isActive: u.isActive ? "Ya" : "Tidak", lastLogin: u.lastLogin || "-" }));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const exportData = users.map((u) => ({
+      ...u,
+      isActive: u.isActive ? "Ya" : "Tidak",
+      lastLogin: u.lastLogin || "-",
+    }));
     exportToExcel(exportData as any[], USER_COLUMNS, "users_mdptv", "Users");
   };
 
@@ -65,7 +66,9 @@ export default function UserManagementPage() {
         imported++;
       }
       toast.success(`Berhasil import ${imported} user (password default: default123)`);
-    } catch { toast.error("Gagal membaca file Excel"); }
+    } catch {
+      toast.error("Gagal membaca file Excel");
+    }
     e.target.value = "";
   };
 
@@ -79,77 +82,90 @@ export default function UserManagementPage() {
 
   const filtered = users
     .filter((u) => roleFilter === "all" || u.role === roleFilter)
-    .filter((u) => !search || u.fullName.toLowerCase().includes(search.toLowerCase()) || u.username.toLowerCase().includes(search.toLowerCase()));
+    .filter(
+      (u) =>
+        !search ||
+        u.fullName.toLowerCase().includes(search.toLowerCase()) ||
+        u.username.toLowerCase().includes(search.toLowerCase()) ||
+        u.email.toLowerCase().includes(search.toLowerCase())
+    );
 
   const counts = {
     total: users.length,
     active: users.filter((u) => u.isActive).length,
-    ...ALL_ROLES.reduce((acc, r) => ({ ...acc, [r]: users.filter((u) => u.role === r).length }), {} as Record<UserRole, number>),
+    ...ALL_ROLES.reduce(
+      (acc, r) => ({ ...acc, [r]: users.filter((u) => u.role === r).length }),
+      {} as Record<UserRole, number>
+    ),
   };
 
-
-  const mobileTitle = (
+  const topbarTitle = (
     <div className="min-w-0 pr-2">
-      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+      <h2 className="text-xs sm:text-sm font-bold text-primary truncate leading-tight">
         Manajemen User
       </h2>
-      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
-        Kelola akun pengguna & hak akses
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5 hidden sm:block">
+        Kelola akun administrator & hak akses
       </p>
     </div>
   );
 
   return (
     <>
-      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
-      {/* Top Bar */}
-      <header className="sticky top-[68px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="flex items-center justify-start lg:justify-between overflow-x-auto hide-scrollbar px-4 sm:px-8 py-3 lg:py-4">
-          <div className="hidden lg:block shrink-0">
-            <h2 className="text-base sm:text-xl font-bold text-primary">Manajemen User</h2>
-            <p className="text-[10px] sm:text-xs text-on-surface-variant/50">Kelola akun pengguna & hak akses</p>
-          </div>
-        </div>
-      </header>
+      {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
 
-      <div className="p-3 sm:p-8">
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
-          <div className="group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border bg-surface-container-low border-outline-variant/20 hover:scale-[1.01] hover:shadow-sm transition-all duration-300">
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors bg-surface-container-highest group-hover:bg-white/50">
-                <Icon name="groups" filled className="text-secondary !text-base sm:!text-xl" />
+      <div className="p-4 sm:p-6 lg:p-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="p-4 sm:p-5 rounded-3xl border bg-surface-container-low border-outline-variant/15">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+                <Icon name="groups" filled size="sm" />
               </div>
-              <span className="text-[9px] sm:text-[11px] uppercase tracking-widest font-bold text-on-surface-variant/50">Total User</span>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-on-surface-variant/60">
+                Total Akun
+              </span>
             </div>
-            <div className="text-2xl sm:text-4xl font-black text-primary">{counts.total}</div>
+            <div className="text-2xl sm:text-3xl font-black text-primary font-display">
+              {counts.total}
+            </div>
           </div>
 
-          <div className="group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border bg-green-50/50 border-green-200/50 hover:scale-[1.01] hover:shadow-sm transition-all duration-300">
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors bg-green-50 group-hover:bg-white/50">
-                <Icon name="check_circle" filled className="text-green-500 !text-base sm:!text-xl" />
+          <div className="p-4 sm:p-5 rounded-3xl border bg-emerald-500/5 border-emerald-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-600">
+                <Icon name="check_circle" filled size="sm" />
               </div>
-              <span className="text-[9px] sm:text-[11px] uppercase tracking-widest font-bold text-green-600/70">Aktif</span>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-emerald-700">
+                Aktif
+              </span>
             </div>
-            <div className="text-2xl sm:text-4xl font-black text-primary">{counts.active}</div>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-950 font-display">
+              {counts.active}
+            </div>
           </div>
 
           {ALL_ROLES.map((r) => {
             const cfg = ROLE_CONFIG[r];
             const isActive = roleFilter === r;
             return (
-              <div key={r}
-                className={`group relative rounded-xl sm:rounded-2xl p-3 sm:p-5 border transition-all duration-300 text-left bg-surface-container-low border-outline-variant/20 hover:scale-[1.01] hover:shadow-sm`}>
-                <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                  <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${isActive ? 'bg-white/60 shadow-sm' : `${cfg.activeBg} group-hover:bg-white/50`}`}>
-                    <Icon name={cfg.icon} size="sm" className={`${cfg.color} !text-base sm:!text-xl`} filled={isActive} />
+              <div
+                key={r}
+                className={`p-4 sm:p-5 rounded-3xl border transition-all ${
+                  isActive
+                    ? "bg-secondary/10 border-secondary/30 ring-1 ring-secondary/20"
+                    : "bg-surface-container-low border-outline-variant/15"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`p-2 rounded-xl ${cfg.activeBg} ${cfg.color}`}>
+                    <Icon name={cfg.icon} size="sm" filled />
                   </div>
-                  <span className={`text-[9px] sm:text-[11px] uppercase tracking-widest font-bold ${isActive ? cfg.color : 'text-on-surface-variant/50'}`}>
+                  <span className={`text-[10px] sm:text-[11px] uppercase tracking-wider font-bold ${cfg.color}`}>
                     {cfg.label}
                   </span>
                 </div>
-                <div className={`text-2xl sm:text-4xl font-black text-primary`}>
+                <div className="text-2xl sm:text-3xl font-black text-primary font-display">
                   {(counts as Record<string, number>)[r] || 0}
                 </div>
               </div>
@@ -159,97 +175,162 @@ export default function UserManagementPage() {
 
         {/* Toolbar: Search, Filter & Actions */}
         <div className="mb-6 flex items-center gap-2 w-full">
-          {/* Search Box */}
           <div className="relative flex-1">
-            <Icon name="search" size="sm" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30" />
-            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-sm focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
-              placeholder="Cari nama atau username..." />
+            <Icon
+              name="search"
+              size="sm"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
+            />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-sm focus:outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10 transition-all placeholder:text-on-surface-variant/40"
+              placeholder="Cari nama, username, atau email..."
+            />
           </div>
 
-          {/* Menus */}
           <div className="flex items-center gap-2 shrink-0">
             {/* Filter Menu */}
-            <ActionMenu 
-              triggerIcon="filter_list" 
-              title="Saring Role"
+            <ActionMenu
+              triggerIcon="filter_list"
+              title="Saring Role Pengguna"
               actions={[
-                { label: "Semua Role", icon: "list", active: roleFilter === "all", onClick: () => setRoleFilter("all") },
-                ...ALL_ROLES.map(r => ({
+                {
+                  label: "Semua Role",
+                  icon: "list",
+                  active: roleFilter === "all",
+                  onClick: () => setRoleFilter("all"),
+                },
+                ...ALL_ROLES.map((r) => ({
                   label: ROLE_CONFIG[r].label,
                   icon: ROLE_CONFIG[r].icon,
                   active: roleFilter === r,
-                  onClick: () => setRoleFilter(r)
-                }))
-            ]} />
+                  onClick: () => setRoleFilter(r),
+                })),
+              ]}
+            />
 
             {/* Actions Menu */}
-            <ActionMenu actions={[
-              { label: "Tambah User", icon: "person_add", onClick: () => setModal({ mode: "add", user: null }) },
-              { label: "Import Excel", icon: "upload", onClick: () => importRef.current?.click() },
-              { label: "Export Excel", icon: "download", onClick: handleExport, variant: "success" },
-            ]} />
-            <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+            <ActionMenu
+              actions={[
+                {
+                  label: "Tambah User Baru",
+                  icon: "person_add",
+                  onClick: () => setModal({ mode: "add", user: null }),
+                },
+                {
+                  label: "Import Excel",
+                  icon: "upload",
+                  onClick: () => importRef.current?.click(),
+                },
+                {
+                  label: "Export Excel",
+                  icon: "download",
+                  onClick: handleExport,
+                  variant: "success",
+                },
+              ]}
+            />
+            <input
+              ref={importRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleImport}
+              className="hidden"
+            />
           </div>
         </div>
 
-        {/* User List */}
-        <div className="flex flex-col gap-2">
+        {/* User List Cards */}
+        <div className="flex flex-col gap-2.5">
           {filtered.length === 0 && (
-            <div className="text-center py-16">
-              <Icon name="person_off" className="text-5xl text-on-surface-variant/20 mb-3" />
-              <p className="text-sm text-on-surface-variant/40">Tidak ada user ditemukan</p>
+            <div className="text-center py-16 bg-surface-container-lowest rounded-3xl border border-outline-variant/15">
+              <Icon name="person_off" className="text-5xl text-on-surface-variant/20 mb-3 mx-auto" />
+              <p className="text-sm font-semibold text-primary">Tidak ada user ditemukan</p>
+              <p className="text-xs text-on-surface-variant/50 mt-1">
+                Coba sesuaikan kata kunci pencarian atau role filter.
+              </p>
             </div>
           )}
 
           {filtered.map((u) => {
             const roleCfg = ROLE_CONFIG[u.role];
             return (
-              <div key={u.id}
-                className="p-4 sm:p-5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest flex items-center gap-3 sm:gap-4 hover:border-outline-variant/30 transition-all">
-                {/* Avatar */}
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${roleCfg.activeBg} border ${roleCfg.border} flex items-center justify-center shrink-0 relative`}>
-                  <Icon name={roleCfg.icon} filled className={`${roleCfg.color} !text-lg sm:!text-xl`} />
-                  {!u.isActive && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-white flex items-center justify-center">
-                      <Icon name="close" size="sm" className="!text-[8px] text-white" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-semibold text-primary truncate">{u.fullName}</h3>
-                    <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${roleCfg.activeBg} ${roleCfg.border} ${roleCfg.color}`}>
-                      {roleCfg.label}
-                    </span>
+              <div
+                key={u.id}
+                className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-outline-variant/15 bg-surface-container-lowest flex items-center justify-between gap-3 sm:gap-4 hover:border-outline-variant/30 transition-all"
+              >
+                {/* Avatar Icon */}
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div
+                    className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl ${roleCfg.activeBg} border ${roleCfg.border} flex items-center justify-center shrink-0 relative font-bold text-sm font-display`}
+                  >
+                    <Icon name={roleCfg.icon} filled className={`${roleCfg.color} !text-base sm:!text-lg`} />
                     {!u.isActive && (
-                      <span className="inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-red-50 text-red-500">Nonaktif</span>
+                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-rose-500 border-2 border-white flex items-center justify-center" />
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5 text-[10px] sm:text-xs text-on-surface-variant/50 flex-wrap">
-                    <span>@{u.username}</span>
-                    <span className="opacity-30">•</span>
-                    <span>{u.email}</span>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <h3 className="text-sm sm:text-base font-bold text-primary font-display truncate">
+                        {u.fullName}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${roleCfg.activeBg} ${roleCfg.border} ${roleCfg.color}`}
+                      >
+                        {roleCfg.label}
+                      </span>
+                      {!u.isActive && (
+                        <span className="inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-200">
+                          Nonaktif
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-on-surface-variant/60 flex-wrap">
+                      <span className="font-mono text-secondary font-semibold">@{u.username}</span>
+                      <span className="opacity-30">•</span>
+                      <span className="truncate">{u.email}</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="icon" size="icon" onClick={() => toggleActive(u.id)}
-                    className={u.isActive ? "text-green-500 hover:bg-green-50" : "text-red-400 hover:bg-red-50"}
-                    title={u.isActive ? "Nonaktifkan" : "Aktifkan"}>
+                  <Button
+                    variant="icon"
+                    size="icon"
+                    onClick={() => toggleActive(u.id)}
+                    className={
+                      u.isActive
+                        ? "text-emerald-500 hover:bg-emerald-50"
+                        : "text-rose-400 hover:bg-rose-50"
+                    }
+                    title={u.isActive ? "Nonaktifkan Akun" : "Aktifkan Akun"}
+                  >
                     <Icon name={u.isActive ? "toggle_on" : "toggle_off"} size="sm" />
                   </Button>
-                  <Button variant="icon" size="icon" onClick={() => setModal({ mode: "edit", user: u })}
-                    title="Edit">
+
+                  <Button
+                    variant="icon"
+                    size="icon"
+                    onClick={() => setModal({ mode: "edit", user: u })}
+                    title="Edit User"
+                  >
                     <Icon name="edit" size="sm" />
                   </Button>
+
                   {u.role !== "superadmin" && (
-                    <Button variant="icon" size="icon" onClick={() => { if (confirm(`Hapus user "${u.fullName}"?`)) removeUser(u.id); }}
-                      className="hover:bg-red-50 hover:text-red-500 text-on-surface-variant/40"
-                      title="Hapus">
+                    <Button
+                      variant="icon"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm(`Hapus akun "${u.fullName}"?`)) removeUser(u.id);
+                      }}
+                      className="hover:bg-rose-50 hover:text-rose-600 text-on-surface-variant/40"
+                      title="Hapus Akun"
+                    >
                       <Icon name="delete" size="sm" />
                     </Button>
                   )}

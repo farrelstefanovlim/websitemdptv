@@ -52,10 +52,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onToggleCollapse={() => setDesktopCollapsed(!desktopCollapsed)}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 min-w-0 transition-all duration-300">
-        <AdminTopbar onToggleSidebar={() => setMobileMenuOpen(!mobileMenuOpen)} />
-        {children}
+      {/* Main Content Shell */}
+      <main className="flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300">
+        <AdminTopbar
+          onToggleSidebar={() => setMobileMenuOpen(!mobileMenuOpen)}
+          isCollapsed={desktopCollapsed}
+          onToggleCollapse={() => setDesktopCollapsed(!desktopCollapsed)}
+        />
+        <div className="flex-1 min-w-0">
+          {children}
+        </div>
       </main>
     </div>
   );

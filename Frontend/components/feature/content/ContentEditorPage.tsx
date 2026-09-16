@@ -61,56 +61,47 @@ export default function ContentEditorPage() {
     );
   }
 
-  const mobileActions = (
-    <>
-      <Button variant="none" size="none" onClick={resetAll}
-        className="w-9 h-9 flex items-center justify-center rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300 shrink-0">
-        <Icon name="restart_alt" size="sm" />
+  const topbarActions = (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="none"
+        size="none"
+        onClick={resetAll}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:bg-error/10 hover:text-error hover:border-error/30 text-xs font-semibold transition-all shrink-0"
+      >
+        <Icon name="restart_alt" size="sm" className="!text-xs" />
+        <span className="hidden sm:inline">Reset All</span>
       </Button>
-      <a href="/" target="_blank" rel="noopener noreferrer"
-        className="w-9 h-9 flex items-center justify-center rounded-xl bg-secondary text-on-secondary hover:brightness-110 transition-all duration-300 shadow-sm shadow-secondary/20 shrink-0">
-        <Icon name="open_in_new" size="sm" />
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary text-white text-xs font-semibold hover:brightness-110 shadow-sm shadow-secondary/20 transition-all shrink-0"
+      >
+        <Icon name="open_in_new" size="sm" className="!text-xs" />
+        <span className="hidden sm:inline">Preview</span>
       </a>
-    </>
+    </div>
   );
 
-  const mobileTitle = (
+  const topbarTitle = (
     <div className="min-w-0 pr-2">
-      <h2 className="text-[14px] font-bold text-primary truncate leading-tight">
+      <h2 className="text-xs sm:text-sm font-bold text-primary truncate leading-tight">
         Content Editor
       </h2>
-      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">
-        Edit konten setiap section
+      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5 hidden sm:block">
+        Edit konten setiap section landing page
       </p>
     </div>
   );
 
   return (
     <>
-      {hydrated && portalTarget && createPortal(mobileActions, portalTarget)}
-      {hydrated && mobileTitlePortalTarget && createPortal(mobileTitle, mobileTitlePortalTarget)}
-      {/* Top Bar */}
-      <header className="hidden lg:block sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10">
-        <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
-          <div>
-            <h2 className="text-base sm:text-xl font-bold text-primary">Content Editor</h2>
-            <p className="text-[10px] sm:text-xs text-on-surface-variant/50">Edit konten setiap section landing page</p>
-          </div>
-          <div className="hidden lg:flex items-center gap-2">
-            <Button variant="none" size="none" onClick={resetAll}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl border border-outline-variant/25 text-on-surface-variant hover:bg-error/8 hover:text-error hover:border-error/25 transition-all duration-300">
-              <Icon name="restart_alt" size="sm" /> Reset All
-            </Button>
-            <a href="/" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl bg-secondary text-on-secondary hover:brightness-110 shadow-sm shadow-secondary/20 transition-all duration-300">
-              <Icon name="open_in_new" size="sm" /> <span className="hidden sm:inline">Preview</span>
-            </a>
-          </div>
-        </div>
-      </header>
+      {hydrated && portalTarget && createPortal(topbarActions, portalTarget)}
+      {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
 
       {/* Content */}
-      <div className="p-3 sm:p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto flex flex-col gap-3">
           {sectionMeta.map(({ id, label, icon }) => {
             const isOpen = openSection === id;

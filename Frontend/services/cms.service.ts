@@ -62,7 +62,7 @@ export const cmsService = {
   getGallery: (page = 1, limit = 12) =>
     api.get("/cms/gallery", { params: { page, limit } }),
   
-  addGalleryImage: (data: { label?: string; title?: string; image_url: string }) =>
+  addGalleryImage: (data: { label?: string; title?: string; image_url: string; featured?: boolean }) =>
     api.post("/cms/gallery", data),
     
   deleteGalleryImage: (id: string) =>
