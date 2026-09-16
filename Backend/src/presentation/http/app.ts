@@ -26,13 +26,21 @@ export function createExpressApp(controllers: AppControllers): Express {
   // Dynamic CORS Configuration
   const rawCorsOrigin = process.env.CORS_ORIGIN || "http://localhost:3000,https://websitemdptv.vercel.app";
   const allowedOrigins = rawCorsOrigin.split(",").map((o) => o.trim());
+  const envOrigins = rawCorsOrigin.split(",").map((o) => o.trim());
 
   app.use(
     cors({
       origin: (origin, callback) => {
         // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+
+        if (origin.endsWith("vercel.app")) {
+          return callback(null, true);
+        }
+        if (origin.includes("localhost")) {
+          return callback(null, true);
+        }
+        if (envOrigins.includes("*") || envOrigins.includes(origin)) {
           return callback(null, true);
         }
         // In development, allow localhost origins smoothly
@@ -40,11 +48,12 @@ export function createExpressApp(controllers: AppControllers): Express {
           return callback(null, true);
         }
         // Tolak tamu tak diundang (Keamanan)
-        return callback(new Error("Not allowed by CORS"));
+        console.error("⛔ CORS Ditolak untuk origin:", origin);
+        return callback(new Error("Domain tidak diizinkan oleh CORS"));
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
+      allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"],
     })
   );
   app.use(express.json({ limit: "10mb" }));
