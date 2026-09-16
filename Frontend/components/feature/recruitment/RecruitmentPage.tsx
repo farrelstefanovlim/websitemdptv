@@ -43,10 +43,10 @@ export default function RecruitmentPage() {
       );
       let imported = 0;
       for (const row of rows) {
-        if (!row.name || !row.nim) continue;
+        if (!row.name || !row.npm) continue;
         addApplicant({
           name: row.name,
-          nim: row.nim,
+          npm: row.npm,
           email: row.email || "",
           phone: row.phone || "",
           division: row.division || "Photography & Videography",

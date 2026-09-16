@@ -40,7 +40,7 @@ export default function ApplicantTable({ actions }: { actions?: React.ReactNode 
   const filtered = applicants.filter((a) => {
     if (filterStatus !== "all" && a.status !== filterStatus) return false;
     if (filterDivision !== "Semua" && a.division !== filterDivision) return false;
-    if (search && !a.name.toLowerCase().includes(search.toLowerCase()) && !a.nim.includes(search)) return false;
+    if (search && !a.name.toLowerCase().includes(search.toLowerCase()) && !a.npm.includes(search)) return false;
     return true;
   });
 
@@ -63,7 +63,7 @@ export default function ApplicantTable({ actions }: { actions?: React.ReactNode 
           <Icon name="search" size="sm" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30" />
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-sm focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 transition-all"
-            placeholder="Cari nama atau NIM..." />
+            placeholder="Cari nama atau NPM..." />
         </div>
 
         <div className="flex items-center gap-2 shrink-0">

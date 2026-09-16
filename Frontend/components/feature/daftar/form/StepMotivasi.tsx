@@ -74,8 +74,8 @@ export default function StepMotivasi({ form, set, inputCls, onEnter }: Props) {
               <span className="font-medium text-primary">{form.name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-on-surface-variant/50">NIM</span>
-              <span className="font-medium text-primary">{form.nim}</span>
+              <span className="text-on-surface-variant/50">NPM</span>
+              <span className="font-medium text-primary">{form.npm}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-on-surface-variant/50">Email</span>

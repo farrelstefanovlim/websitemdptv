@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface AcceptedApplicant {
   name: string;
-  nim: string;
+  npm: string;
   divisionName: string;
 }
 
@@ -133,7 +133,7 @@ export default function PengumumanPage() {
                           {apps.map((app, appIdx) => (
                             <div key={appIdx} className="px-6 py-4 flex items-center justify-between gap-4 hover:bg-surface-container-lowest transition-colors">
                               <span className="font-bold text-primary truncate sm:text-lg">{app.name}</span>
-                              <span className="font-mono text-secondary tracking-widest text-sm bg-secondary/10 px-3 py-1 rounded-lg shrink-0">{app.nim}</span>
+                              <span className="font-mono text-secondary tracking-widest text-sm bg-secondary/10 px-3 py-1 rounded-lg shrink-0">{app.npm}</span>
                             </div>
                           ))}
                         </div>

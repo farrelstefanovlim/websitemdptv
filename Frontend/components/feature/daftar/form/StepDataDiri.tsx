@@ -38,7 +38,7 @@ export default function StepDataDiri({ form, set, inputCls, onEnter }: Props) {
       </div>
 
       <Alert variant="info" className="mb-6 text-left">
-        Penting: Pastikan <strong>Nama Lengkap</strong> dan <strong>NIM</strong> yang diinput sesuai dengan Kartu Tanda Mahasiswa (KTM) yang terdaftar.
+        Penting: Pastikan <strong>Nama Lengkap</strong> dan <strong>NPM</strong> yang diinput sesuai dengan Kartu Tanda Mahasiswa (KTM) yang terdaftar.
       </Alert>
 
       <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
@@ -47,8 +47,8 @@ export default function StepDataDiri({ form, set, inputCls, onEnter }: Props) {
           <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Masukkan nama lengkap" autoComplete="name"/>
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">NIM *</label>
-          <input type="text" value={form.nim} onChange={(e) => set("nim", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" autoComplete="off"/>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">NPM *</label>
+          <input type="text" value={form.npm} onChange={(e) => set("npm", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" autoComplete="off"/>
         </div>
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Email Kampus *</label>

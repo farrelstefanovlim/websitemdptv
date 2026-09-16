@@ -3,7 +3,7 @@ export type RecruitmentStatus = "pending" | "interview" | "accepted" | "rejected
 export interface Applicant {
   id: string;
   name: string;
-  nim: string;
+  npm: string;
   email: string;
   phone: string;
   division: string;

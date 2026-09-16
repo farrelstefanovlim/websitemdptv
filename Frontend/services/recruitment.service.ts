@@ -5,7 +5,7 @@ import type { Applicant, RecruitmentStatus } from "@/components/feature/recruitm
 const mapApplicant = (a: any): Applicant => ({
   id: a.id,
   name: a.name,
-  nim: a.nim,
+  npm: a.npm,
   email: a.email,
   phone: a.phone || "",
   division: a.division?.name || "",
@@ -27,7 +27,7 @@ export const recruitmentService = {
   /** Submit a new application */
   apply: (data: {
     name: string;
-    nim: string;
+    npm: string;
     email: string;
     phone?: string;
     division_id: string;

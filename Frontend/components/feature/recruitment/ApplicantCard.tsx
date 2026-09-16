@@ -52,7 +52,7 @@ export default function ApplicantCard({ applicant }: { applicant: Applicant }) {
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[9px] sm:text-[10px] text-on-surface-variant/45 uppercase tracking-widest font-medium">
-                {applicant.nim}
+                {applicant.npm}
               </span>
               <span className="text-on-surface-variant/20">·</span>
               <span className="text-[9px] sm:text-[10px] text-on-surface-variant/45 truncate">

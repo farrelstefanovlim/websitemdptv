@@ -22,7 +22,7 @@ export default function DaftarPage() {
 
   const [form, setForm] = useState({
     name: "",
-    nim: "",
+    npm: "",
     email: "",
     phone: "",
     division: "",
@@ -35,7 +35,7 @@ export default function DaftarPage() {
     setErrorMSG(null);
     if (step === 1) {
       if (!form.name.trim()) return setErrorMSG("Nama Lengkap harus diisi!");
-      if (!form.nim.trim() || !/^\d+$/.test(form.nim)) return setErrorMSG("NIM harus diisi dengan angka yang valid!");
+      if (!form.npm.trim() || !/^\d+$/.test(form.npm)) return setErrorMSG("NPM harus diisi dengan angka yang valid!");
       const emailBersih = form.email.trim().toLowerCase();
       if (!emailBersih || !/^[^\s@]+@mhs\.mdp\.ac\.id$/.test(emailBersih)) return setErrorMSG("Gunakan email kampus yang valid!");
       if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone)) return setErrorMSG("Nomor WhatsApp harus diisi dengan angka (minimal 10 digit)!");

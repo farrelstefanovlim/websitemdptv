@@ -91,7 +91,7 @@ export const ABSENSI_COLUMNS: Column[] = [
 
 export const RECRUITMENT_COLUMNS: Column[] = [
   { key: "name", header: "Nama" },
-  { key: "nim", header: "NIM" },
+  { key: "npm", header: "NPM" },
   { key: "email", header: "Email" },
   { key: "phone", header: "Telepon" },
   { key: "division", header: "Divisi" },

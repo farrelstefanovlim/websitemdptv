@@ -89,7 +89,7 @@ export const useRecruitmentStore = create<RecruitmentState>()(
         try {
           await recruitmentService.apply({
             name: data.name,
-            nim: data.nim,
+            npm: data.npm,
             email: data.email,
             phone: data.phone || undefined,
             division_id: data.division,
