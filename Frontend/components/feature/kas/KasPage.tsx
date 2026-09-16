@@ -3,6 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import DatePicker from "@/components/ui/DatePicker";
+import Modal from "@/components/ui/Modal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
+import { toast } from "@/stores/toast.store";
 import {
   kasService,
   KasRecord,
@@ -12,6 +18,8 @@ import {
 } from "@/services/kas.service";
 import { exportToExcel } from "@/lib/excel";
 import { exportToPDF } from "@/lib/pdf";
+import { memberService } from "@/services/member.service";
+import type { Member } from "@/components/feature/absensi/types/attendance.type";
 import * as XLSX from "xlsx";
 
 export default function KasPage() {
@@ -31,6 +39,8 @@ export default function KasPage() {
 
   // Form manual modal state - Log Transaksi
   const [showManualModal, setShowManualModal] = useState(false);
+  const [deleteLogTarget, setDeleteLogTarget] = useState<KasRecord | null>(null);
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
     description: "",
@@ -55,6 +65,9 @@ export default function KasPage() {
 
   // Form manual modal state - Unpaid Kas
   const [showUnpaidModal, setShowUnpaidModal] = useState(false);
+  const [deleteUnpaidTarget, setDeleteUnpaidTarget] = useState<KasUnpaidRecord | null>(null);
+  const [availableMembers, setAvailableMembers] = useState<Member[]>([]);
+  const [selectedMemberId, setSelectedMemberId] = useState<string>("");
   const [unpaidFormData, setUnpaidFormData] = useState({
     member_name: "",
     npm: "",
@@ -105,6 +118,12 @@ export default function KasPage() {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    memberService.getAll()
+      .then((data) => setAvailableMembers(data))
+      .catch(() => {});
+  }, []);
+
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -131,16 +150,16 @@ export default function KasPage() {
 
           await kasService.uploadJSON(parsedData);
           await loadKasData();
-          alert("File Excel transaksi kas berhasil di-upload!");
+          toast.success("File Excel transaksi kas berhasil di-upload!");
         } catch (err: any) {
-          alert("Gagal membaca file Excel. Pastikan format file sesuai.");
+          toast.error("Gagal membaca file Excel. Pastikan format file sesuai.");
         } finally {
           setIsLoading(false);
         }
       };
       reader.readAsBinaryString(file);
     } catch (err: any) {
-      alert("Gagal mengunggah file.");
+      toast.error("Gagal mengunggah file Excel.");
       setIsLoading(false);
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -165,16 +184,16 @@ export default function KasPage() {
 
           await kasService.uploadUnpaidJSON(parsedData);
           await loadUnpaidData();
-          alert("Data Excel anggota belum bayar kas berhasil di-upload!");
+          toast.success("Data Excel anggota belum bayar kas berhasil di-upload!");
         } catch (err: any) {
-          alert("Gagal membaca file Excel tunggakan kas.");
+          toast.error("Gagal membaca file Excel tunggakan kas.");
         } finally {
           setIsLoading(false);
         }
       };
       reader.readAsBinaryString(file);
     } catch (err: any) {
-      alert("Gagal mengunggah file.");
+      toast.error("Gagal mengunggah file Excel.");
       setIsLoading(false);
     } finally {
       if (unpaidFileInputRef.current) unpaidFileInputRef.current.value = "";
@@ -185,7 +204,7 @@ export default function KasPage() {
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.description || !formData.amount) {
-      alert("Mohon isi keterangan dan nominal.");
+      toast.error("Mohon isi keterangan dan nominal transaksi.");
       return;
     }
 
@@ -210,8 +229,9 @@ export default function KasPage() {
         notes: "",
       });
       await loadKasData();
+      toast.success("Transaksi kas berhasil dicatat!");
     } catch (err) {
-      alert("Gagal menambah transaksi.");
+      toast.error("Gagal menambah transaksi kas.");
     } finally {
       setIsSubmitting(false);
     }
@@ -221,7 +241,7 @@ export default function KasPage() {
   const handleUnpaidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!unpaidFormData.member_name || !unpaidFormData.period) {
-      alert("Mohon isi nama anggota dan periode.");
+      toast.error("Mohon isi nama anggota dan periode.");
       return;
     }
 
@@ -238,6 +258,7 @@ export default function KasPage() {
       });
 
       setShowUnpaidModal(false);
+      setSelectedMemberId("");
       setUnpaidFormData({
         member_name: "",
         npm: "",
@@ -248,8 +269,9 @@ export default function KasPage() {
         notes: "",
       });
       await loadUnpaidData();
+      toast.success("Data tunggakan kas berhasil disimpan!");
     } catch (err) {
-      alert("Gagal menambah data tunggakan.");
+      toast.error("Gagal menambah data tunggakan.");
     } finally {
       setIsSubmitting(false);
     }
@@ -260,39 +282,48 @@ export default function KasPage() {
     const nextStatus = item.status === "BELUM_BAYAR" ? "LUNAS" : "BELUM_BAYAR";
     try {
       await kasService.updateUnpaid(item.id, { status: nextStatus });
+      toast.success(`Status ${item.member_name} diubah menjadi ${nextStatus}`);
       await loadUnpaidData();
     } catch (err) {
-      alert("Gagal mengbarui status bayar.");
+      toast.error("Gagal memperbarui status bayar.");
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) return;
+  const handleDeleteLogConfirm = async () => {
+    if (!deleteLogTarget) return;
     try {
-      await kasService.delete(id);
+      await kasService.delete(deleteLogTarget.id);
+      toast.success("Transaksi kas berhasil dihapus.");
       await loadKasData();
     } catch (err) {
-      alert("Gagal menghapus transaksi.");
+      toast.error("Gagal menghapus transaksi.");
+    } finally {
+      setDeleteLogTarget(null);
     }
   };
 
-  const handleDeleteUnpaid = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus data tunggakan ini?")) return;
+  const handleDeleteUnpaidConfirm = async () => {
+    if (!deleteUnpaidTarget) return;
     try {
-      await kasService.deleteUnpaid(id);
+      await kasService.deleteUnpaid(deleteUnpaidTarget.id);
+      toast.success("Data tunggakan kas berhasil dihapus.");
       await loadUnpaidData();
     } catch (err) {
-      alert("Gagal menghapus data tunggakan.");
+      toast.error("Gagal menghapus data tunggakan.");
+    } finally {
+      setDeleteUnpaidTarget(null);
     }
   };
 
-  const handleResetAll = async () => {
-    if (!confirm("⚠️ PERINGATAN: Semua log transaksi kas akan dibersihkan! Lanjutkan?")) return;
+  const handleResetAllConfirm = async () => {
     try {
       await kasService.deleteAll();
+      toast.success("Semua log transaksi kas berhasil dibersihkan.");
       await loadKasData();
     } catch (err) {
-      alert("Gagal membersihkan log kas.");
+      toast.error("Gagal membersihkan log kas.");
+    } finally {
+      setShowClearAllConfirm(false);
     }
   };
 
@@ -408,8 +439,9 @@ export default function KasPage() {
   });
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Header & Sub-Tab Switcher */}
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="max-w-[1440px] mx-auto space-y-6">
+        {/* Header & Sub-Tab Switcher */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15 shadow-sm">
         <div>
           <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
@@ -541,8 +573,8 @@ export default function KasPage() {
 
                 {records.length > 0 && (
                   <button
-                    onClick={handleResetAll}
-                    className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1 px-3 py-2"
+                    onClick={() => setShowClearAllConfirm(true)}
+                    className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1 px-3 py-2 cursor-pointer"
                   >
                     <Icon name="delete_sweep" size="sm" />
                     <span>Reset Log</span>
@@ -672,8 +704,8 @@ export default function KasPage() {
                           </td>
                           <td className="p-4 text-center">
                             <button
-                              onClick={() => handleDelete(r.id)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors"
+                              onClick={() => setDeleteLogTarget(r)}
+                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                               title="Hapus Transaksi"
                             >
                               <Icon name="delete" size="sm" />
@@ -896,8 +928,8 @@ export default function KasPage() {
                           </td>
                           <td className="p-4 text-center">
                             <button
-                              onClick={() => handleDeleteUnpaid(r.id)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors"
+                              onClick={() => setDeleteUnpaidTarget(r)}
+                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                               title="Hapus Data Tunggakan"
                             >
                               <Icon name="delete" size="sm" />
@@ -915,202 +947,244 @@ export default function KasPage() {
       )}
 
       {/* Modal Manual Form - Log Transaksi */}
-      {showManualModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 p-6 sm:p-8 w-full max-w-md shadow-2xl space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-primary">Tambah Transaksi Kas</h3>
-              <button
-                onClick={() => setShowManualModal(false)}
-                className="text-on-surface-variant/40 hover:text-primary"
-              >
-                <Icon name="close" />
-              </button>
-            </div>
+      <Modal
+        isOpen={showManualModal}
+        onClose={() => setShowManualModal(false)}
+        size="md"
+        title="Tambah Transaksi Kas"
+        description="Catat mutasi pemasukan atau pengeluaran keuangan kas MDPTV"
+        headerIcon="account_balance_wallet"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowManualModal(false)}
+              disabled={isSubmitting}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={handleManualSubmit as any}
+              isLoading={isSubmitting}
+            >
+              Simpan Transaksi
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleManualSubmit} className="space-y-4">
+          <DatePicker
+            label="Tanggal Transaksi"
+            required
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          />
 
-            <form onSubmit={handleManualSubmit} className="space-y-4 text-xs font-medium">
-              <div>
-                <label className="block text-on-surface-variant mb-1 font-bold">Tanggal</label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary"
-                  required
-                />
-              </div>
+          <Input
+            label="Keterangan Transaksi"
+            required
+            startIcon="description"
+            placeholder="Misal: Uang Kas Bulan Januari"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
 
-              <div>
-                <label className="block text-on-surface-variant mb-1 font-bold">Keterangan Transaksi</label>
-                <input
-                  type="text"
-                  placeholder="Misal: Uang Kas Bulan Januari"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary font-bold"
-                  required
-                />
-              </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Select
+              label="Tipe Transaksi"
+              startIcon="swap_horiz"
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as "IN" | "OUT" })}
+              options={[
+                { label: "Masuk (IN)", value: "IN" },
+                { label: "Keluar (OUT)", value: "OUT" },
+              ]}
+            />
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-on-surface-variant mb-1 font-bold">Tipe Transaksi</label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value as "IN" | "OUT" })}
-                    className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary font-bold"
-                  >
-                    <option value="IN">Masuk (IN)</option>
-                    <option value="OUT">Keluar (OUT)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-on-surface-variant mb-1 font-bold">Nominal (Rp)</label>
-                  <input
-                    type="number"
-                    placeholder="20000"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary font-bold"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-on-surface-variant mb-1 font-bold">Kategori</label>
-                <input
-                  type="text"
-                  placeholder="Kas Anggota, Peralatan, dll"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setShowManualModal(false)}>
-                  Batal
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Menyimpan..." : "Simpan Transaksi"}
-                </Button>
-              </div>
-            </form>
+            <Input
+              label="Nominal (Rp)"
+              required
+              type="number"
+              startIcon="payments"
+              placeholder="20000"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+            />
           </div>
-        </div>
-      )}
+
+          <Input
+            label="Kategori"
+            startIcon="category"
+            placeholder="Kas Anggota, Peralatan, dll"
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          />
+        </form>
+      </Modal>
 
       {/* Modal Manual Form - Unpaid Kas */}
-      {showUnpaidModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 p-6 sm:p-8 w-full max-w-md shadow-2xl space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-primary">Tambah Anggota Belum Bayar</h3>
-              <button
-                onClick={() => setShowUnpaidModal(false)}
-                className="text-on-surface-variant/40 hover:text-primary"
-              >
-                <Icon name="close" />
-              </button>
-            </div>
+      <Modal
+        isOpen={showUnpaidModal}
+        onClose={() => setShowUnpaidModal(false)}
+        size="md"
+        title="Tambah Anggota Belum Bayar"
+        description="Catat tagihan iuran kas anggota yang belum dibayarkan"
+        headerIcon="person_add"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowUnpaidModal(false)}
+              disabled={isSubmitting}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={handleUnpaidSubmit as any}
+              isLoading={isSubmitting}
+            >
+              Simpan Tagihan
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleUnpaidSubmit} className="space-y-4">
+          {/* Quick Member Selector */}
+          <Select
+            label="Pilih dari Data Anggota Terdaftar (Otomatis Isi Data)"
+            startIcon="badge"
+            value={selectedMemberId}
+            placeholder="-- Cari & Pilih Anggota (Opsional) --"
+            onChange={(e) => {
+              const memId = e.target.value;
+              setSelectedMemberId(memId);
+              const found = availableMembers.find((m) => m.id === memId);
+              if (found) {
+                setUnpaidFormData((prev) => ({
+                  ...prev,
+                  member_name: found.name,
+                  npm: found.npm || "",
+                  division: found.division || "",
+                }));
+              }
+            }}
+            options={[
+              { label: "-- Reset / Input Manual Kosong --", value: "" },
+              ...availableMembers.map((m) => ({
+                label: `${m.name} (${m.npm || "-"}) • ${m.division || "Umum"}`,
+                value: m.id,
+              })),
+            ]}
+          />
 
-            <form onSubmit={handleUnpaidSubmit} className="space-y-4 text-xs font-medium">
-              <div>
-                <label className="block text-on-surface-variant mb-1 font-bold">
-                  Nama Anggota <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Masukkan nama anggota..."
-                  value={unpaidFormData.member_name}
-                  onChange={(e) => setUnpaidFormData({ ...unpaidFormData, member_name: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary font-bold"
-                  required
-                />
-              </div>
+          <Input
+            label="Nama Lengkap Anggota"
+            required
+            startIcon="person"
+            placeholder="Masukkan nama anggota..."
+            value={unpaidFormData.member_name}
+            onChange={(e) => setUnpaidFormData({ ...unpaidFormData, member_name: e.target.value })}
+          />
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-on-surface-variant mb-1 font-bold">NPM</label>
-                  <input
-                    type="text"
-                    placeholder="2226250001"
-                    value={unpaidFormData.npm}
-                    onChange={(e) => setUnpaidFormData({ ...unpaidFormData, npm: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary"
-                  />
-                </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Input
+              label="NPM"
+              startIcon="badge"
+              placeholder="2226250001"
+              value={unpaidFormData.npm}
+              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, npm: e.target.value })}
+            />
 
-                <div>
-                  <label className="block text-on-surface-variant mb-1 font-bold">Divisi</label>
-                  <input
-                    type="text"
-                    placeholder="Broadcasting, Tim Kreatif"
-                    value={unpaidFormData.division}
-                    onChange={(e) => setUnpaidFormData({ ...unpaidFormData, division: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-on-surface-variant mb-1 font-bold">
-                    Periode / Bulan <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Januari 2026"
-                    value={unpaidFormData.period}
-                    onChange={(e) => setUnpaidFormData({ ...unpaidFormData, period: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary font-bold"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-on-surface-variant mb-1 font-bold">Jumlah Tunggakan (Rp)</label>
-                  <input
-                    type="number"
-                    placeholder="10000"
-                    value={unpaidFormData.amount}
-                    onChange={(e) => setUnpaidFormData({ ...unpaidFormData, amount: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary font-bold"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-on-surface-variant mb-1 font-bold">Status Awal</label>
-                <select
-                  value={unpaidFormData.status}
-                  onChange={(e) =>
-                    setUnpaidFormData({
-                      ...unpaidFormData,
-                      status: e.target.value as "BELUM_BAYAR" | "LUNAS",
-                    })
-                  }
-                  className="w-full p-3 rounded-xl border border-outline-variant/20 bg-background text-primary font-bold"
-                >
-                  <option value="BELUM_BAYAR">BELUM BAYAR</option>
-                  <option value="LUNAS">LUNAS</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setShowUnpaidModal(false)}>
-                  Batal
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Menyimpan..." : "Simpan Anggota"}
-                </Button>
-              </div>
-            </form>
+            <Input
+              label="Divisi"
+              startIcon="category"
+              placeholder="Broadcasting, Tim Kreatif"
+              value={unpaidFormData.division}
+              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, division: e.target.value })}
+            />
           </div>
-        </div>
-      )}
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Input
+              label="Periode / Bulan"
+              required
+              startIcon="event"
+              placeholder="Januari 2026"
+              value={unpaidFormData.period}
+              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, period: e.target.value })}
+            />
+
+            <Input
+              label="Jumlah Tunggakan (Rp)"
+              type="number"
+              startIcon="payments"
+              placeholder="10000"
+              value={unpaidFormData.amount}
+              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, amount: e.target.value })}
+            />
+          </div>
+
+          <Select
+            label="Status Awal"
+            startIcon="flag"
+            value={unpaidFormData.status}
+            onChange={(e) =>
+              setUnpaidFormData({
+                ...unpaidFormData,
+                status: e.target.value as "BELUM_BAYAR" | "LUNAS",
+              })
+            }
+            options={[
+              { label: "BELUM BAYAR", value: "BELUM_BAYAR" },
+              { label: "LUNAS", value: "LUNAS" },
+            ]}
+          />
+        </form>
+      </Modal>
+
+      {/* Delete Log Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteLogTarget)}
+        onClose={() => setDeleteLogTarget(null)}
+        onConfirm={handleDeleteLogConfirm}
+        title="Hapus Transaksi Kas"
+        message={`Apakah Anda yakin ingin menghapus catatan transaksi "${deleteLogTarget?.description}"? Tindakan ini akan memperbarui kalkulasi akumulasi saldo.`}
+        confirmText="Hapus Transaksi"
+        variant="danger"
+      />
+
+      {/* Delete Unpaid Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteUnpaidTarget)}
+        onClose={() => setDeleteUnpaidTarget(null)}
+        onConfirm={handleDeleteUnpaidConfirm}
+        title="Hapus Data Tunggakan Kas"
+        message={`Apakah Anda yakin ingin menghapus data tagihan kas untuk "${deleteUnpaidTarget?.member_name}" (${deleteUnpaidTarget?.period})?`}
+        confirmText="Hapus Tagihan"
+        variant="danger"
+      />
+
+      {/* Reset All Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showClearAllConfirm}
+        onClose={() => setShowClearAllConfirm(false)}
+        onConfirm={handleResetAllConfirm}
+        title="Reset Seluruh Log Transaksi Kas"
+        message="⚠️ PERINGATAN: Semua riwayat transaksi kas akan dihapus secara permanen dari sistem. Anda yakin ingin melanjutkan?"
+        confirmText="Bersihkan Semua Log"
+        variant="danger"
+      />
+      </div>
     </div>
   );
 }

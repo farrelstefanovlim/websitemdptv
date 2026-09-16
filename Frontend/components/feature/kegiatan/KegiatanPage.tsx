@@ -9,6 +9,7 @@ import { useHydrated } from "@/hooks/useHydrated";
 import { exportToExcel, importFromExcel, KEGIATAN_COLUMNS } from "@/lib/excel";
 import { toast } from "@/stores/toast.store";
 import Button from "@/components/ui/Button";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import KegiatanModal from "./KegiatanModal";
 import ProposalUploader from "./ProposalUploader";
 import ActionMenu from "@/components/ui/ActionMenu";
@@ -23,6 +24,7 @@ export default function KegiatanPage() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [modal, setModal] = useState<{ mode: "add" | "edit"; kegiatan: Kegiatan | null } | null>(null);
+  const [deleteTargetKegiatan, setDeleteTargetKegiatan] = useState<Kegiatan | null>(null);
   const excelImportRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -101,8 +103,9 @@ export default function KegiatanPage() {
       {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
 
       <div className="p-4 sm:p-6 lg:p-8">
-        {/* Status Count Metric Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+        <div className="max-w-[1440px] mx-auto space-y-6">
+          {/* Status Count Metric Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {ALL_STATUSES.map((s) => {
             const cfg = STATUS_CONFIG[s];
             return (
@@ -336,9 +339,7 @@ export default function KegiatanPage() {
                         <Button
                           variant="danger"
                           size="none"
-                          onClick={() => {
-                            if (confirm(`Hapus kegiatan "${k.title}"?`)) removeKegiatan(k.id);
-                          }}
+                          onClick={() => setDeleteTargetKegiatan(k)}
                           className="px-3.5 py-2 text-xs font-semibold"
                         >
                           <Icon name="delete" size="sm" className="!text-xs" />
@@ -352,6 +353,7 @@ export default function KegiatanPage() {
             );
           })}
         </div>
+        </div>
       </div>
 
       {/* Modal */}
@@ -359,16 +361,43 @@ export default function KegiatanPage() {
         <KegiatanModal
           kegiatan={modal.kegiatan}
           onClose={() => setModal(null)}
-          onSave={(data) => {
-            if (modal.mode === "edit" && modal.kegiatan) {
-              updateKegiatan(modal.kegiatan.id, data);
-            } else {
-              addKegiatan(data as Omit<Kegiatan, "id" | "createdAt">);
+          onSave={async (data) => {
+            try {
+              if (modal.mode === "edit" && modal.kegiatan) {
+                await updateKegiatan(modal.kegiatan.id, data);
+                toast.success("Kegiatan berhasil diperbarui!");
+              } else {
+                await addKegiatan(data as Omit<Kegiatan, "id" | "createdAt">);
+                toast.success("Kegiatan baru berhasil ditambahkan!");
+              }
+              setModal(null);
+            } catch (e: any) {
+              toast.error(e?.response?.data?.message || "Gagal menyimpan kegiatan.");
             }
-            setModal(null);
           }}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetKegiatan)}
+        onClose={() => setDeleteTargetKegiatan(null)}
+        onConfirm={async () => {
+          if (deleteTargetKegiatan) {
+            try {
+              await removeKegiatan(deleteTargetKegiatan.id);
+              toast.success(`Kegiatan "${deleteTargetKegiatan.title}" berhasil dihapus.`);
+            } catch (e) {
+              toast.error("Gagal menghapus kegiatan.");
+            }
+            setDeleteTargetKegiatan(null);
+          }
+        }}
+        title="Hapus Agenda Kegiatan"
+        message={`Apakah Anda yakin ingin menghapus agenda kegiatan "${deleteTargetKegiatan?.title}"? Dokumen proposal dan detail kegiatan ini akan ikut dihapus.`}
+        confirmText="Hapus Kegiatan"
+        variant="danger"
+      />
     </>
   );
 }

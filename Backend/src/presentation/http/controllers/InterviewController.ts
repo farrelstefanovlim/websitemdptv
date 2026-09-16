@@ -33,9 +33,9 @@ export class InterviewController {
         distinct: ["year_period"],
       });
 
-      const dbYearsSet = new Set<number>(periods.map((p) => p.year));
-      questionsYears.forEach((q) => dbYearsSet.add(q.year_period));
-      responsesYears.forEach((r) => dbYearsSet.add(r.year_period));
+      const dbYearsSet = new Set<number>(periods.map((p: any) => p.year));
+      questionsYears.forEach((q: any) => dbYearsSet.add(q.year_period));
+      responsesYears.forEach((r: any) => dbYearsSet.add(r.year_period));
 
       const sortedYears = Array.from(dbYearsSet).sort((a, b) => b - a);
 

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import UserModal from "@/components/feature/users/UserModal";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import ActionMenu from "@/components/ui/ActionMenu";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "@/hooks/usePortalTarget";
@@ -30,6 +31,7 @@ export default function UserManagementPage() {
   const portalTarget = usePortalTarget("mobile-topbar-actions");
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
   const [modal, setModal] = useState<{ mode: "add" | "edit"; user: AppUser | null } | null>(null);
+  const [deleteTargetUser, setDeleteTargetUser] = useState<AppUser | null>(null);
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [search, setSearch] = useState("");
   const importRef = useRef<HTMLInputElement>(null);
@@ -115,8 +117,9 @@ export default function UserManagementPage() {
       {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
 
       <div className="p-4 sm:p-6 lg:p-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="max-w-[1440px] mx-auto space-y-6">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-4 sm:p-5 rounded-3xl border bg-surface-container-low border-outline-variant/15">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
@@ -325,9 +328,7 @@ export default function UserManagementPage() {
                     <Button
                       variant="icon"
                       size="icon"
-                      onClick={() => {
-                        if (confirm(`Hapus akun "${u.fullName}"?`)) removeUser(u.id);
-                      }}
+                      onClick={() => setDeleteTargetUser(u)}
                       className="hover:bg-rose-50 hover:text-rose-600 text-on-surface-variant/40"
                       title="Hapus Akun"
                     >
@@ -338,6 +339,7 @@ export default function UserManagementPage() {
               </div>
             );
           })}
+        </div>
         </div>
       </div>
 
@@ -356,6 +358,23 @@ export default function UserManagementPage() {
           }}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetUser)}
+        onClose={() => setDeleteTargetUser(null)}
+        onConfirm={async () => {
+          if (deleteTargetUser) {
+            await removeUser(deleteTargetUser.id);
+            toast.success(`Akun "${deleteTargetUser.fullName}" berhasil dihapus.`);
+            setDeleteTargetUser(null);
+          }
+        }}
+        title="Hapus Akun Administrator"
+        message={`Apakah Anda yakin ingin menghapus akun administrator "${deleteTargetUser?.fullName}" (@${deleteTargetUser?.username})? Tindakan ini tidak dapat dibatalkan.`}
+        confirmText="Hapus Akun"
+        variant="danger"
+      />
     </>
   );
 }

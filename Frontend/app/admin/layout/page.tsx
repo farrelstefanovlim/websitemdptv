@@ -67,7 +67,7 @@ export default function Page() {
 
       {/* Content */}
       <div className="p-4 sm:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-6">
+        <div className="max-w-[1440px] mx-auto flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-6">
           {/* Editor */}
           <div className="lg:col-span-3">
             <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 p-4 sm:p-6">

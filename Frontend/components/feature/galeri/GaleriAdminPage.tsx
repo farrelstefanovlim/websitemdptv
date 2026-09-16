@@ -6,11 +6,15 @@ import { createPortal } from "react-dom";
 import { usePortalTarget } from "@/hooks/usePortalTarget";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useHydrated } from "@/hooks/useHydrated";
 import type { GalleryItem } from "@/components/feature/content/types/content.type";
 import { getImageUrl } from "@/lib/image";
 import { useGalleryStore } from "@/stores/gallery.store";
 import Alert from "@/components/ui/Alert";
+import { toast } from "@/stores/toast.store";
 
 export default function GaleriAdminPage() {
   const hydrated = useHydrated();
@@ -18,7 +22,7 @@ export default function GaleriAdminPage() {
   const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title");
 
   const [showForm, setShowForm] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<GalleryItem | null>(null);
 
   const { items, fetchGallery, deleteGalleryImage, toggleGalleryFeature, error: storeError } =
     useGalleryStore();
@@ -52,22 +56,19 @@ export default function GaleriAdminPage() {
   };
 
   const handleAdd = async () => {
-    setLocalError(null);
     setShowForm(false);
+    toast.success("Foto dokumentasi berhasil ditambahkan!");
   };
 
-  const handleDelete = async (item: GalleryItem) => {
-    setLocalError(null);
-    if (!item.id) {
-      setLocalError("Error: Foto ini tidak memiliki ID valid di database.");
-      return;
-    }
-    if (confirm(`Hapus foto "${item.title || "ini"}"?`)) {
-      try {
-        await deleteGalleryImage(item.id);
-      } catch (e: any) {
-        setLocalError(e?.response?.data?.message || "Gagal menghapus gambar.");
-      }
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget?.id) return;
+    try {
+      await deleteGalleryImage(deleteTarget.id);
+      toast.success("Foto dokumentasi berhasil dihapus!");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || "Gagal menghapus gambar.");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -91,17 +92,12 @@ export default function GaleriAdminPage() {
         <span className="hidden sm:inline">Preview</span>
       </a>
       <Button
-        variant="none"
-        size="none"
-        onClick={() => setShowForm(!showForm)}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition-all shrink-0 ${
-          showForm
-            ? "bg-surface-container-high text-on-surface hover:brightness-95"
-            : "bg-secondary text-white hover:brightness-110 shadow-secondary/20"
-        }`}
+        variant="primary"
+        size="xs"
+        onClick={() => setShowForm(true)}
+        startIcon={<Icon name="add_photo_alternate" size="sm" className="!text-xs" />}
       >
-        <Icon name={showForm ? "close" : "add_photo_alternate"} size="sm" className="!text-xs" />
-        <span>{showForm ? "Batal" : "Tambah Foto"}</span>
+        Tambah Foto
       </Button>
     </div>
   );
@@ -123,10 +119,10 @@ export default function GaleriAdminPage() {
       {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
 
       <div className="p-4 sm:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto">
-          {(localError || storeError) && (
-            <Alert variant="error" className="mb-6" title="Terjadi Kesalahan">
-              {localError || storeError}
+        <div className="max-w-[1440px] mx-auto space-y-6">
+          {storeError && (
+            <Alert variant="error" title="Terjadi Kesalahan">
+              {storeError}
             </Alert>
           )}
 
@@ -137,13 +133,14 @@ export default function GaleriAdminPage() {
 
           {/* Gallery Content */}
           {items.length === 0 ? (
-            <div className="text-center py-20 bg-surface-container-lowest rounded-3xl border border-outline-variant/15">
-              <Icon name="photo_library" className="text-on-surface-variant/20 !text-6xl mx-auto mb-3" />
-              <p className="text-base font-bold text-primary font-display">Belum ada foto dokumentasi</p>
-              <p className="text-xs text-on-surface-variant/50 mt-1">
-                Klik tombol &quot;Tambah Foto&quot; di atas untuk mulai mengunggah aset dokumentasi.
-              </p>
-            </div>
+            <EmptyState
+              icon="photo_library"
+              title="Belum Ada Foto Dokumentasi"
+              description="Mulai unggah karya visual dan momen kegiatan studio MDPTV untuk ditampilkan pada website."
+              actionText="Tambah Foto Baru"
+              actionIcon="add_photo_alternate"
+              onAction={() => setShowForm(true)}
+            />
           ) : (
             <div className="space-y-8">
               {sortedDates.map((date) => {
@@ -171,7 +168,7 @@ export default function GaleriAdminPage() {
                       {groupItems.map((item, gi) => (
                         <div
                           key={item.id || gi}
-                          className="relative group rounded-2xl sm:rounded-3xl overflow-hidden border border-outline-variant/15 hover:border-secondary/40 transition-all duration-300 shadow-sm bg-surface-container-lowest"
+                          className="relative group rounded-2xl sm:rounded-3xl overflow-hidden border border-outline-variant/15 hover:border-secondary/40 transition-all duration-300 shadow-xs bg-surface-container-lowest"
                         >
                           {item.image && (
                             <img
@@ -183,9 +180,10 @@ export default function GaleriAdminPage() {
 
                           {/* Top Featured Pill */}
                           {item.featured && (
-                            <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-bold shadow-md flex items-center gap-1">
-                              <Icon name="star" filled size="sm" className="!text-[10px]" />
-                              <span>Featured</span>
+                            <div className="absolute top-3 left-3">
+                              <Badge variant="warning" size="sm" icon="star">
+                                Featured
+                              </Badge>
                             </div>
                           )}
 
@@ -194,8 +192,8 @@ export default function GaleriAdminPage() {
                             <div className="flex items-center justify-end gap-1">
                               <button
                                 type="button"
-                                onClick={() => handleDelete(item)}
-                                className="w-8 h-8 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white flex items-center justify-center transition-colors shadow-sm"
+                                onClick={() => setDeleteTarget(item)}
+                                className="w-8 h-8 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                                 title="Hapus Foto"
                               >
                                 <Icon name="delete" size="sm" className="!text-sm" />
@@ -225,6 +223,17 @@ export default function GaleriAdminPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Hapus Foto Dokumentasi"
+        message={`Apakah Anda yakin ingin menghapus foto "${deleteTarget?.title || "ini"}"? Foto yang dihapus tidak dapat dipulihkan.`}
+        confirmText="Hapus Foto"
+        variant="danger"
+      />
     </>
   );
 }

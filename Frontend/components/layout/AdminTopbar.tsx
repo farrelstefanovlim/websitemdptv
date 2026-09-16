@@ -42,7 +42,7 @@ export default function AdminTopbar({
   const initial = username.charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/15 px-4 sm:px-6 flex items-center justify-between gap-3 shrink-0">
+    <header className="sticky top-0 z-30 h-16 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/15 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 shrink-0">
       {/* ── Left: Controls & Page Title Portal ────────────────── */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Mobile Menu Button */}

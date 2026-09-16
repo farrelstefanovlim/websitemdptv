@@ -74,17 +74,20 @@ model Division {
 }
 
 model Applicant {
-  id          String         @id @default(uuid()) @db.Uuid
-  name        String         @db.VarChar(100)
-  npm         String         @unique @db.VarChar(20)
-  email       String         @db.VarChar(255)
-  phone       String?        @db.VarChar(20)
-  division_id String         @db.Uuid
-  motivation  String         @db.Text
-  status      ApplicantStatus @default(pending)
-  admin_note  String?        @db.Text
-  reviewed_by String?        @db.Uuid
-  applied_at  DateTime       @default(now())
+  id            String          @id @default(uuid()) @db.Uuid
+  name          String          @db.VarChar(100)
+  npm           String          @unique @db.VarChar(20)
+  email         String          @db.VarChar(255)
+  phone         String?         @db.VarChar(20)
+  division_id   String          @db.Uuid
+  motivation    String          @db.Text
+  cv_url        String?         @db.VarChar(500)
+  portfolio_url String?         @db.VarChar(500)
+  period        String          @default("2026/2027") @db.VarChar(50)
+  status        ApplicantStatus @default(pending)
+  admin_note    String?         @db.Text
+  reviewed_by   String?         @db.Uuid
+  applied_at    DateTime        @default(now())
 
   division Division @relation(fields: [division_id], references: [id])
   reviewer User?    @relation("AdminReviewer", fields: [reviewed_by], references: [id])
@@ -100,6 +103,7 @@ model Member {
   email       String?  @db.VarChar(255)
   division_id String?  @db.Uuid
   angkatan    Int
+  tahun_masuk Int      @default(2026)
   is_core     Boolean  @default(false)
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())
@@ -190,6 +194,16 @@ model InterviewPeriod {
   @@map("interview_periods")
 }
 
+model RecruitmentPeriod {
+  id         String   @id @default(uuid()) @db.Uuid
+  period     String   @unique @db.VarChar(50)
+  title      String?  @db.VarChar(100)
+  is_active  Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("recruitment_periods")
+}
+
 
 model AttendanceRecord {
   id         String           @id @default(uuid()) @db.Uuid
@@ -198,7 +212,7 @@ model AttendanceRecord {
   status     AttendanceStatus
   created_at DateTime         @default(now())
 
-  member     Member           @relation(fields: [member_id], references: [id])
+  member     Member           @relation(fields: [member_id], references: [id], onDelete: Cascade)
 
   @@unique([member_id, date])
   @@map("attendance_records")
@@ -213,6 +227,7 @@ model Kegiatan {
   location    String?        @db.VarChar(200)
   status      KegiatanStatus @default(draft)
   pic_id      String?        @db.Uuid
+  pic_name    String?        @db.VarChar(100)
   budget      String?        @db.VarChar(50)
   notes       String?        @db.Text
   created_at  DateTime       @default(now())

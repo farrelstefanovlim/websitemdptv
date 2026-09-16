@@ -4,6 +4,7 @@ import { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 import DatePicker from "@/components/ui/DatePicker";
+import Modal from "@/components/ui/Modal";
 import { useAttendanceStore } from "@/stores/attendance.store";
 import { exportToExcel } from "@/lib/excel";
 
@@ -64,35 +65,15 @@ export default function AbsensiRekapModal({ onClose }: AbsensiRekapModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-surface-container-lowest rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col border border-outline-variant/15">
-        <div className="p-5 sm:p-6 border-b border-outline-variant/10 flex items-center justify-between">
-          <h3 className="text-base sm:text-lg font-bold text-primary font-display flex items-center gap-2">
-            <Icon name="date_range" className="text-secondary" />
-            Rekap Rentang Tanggal
-          </h3>
-          <Button variant="icon" size="icon" onClick={onClose}>
-            <Icon name="close" size="sm" />
-          </Button>
-        </div>
-
-        <div className="p-5 sm:p-6 flex flex-col gap-4">
-          <div>
-            <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
-              Mulai Tanggal
-            </label>
-            <DatePicker value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
-              Sampai Tanggal
-            </label>
-            <DatePicker value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-          </div>
-        </div>
-
-        <div className="p-5 sm:p-6 border-t border-outline-variant/10 flex gap-2.5 justify-end bg-surface-container-low/40 mt-auto">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      size="sm"
+      title="Rekap Rentang Tanggal"
+      description="Ekspor ringkasan kehadiran anggota ke dokumen Excel"
+      headerIcon="date_range"
+      footer={
+        <>
           <Button variant="ghost" size="sm" onClick={onClose}>
             Batal
           </Button>
@@ -101,12 +82,27 @@ export default function AbsensiRekapModal({ onClose }: AbsensiRekapModalProps) {
             size="sm"
             onClick={handleExport}
             disabled={!startDate || !endDate}
+            startIcon={<Icon name="download" size="sm" />}
           >
-            <Icon name="download" size="sm" />
-            <span>Export Rekap Excel</span>
+            Export Rekap Excel
           </Button>
-        </div>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <DatePicker
+          label="Mulai Tanggal"
+          required
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+        <DatePicker
+          label="Sampai Tanggal"
+          required
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
       </div>
-    </div>
+    </Modal>
   );
 }

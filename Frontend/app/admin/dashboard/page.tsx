@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
       {/* Main Page Content */}
       <div className="p-4 sm:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[1440px] mx-auto">
           <OverviewDashboard />
         </div>
       </div>

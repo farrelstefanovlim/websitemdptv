@@ -1,101 +1,124 @@
-# MDPTV Scroll Down Website 🚀
+# MDPTV Monorepo Project 🚀
 
-Repositori ini berisi kode sumber lengkap untuk proyek **MDPTV Scroll Down Website** yang terbagi menjadi dua bagian utama: **Frontend** (berbasis Next.js) dan **Backend** (berbasis Bun + Express.js dengan arsitektur Domain-Driven Design).
+Repositori ini berisi proyek **MDPTV** yang terbagi menjadi dua aplikasi utama:
 
----
-
-## 🏛️ Gambaran Umum Arsitektur
-
-Proyek ini dibangun menggunakan struktur modular yang memisahkan urusan visual (tampilan) dan logika bisnis utama (data & API):
-
-*   **`/frontend`**: Aplikasi client-side interaktif modern berbasis **Next.js 16** dengan performa rendering super cepat menggunakan compiler **Turbopack**.
-*   **`/Backend`**: Server RESTful API berperforma tinggi yang didukung oleh **Bun** (runtime JS modern) dan **Express.js** menggunakan pola arsitektur **Domain-Driven Design (DDD)** yang bersih, modular, dan siap diskalakan.
+- **Frontend**: website publik dan admin panel berbasis **Next.js 16**
+- **Backend**: REST API berbasis **Bun + Express.js + Prisma + PostgreSQL**
 
 ---
 
-## 📚 Library & Teknologi yang Digunakan
-
-### 🖥️ Frontend (Next.js)
-Tampilan web dibuat interaktif, estetis, dan responsif dengan library berikut:
-*   **Next.js (v16.2.6)** & **React (v19)**: Framework React modern dengan performa tinggi.
-*   **Turbopack**: Compiler Next.js berbasis Rust yang mempercepat hot-reloading di lokal hingga di bawah 1 detik.
-*   **Framer Motion (v12.38.0)**: Library animasi modern untuk menghadirkan mikro-interaksi dan animasi scroll down yang premium.
-*   **Zustand (v5.0.13)**: Manajemen state global yang sangat ringan dan cepat.
-*   **Tailwind CSS (v4)**: Framework CSS utilitas terbaru untuk styling antarmuka modern yang cepat.
-*   **xlsx**: Library untuk mengekspor data tabel frontend langsung ke dokumen Excel.
-
-### 🗄️ Backend (Bun + Express.js DDD)
-Server API tangguh dengan performa tinggi, type-safety, dan arsitektur kokoh:
-*   **Express.js (v4.22.2)**: Framework minimalis dan andal untuk perutean HTTP API.
-*   **Zod (v3.25.76)**: Pustaka validasi skema data runtime dan tipe data TypeScript untuk request payload dan environment variables.
-*   **Bun Password Hashing (Native)**: Keamanan hashing bawaan runtime Bun (`Bun.password`) yang diimplementasikan secara native di level mesin untuk enkripsi sangat cepat dan aman tanpa dependensi eksternal.
-*   **Cors & Dotenv**: Integrasi keamanan lintas domain (CORS) dan pembaca variabel lingkungan `.env`.
-*   **TypeScript (v5.9.3)** & **Path Mapping Aliases**: Konfigurasi path khusus (`@domain/*`, `@application/*`, `@infrastructure/*`, `@presentation/*`) agar kode import terbebas dari path relatif `../../../../`.
-
----
-
-## 📂 Struktur Repositori
+## 🏗️ Struktur Workspace
 
 ```text
-/ (Root Workspace)
-├── frontend/                # Aplikasi Next.js (Visual & State Management)
-│   ├── app/                 # Next.js App Router (Halaman & Layout)
-│   ├── components/          # Komponen UI Reusable (Accordion, Navbar, Faq, dll)
-│   ├── hooks/               # Custom React Hooks
-│   ├── lib/                 # Utilitas frontend & client API
-│   ├── public/              # File aset statis (gambar, ikon, logo)
-│   └── stores/              # State management global (Zustand)
+websitemdptv-v2/
+├── Backend/                  # API server dan business logic
+│   ├── prisma/               # Schema Prisma, migrations, seed
+│   ├── src/                  # Application source code
+│   ├── .env.example          # Template env backend
+│   ├── package.json          # Script backend
+│   ├── README.md             # Dokumentasi backend
+│   └── tsconfig.json         # TypeScript config backend
 │
-└── Backend/                 # Aplikasi API Express + Bun (DDD Architecture)
-    ├── src/
-    │   ├── domain/          # Bisnis logika murni (Entities, Value Objects, Kontrak Repo)
-    │   ├── application/     # Kasus Penggunaan (Use Cases) & Data Transfer Objects (DTO)
-    │   ├── infrastructure/  # Detail teknis (Validasi Env, Hash concrete, InMemory DB)
-    │   └── presentation/    # HTTP Interface (Controllers, Routes, Error Middlewares)
-    └── README.md            # Panduan teknis khusus Backend
+├── Frontend/                 # Aplikasi Next.js
+│   ├── app/                  # Halaman dan layout app router
+│   ├── components/           # UI & feature components
+│   ├── lib/                  # Utility client, axios, image, pdf, excel
+│   ├── services/             # API clients per fitur
+│   ├── stores/               # Zustand stores
+│   ├── .env.example          # Template env frontend
+│   ├── package.json          # Script frontend
+│   ├── README.md             # Dokumentasi frontend
+│   └── tsconfig.json         # TypeScript config frontend
+│
+├── README.md                 # Dokumentasi monorepo utama
+└── .gitignore                # Konfigurasi git
 ```
 
 ---
 
-## 🚀 Cara Menjalankan Proyek di Lokal
+## ⚙️ Teknologi Utama
 
-Pastikan Anda sudah menginstal **Bun** di komputer Anda. Bun digunakan sebagai runtime utama di backend dan package manager di frontend demi kecepatan maksimal.
+### Frontend
 
-### 1. Jalankan Backend (API Server)
-Buka terminal baru di folder proyek utama Anda, lalu jalankan perintah berikut:
+- Next.js 16 App Router
+- React 19
+- Tailwind CSS v4
+- Framer Motion
+- Zustand
+- Axios
+- XLSX / jsPDF
+
+### Backend
+
+- Bun runtime
+- Express.js 4
+- TypeScript
+- Prisma ORM
+- PostgreSQL / Supabase
+- Redis
+- ImageKit
+- JWT + Cookie Authentication
+- Zod validation
+
+---
+
+## 🚀 Menjalankan Proyek di Lokal
+
+### 1. Backend
 
 ```bash
-# 1. Masuk ke direktori Backend
 cd Backend
-
-# 2. Salin file konfigurasi env lokal
 cp .env.example .env
-
-# 3. Jalankan server backend (Mode development dengan watch mode)
+bun install
 bun run dev
 ```
-*Server Backend akan aktif di: `http://localhost:5000` (Verifikasi di: `http://localhost:5000/api/health`)*
 
----
+Backend berjalan di:
 
-### 2. Jalankan Frontend (Web Client)
-Buka terminal baru yang berbeda, lalu jalankan perintah berikut:
+- `http://localhost:3005`
+- API prefix: `http://localhost:3005/api/v1`
+- Health check: `http://localhost:3005/api/v1/health`
+
+### 2. Frontend
 
 ```bash
-# 1. Masuk ke direktori frontend
-cd frontend
-
-# 2. Jalankan aplikasi frontend Next.js (dengan Turbopack)
-bun run dev
+cd Frontend
+cp .env.example .env.local
+npm install
+npm run dev
 ```
-*Aplikasi Frontend Anda akan aktif di: `http://localhost:3000`*
+
+Frontend berjalan di:
+
+- `http://localhost:3000`
 
 ---
 
-## 📡 Endpoint API Utama yang Tersedia (Bawaan)
+## 🧭 Dokumentasi Detail
 
-Untuk mempermudah pengujian awal Anda, backend telah dilengkapi dengan beberapa endpoint default:
+- [Backend/README.md](Backend/README.md) — panduan penuh backend, konfigurasi, modul API, dan arsitektur
+- [Frontend/README.md](Frontend/README.md) — panduan frontend, feature utama, dan arsitektur UI
+- [Backend/.env.example](Backend/.env.example) — template env backend
+- [Frontend/.env.example](Frontend/.env.example) — template env frontend
 
-*   **`GET /api/health`** — Memeriksa status kesehatan server backend dan versi Bun.
-*   **`POST /api/users/register`** — Mendaftarkan akun user baru (melakukan validasi email menggunakan *Value Object* domain dan melakukan hashing aman).
-*   **`GET /api/users`** — Mengambil seluruh daftar data user yang terdaftar di database in-memory.
+---
+
+## ✅ Catatan Penting
+
+- Port backend default adalah `3005` dan bukan `5000`.
+- Frontend mengakses backend melalui `NEXT_PUBLIC_API_URL`.
+- Untuk produksi, pastikan `CORS_ORIGIN` dan `NEXT_PUBLIC_API_URL` disesuaikan dengan domain yang benar.
+- Logo aplikasi sudah dikonfigurasi untuk mendukung format `PNG`.
+
+---
+
+## 🔗 Ringkasan Proyek
+
+Proyek ini menggabungkan:
+
+- Website publik MDPTV untuk calon anggota dan pengguna umum
+- Admin panel untuk pengelolaan organisasi
+- Sistem pendaftaran, wawancara, absensi, kas, kegiatan, galeri, dan konten CMS
+- API backend yang stabil dan terstruktur untuk kebutuhan operasional organisasi
+
+* **`GET /api/users`** — Mengambil seluruh daftar data user yang terdaftar di database in-memory.

@@ -3,8 +3,12 @@ import type { Member } from "@/components/feature/absensi/types/attendance.type"
 
 export interface CreateMemberDto {
   full_name: string;
+  npm?: string;
+  phone?: string;
+  email?: string;
   division_id?: string;
   angkatan: number;
+  tahun_masuk?: number;
   is_core?: boolean;
   is_active?: boolean;
 }
@@ -15,9 +19,13 @@ export const memberService = {
     return (res.data.data || []).map((u: any) => ({
       id: u.id,
       name: u.full_name,
+      npm: u.npm || "",
+      phone: u.phone || "",
+      email: u.email || "",
       division_id: u.division_id,
       division: u.division?.name || "",
       angkatan: u.angkatan,
+      tahun_masuk: u.tahun_masuk || u.angkatan || 2026,
       is_core: u.is_core ?? false,
       is_active: u.is_active,
     }));
