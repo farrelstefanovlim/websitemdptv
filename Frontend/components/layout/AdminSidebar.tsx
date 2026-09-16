@@ -82,7 +82,10 @@ export default function AdminSidebar({ isOpen, onClose, isCollapsed }: AdminSide
   })
 
   const toggleExpand = (menuId: string) => {
-    setExpandedMenus((prev) => ({ ...prev, [menuId]: !prev[menuId] }))
+    setExpandedMenus((prev) => ({
+      ...prev,
+      [menuId]: !(prev[menuId] ?? false),
+    }))
   }
 
   return (
@@ -126,7 +129,7 @@ export default function AdminSidebar({ isOpen, onClose, isCollapsed }: AdminSide
               {group.items.map((item) => {
                 const hasChildren = item.children && item.children.length > 0
                 const isParentActive = pathname.startsWith(item.href)
-                const isExpanded = expandedMenus[item.id] || isParentActive
+                const isExpanded = expandedMenus[item.id] ?? isParentActive
 
                 if (hasChildren && !isCollapsed) {
                   return (
