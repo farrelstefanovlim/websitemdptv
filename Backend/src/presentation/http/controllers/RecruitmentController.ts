@@ -119,19 +119,54 @@ export class RecruitmentController {
         }
 
         const existingMember = await prisma.member.findFirst({
-          where: { full_name: applicant.name, angkatan }
+          where: {
+            OR: [
+              { npm: applicant.nim },
+              { full_name: applicant.name }
+            ]
+          }
         });
 
         if (!existingMember) {
           await prisma.member.create({
             data: {
               full_name: applicant.name,
+              npm: applicant.nim,
+              email: applicant.email,
+              phone: applicant.phone,
               division_id: applicant.division_id,
               angkatan,
               is_core: false,
               is_active: true
             }
           });
+        } else {
+          await prisma.member.update({
+            where: { id: existingMember.id },
+            data: {
+              is_active: true,
+              division_id: applicant.division_id,
+              npm: applicant.nim,
+              email: applicant.email,
+              phone: applicant.phone,
+            }
+          });
+        }
+      } else {
+        // Jika status diubah kembali dari "accepted" ke "pending", "interview", atau "rejected"
+        // Hapus data member dan absensinya agar hilang dari Rekap Absensi & Data Anggota
+        const targetMembers = await prisma.member.findMany({
+          where: {
+            OR: [
+              { npm: applicant.nim },
+              { full_name: applicant.name }
+            ]
+          }
+        });
+
+        for (const m of targetMembers) {
+          await prisma.attendanceRecord.deleteMany({ where: { member_id: m.id } });
+          await prisma.member.delete({ where: { id: m.id } });
         }
       }
 

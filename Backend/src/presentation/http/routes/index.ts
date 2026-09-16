@@ -8,6 +8,10 @@ import { AttendanceController } from "../controllers/AttendanceController";
 import { UploadController } from "../controllers/UploadController";
 import { MemberController } from "../controllers/MemberController";
 import { DivisionController } from "../controllers/DivisionController";
+import { DashboardController } from "../controllers/DashboardController";
+import { KasController } from "../controllers/KasController";
+import { InterviewController } from "../controllers/InterviewController";
+import { FaqController } from "../controllers/FaqController";
 import { createUserRoutes } from "./userRoutes";
 import { createAuthRoutes } from "./authRoutes";
 import { createCmsRoutes } from "./cmsRoutes";
@@ -18,7 +22,9 @@ import { createUploadRoutes } from "./uploadRoutes";
 import { createMemberRoutes } from "./memberRoutes";
 import { createDivisionRoutes } from "./divisionRoutes";
 import { createDashboardRoutes } from "./dashboard.routes";
-import { DashboardController } from "../controllers/DashboardController";
+import { createKasRoutes } from "./kasRoutes";
+import { createInterviewRoutes } from "./interviewRoutes";
+import { createFaqRoutes } from "./faqRoutes";
 
 export interface AppControllers {
   dashboardController: DashboardController;
@@ -31,6 +37,9 @@ export interface AppControllers {
   uploadController: UploadController;
   memberController: MemberController;
   divisionController: DivisionController;
+  kasController: KasController;
+  interviewController: InterviewController;
+  faqController: FaqController;
 }
 
 export function createApiRouter(controllers: AppControllers): Router {
@@ -46,6 +55,10 @@ export function createApiRouter(controllers: AppControllers): Router {
   router.use("/divisions", createDivisionRoutes(controllers.divisionController));
   router.use("/members", createMemberRoutes(controllers.memberController));
   router.use("/dashboard", createDashboardRoutes(controllers.dashboardController));
+  router.use("/kas", createKasRoutes(controllers.kasController));
+  router.use("/wawancara", createInterviewRoutes(controllers.interviewController));
+  router.use("/faqs", createFaqRoutes(controllers.faqController));
+
 
   // Health Check
   router.get("/health", (_req, res) => {
@@ -58,3 +71,4 @@ export function createApiRouter(controllers: AppControllers): Router {
 
   return router;
 }
+

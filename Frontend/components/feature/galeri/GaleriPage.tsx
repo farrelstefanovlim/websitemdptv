@@ -75,11 +75,10 @@ export default function GaleriPage() {
             <span className="text-sm font-medium tracking-wide">Kembali</span>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
-              <Icon name="settings_input_component" size="sm" />
-            </div>
+            <img src="/logo-mdptv.png" alt="MDPTV Logo" className="h-8 sm:h-9 w-auto object-contain" />
             <span className="text-xl font-black tracking-tighter font-display text-primary">MDPTV</span>
           </div>
+
         </div>
       </header>
 

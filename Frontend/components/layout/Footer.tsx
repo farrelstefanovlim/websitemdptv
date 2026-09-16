@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import Icon from "@/components/ui/Icon";
 import Badge from "@/components/ui/Badge";
 import AnimateOnScroll, {
@@ -49,8 +50,15 @@ export default function Footer() {
             {/* Brand */}
             <div className="max-w-md">
               <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center text-white">
-                  <Icon name="settings_input_component" />
+                <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl p-1 bg-black/60 border border-white/10 flex items-center justify-center flex-shrink-0 shadow-md">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/logo-mdptv.png"
+                      alt="MDPTV Logo"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
                 </div>
                 <div className="text-3xl sm:text-4xl text-primary font-black tracking-tighter font-display">
                   MDPTV

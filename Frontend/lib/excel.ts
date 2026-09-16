@@ -84,10 +84,13 @@ export const MEMBERS_COLUMNS: Column[] = [
 ];
 
 export const ABSENSI_COLUMNS: Column[] = [
-  { key: "name", header: "Nama" },
-  { key: "division", header: "Divisi" },
-  { key: "date", header: "Tanggal" },
+  { key: "npm", header: "NPM" },
+  { key: "name", header: "Nama Anggota" },
+  { key: "phone", header: "No HP" },
+  { key: "email", header: "Email" },
   { key: "status", header: "Status" },
+  { key: "division", header: "Divisi" },
+  { key: "date", header: "Tanggal Absensi" },
 ];
 
 export const RECRUITMENT_COLUMNS: Column[] = [

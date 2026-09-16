@@ -3,6 +3,9 @@ export type AttendanceStatus = "present" | "absent" | "late" | "excused";
 export interface Member {
   id: string;
   name: string;
+  npm?: string;
+  phone?: string;
+  email?: string;
   division_id?: string;
   division: string;
   angkatan: number;

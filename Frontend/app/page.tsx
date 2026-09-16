@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useEffect } from "react";
+import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/feature/home/HeroSection";
@@ -50,28 +51,29 @@ export default function Page() {
       <div className="fixed inset-0 noise-bg z-[100] pointer-events-none" />
       <div className="fixed inset-0 grid-pattern z-0 opacity-40 pointer-events-none" />
 
-      {/* Loading Overlay */}
+      {/* Loading Overlay / Splash Screen */}
       {isFetchingAPI && (
-        <div className="fixed inset-0 z-[200] bg-background flex flex-col items-center justify-center transition-opacity duration-500">
+        <div className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center transition-opacity duration-500">
           <div className="flex flex-col items-center gap-6">
-            {/* Logo placeholder / icon */}
-            <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center animate-pulse">
-              <svg className="w-8 h-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
+            {/* Official MDPTV Logo */}
+            <div className="relative w-32 h-32 sm:w-40 sm:h-40 animate-pulse drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]">
+              <Image
+                src="/logo-mdptv.png"
+                alt="MDPTV Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
             
             {/* Loading text */}
             <div className="flex flex-col items-center gap-2">
-              <h2 className="text-xl font-bold tracking-widest uppercase text-primary animate-pulse">
-                MDPTV
-              </h2>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: "0ms" }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-white/70 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
-              <p className="text-xs text-on-surface-variant/50 uppercase tracking-widest font-medium mt-2">
+              <p className="text-xs text-white/50 uppercase tracking-widest font-medium mt-2">
                 Memuat Data API...
               </p>
             </div>

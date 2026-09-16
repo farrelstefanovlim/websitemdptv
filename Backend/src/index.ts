@@ -14,6 +14,9 @@ import { UploadController } from "@presentation/http/controllers/UploadControlle
 import { MemberController } from "@presentation/http/controllers/MemberController";
 import { DivisionController } from "@presentation/http/controllers/DivisionController";
 import { DashboardController } from "@presentation/http/controllers/DashboardController";
+import { KasController } from "@presentation/http/controllers/KasController";
+import { InterviewController } from "@presentation/http/controllers/InterviewController";
+import { FaqController } from "@presentation/http/controllers/FaqController";
 import { GetDashboardMetricsUseCase } from "@application/use-cases/GetDashboardMetricsUseCase";
 import { DivisionSyncService } from "@infrastructure/services/DivisionSyncService";
 
@@ -45,6 +48,9 @@ async function bootstrap() {
   const memberController = new MemberController();
   const divisionController = new DivisionController();
   const dashboardController = new DashboardController(getDashboardMetricsUseCase);
+  const kasController = new KasController();
+  const interviewController = new InterviewController();
+  const faqController = new FaqController();
 
   // 5. Inisialisasi Express App dengan Controllers
   const app = createExpressApp({
@@ -58,7 +64,11 @@ async function bootstrap() {
     memberController,
     divisionController,
     dashboardController,
+    kasController,
+    interviewController,
+    faqController,
   });
+
 
   // 6. Jalankan Server
   app.listen(env.PORT, () => {
