@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Icon from "@/components/ui/Icon";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 
@@ -24,13 +25,13 @@ const DIVISIONS = [
     description: "Media sosial, publikasi digital, IT",
   },
   {
-    value: "Pengelola Sumber Daya Manusia",
+    value: "Pengelola Sumber Daya Manusia", 
     icon: "badge",
     color: "bg-amber-500/10 border-amber-500/20 text-amber-600",
     description: "Pengembangan bakat, kaderisasi, manajemen anggota",
   },
   {
-    value: "Hubungan Masyarakat",
+    value: "Hubungan Masyarakat", 
     icon: "campaign",
     color: "bg-cyan-500/10 border-cyan-500/20 text-cyan-600",
     description: "Kemitraan, media partner, sponsorship & relasi publik",
@@ -40,9 +41,27 @@ const DIVISIONS = [
 interface Props {
   selectedDivision: string;
   set: (field: string, value: string) => void;
+  onEnter?: () => void;
 }
 
-export default function StepPilihDivisi({ selectedDivision, set }: Props) {
+export default function StepPilihDivisi({ selectedDivision, set, onEnter }: Props) {
+
+useEffect(() => {
+    const handleGlobalEnter = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        // Mencegah fungsi bentrok jika user sedang memilih divisi menggunakan tombol 'Tab' di keyboard
+        const target = e.target as HTMLElement;
+        if (target.tagName === "BUTTON" || target.getAttribute("role") === "button") return;
+        
+        e.preventDefault();
+        if (onEnter) onEnter();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalEnter);
+    return () => window.removeEventListener("keydown", handleGlobalEnter);
+  }, [onEnter]);
+
   return (
     <AnimateOnScroll variant="fadeUp">
       <div className="mb-6">

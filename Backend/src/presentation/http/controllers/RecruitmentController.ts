@@ -46,8 +46,12 @@ export class RecruitmentController {
       });
 
       res.status(201).json({ status: "success", message: "Pendaftaran berhasil dikumpulkan." });
-    } catch (error) {
-      next(error);
+    } catch (error:any) {
+      if (error.code === "P2002") {
+    res.status(409).json({ status: "error", message: "NIM atau Email sudah terdaftar." });
+    return;
+  }
+  throw error;
     }
   };
 

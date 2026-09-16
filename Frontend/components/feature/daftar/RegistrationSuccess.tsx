@@ -7,7 +7,7 @@ import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import { useRecruitmentStore } from "@/stores/recruitment.store";
 
 export default function RegistrationSuccess() {
-  const { groupLink, fetchGroupLink } = useRecruitmentStore();
+  const { groupLink, fetchGroupLink, setHasRegistered } = useRecruitmentStore();
 
   useEffect(() => {
     fetchGroupLink();
@@ -38,6 +38,14 @@ export default function RegistrationSuccess() {
               </a>
             </div>
           )}
+           {/* TAMBAHAN BARU — tombol untuk kembali isi form */}
+          <button
+            onClick={() => setHasRegistered(false)}
+            className="block w-full text-center text-xs text-on-surface-variant/50 underline mb-4 hover:text-on-surface-variant/80 transition-colors"
+          >
+            Salah isi data? Klik di sini untuk mendaftar ulang
+          </button>
+
           <a href="/"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-secondary text-white text-sm font-bold hover:brightness-110 transition-all">
             <Icon name="arrow_back" size="sm" /> Kembali ke Beranda

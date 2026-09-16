@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import Alert from "@/components/ui/Alert";
 
@@ -12,12 +13,22 @@ interface Props {
 }
 
 export default function StepDataDiri({ form, set, inputCls, onEnter }: Props) {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && onEnter) {
-      e.preventDefault();
-      onEnter();
-    }
-  };
+  // [PERBAIKAN]: Menambahkan deteksi tombol Enter global agar berfungsi meski input tidak sedang diklik
+  useEffect(() => {
+    const handleGlobalEnter = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const target = e.target as HTMLElement;
+        // Hindari klik ganda jika user sedang menyeleksi tombol menggunakan keyboard
+        if (target.tagName === "BUTTON" || target.getAttribute("role") === "button") return;
+        
+        e.preventDefault();
+        if (onEnter) onEnter();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalEnter);
+    return () => window.removeEventListener("keydown", handleGlobalEnter);
+  }, [onEnter]);
 
   return (
     <AnimateOnScroll variant="fadeUp">
@@ -33,20 +44,20 @@ export default function StepDataDiri({ form, set, inputCls, onEnter }: Props) {
       <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Nama Lengkap *</label>
-          <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Masukkan nama lengkap" onKeyDown={handleKeyDown} />
+          <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Masukkan nama lengkap" autoComplete="name"/>
         </div>
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">NIM *</label>
-          <input type="text" value={form.nim} onChange={(e) => set("nim", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" onKeyDown={handleKeyDown} />
+          <input type="text" value={form.nim} onChange={(e) => set("nim", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" autoComplete="off"/>
         </div>
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">Email Kampus *</label>
           {/* [PERBAIKAN]: Placeholder diubah untuk menegaskan aturan email kampus */}
-          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} placeholder="nama@mhs.mdp.ac.id" onKeyDown={handleKeyDown} />
+          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} placeholder="nama@mhs.mdp.ac.id" autoComplete="email"/>
         </div>
         <div>
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">No. WhatsApp *</label>
-          <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} placeholder="08xxxxxxxxxx" onKeyDown={handleKeyDown} />
+          <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} placeholder="08xxxxxxxxxx" autoComplete="tel"/>
         </div>
       </div>
     </AnimateOnScroll>

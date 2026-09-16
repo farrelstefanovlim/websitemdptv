@@ -16,9 +16,8 @@ import StepPilihDivisi from "./form/StepPilihDivisi";
 import StepMotivasi from "./form/StepMotivasi";
 
 export default function DaftarPage() {
-  const { addApplicant, registrationOpen, hasRegistered } = useRecruitmentStore();
+  const { addApplicant, registrationOpen, hasRegistered, isLoading, error: storeError } = useRecruitmentStore();
   const [step, setStep] = useState<Step>(1);
-  const [submitted, setSubmitted] = useState(false);
   const [errorMSG, setErrorMSG] = useState<string | null>(null);
 
   const [form, setForm] = useState({
@@ -37,7 +36,8 @@ export default function DaftarPage() {
     if (step === 1) {
       if (!form.name.trim()) return setErrorMSG("Nama Lengkap harus diisi!");
       if (!form.nim.trim() || !/^\d+$/.test(form.nim)) return setErrorMSG("NIM harus diisi dengan angka yang valid!");
-      if (!form.email.trim() || !/^[^\s@]+@[^\s@]+@mhs\.mdp\.ac\.id$/.test(form.email)) return setErrorMSG("Gunakan email kampus yang valid!");
+      const emailBersih = form.email.trim().toLowerCase();
+      if (!emailBersih || !/^[^\s@]+@mhs\.mdp\.ac\.id$/.test(emailBersih)) return setErrorMSG("Gunakan email kampus yang valid!");
       if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone)) return setErrorMSG("Nomor WhatsApp harus diisi dengan angka (minimal 10 digit)!");
       setStep(2);
     } else if (step === 2) {
@@ -47,29 +47,24 @@ export default function DaftarPage() {
   };
 
   const attemptSubmit = async () => {
+    if (isLoading) return; // PENGAMAN TERAKHIR: cegah trigger ganda dari sumber manapun (klik + Enter berbarengan, dsb)
     setErrorMSG(null);
     if (form.motivation.trim().length < 10) return setErrorMSG("Motivasi harus diisi minimal 10 karakter!");
-    const success = await addApplicant(form);
-    if (success) {
-      setSubmitted(true);
-    }
+    await addApplicant(form);
   };
 
   const inputCls = "w-full px-4 py-3 rounded-2xl border border-outline-variant/20 bg-white text-sm text-primary focus:outline-none focus:border-secondary/50 focus:ring-3 focus:ring-secondary/10 transition-all placeholder:text-on-surface-variant/30";
 
   if (hasRegistered) return <RegistrationSuccess />;
-
-  /* Registration closed */
   if (!registrationOpen) return <RegistrationClosed />;
 
-  if (submitted) return <RegistrationSuccess />;
+  const displayError = errorMSG || (step === 3 ? storeError : null);
 
   return (
     <div className="min-h-screen bg-background relative">
       <div className="fixed inset-0 noise-bg z-[1]" />
       <div className="fixed inset-0 grid-pattern z-0 opacity-30" />
 
-      {/* Header */}
       <header className="relative z-10 pt-8 pb-4 px-4">
         <div className="max-w-lg mx-auto">
           <a href="/" className="inline-flex items-center gap-2 text-sm text-on-surface-variant/50 hover:text-primary transition-colors mb-6">
@@ -87,7 +82,6 @@ export default function DaftarPage() {
         </div>
       </header>
 
-      {/* Progress Steps */}
       <div className="relative z-10 px-4 pb-6">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center gap-2">
@@ -110,44 +104,55 @@ export default function DaftarPage() {
         </div>
       </div>
 
-      {/* Form */}
       <main className="relative z-10 px-4 pb-12">
         <div className="max-w-lg mx-auto">
-          <div className="bg-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 border border-outline-variant/15 shadow-xl">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              attemptSubmit();
+            }}
+            className="bg-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 border border-outline-variant/15 shadow-xl">
 
-            {/* Steps Rendering */}
-            {errorMSG && (
+            {displayError && (
               <Alert variant="error" className="mb-6">
-                {errorMSG}
+                {displayError}
               </Alert>
             )}
             {step === 1 && <StepDataDiri form={form} set={set} inputCls={inputCls} onEnter={handleNext} />}
-            {step === 2 && <StepPilihDivisi selectedDivision={form.division} set={set} />}
+            {step === 2 && <StepPilihDivisi selectedDivision={form.division} set={set} onEnter={handleNext} />}
             {step === 3 && <StepMotivasi form={form} set={set} inputCls={inputCls} onEnter={attemptSubmit} />}
 
-            {/* Navigation */}
             <div className="flex gap-3 mt-8">
               {step > 1 && (
-                <Button variant="outline" size="none" onClick={() => { setErrorMSG(null); setStep((s) => (s - 1) as Step); }}
+                <Button
+                  type="button"
+                  variant="outline" size="none"
+                  onClick={() => { setErrorMSG(null); setStep((s) => (s - 1) as Step); }}
                   className="flex-1 py-3.5 rounded-2xl text-sm justify-center">
                   Kembali
                 </Button>
               )}
               {step < 3 ? (
-                <Button variant="secondary" size="none" onClick={handleNext}
+                <Button
+                  type="button"
+                  variant="secondary" size="none"
+                  onClick={handleNext}
                   className="flex-1 py-3.5 rounded-2xl text-sm justify-center">
                   Selanjutnya
                 </Button>
               ) : (
-                <Button variant="secondary" size="none" onClick={attemptSubmit}
+                <Button
+                  type="submit"
+                  variant="secondary" size="none"
+                  disabled={isLoading}
                   className="flex-1 py-3.5 rounded-2xl text-sm justify-center">
-                  <Icon name="send" size="sm" /> Kirim Pendaftaran
+                  <Icon name="send" size="sm" />
+                  {isLoading ? "Mengirim..." : "Kirim Pendaftaran"}
                 </Button>
               )}
             </div>
-          </div>
+          </form>
 
-          {/* Footer note */}
           <p className="text-center text-[10px] text-on-surface-variant/30 mt-6 px-4">
             Dengan mendaftar, kamu menyetujui bahwa data yang diberikan adalah benar dan bersedia mengikuti proses seleksi MDPTV.
           </p>

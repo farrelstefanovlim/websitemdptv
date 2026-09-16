@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 
 interface Props {
@@ -10,6 +11,29 @@ interface Props {
 }
 
 export default function StepMotivasi({ form, set, inputCls, onEnter }: Props) {
+
+// [PERBAIKAN FINAL]: Menambahkan sensor tombol Enter global yang cerdas
+  useEffect(() => {
+    const handleGlobalEnter = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const target = e.target as HTMLElement;
+
+        // 1. Hindari error jika user mengklik tombol "Kembali / Kirim" menggunakan keyboard
+        if (target.tagName === "BUTTON" || target.getAttribute("role") === "button") return;
+
+        // 2. Jika user sedang mengetik di dalam textarea dan menekan Shift+Enter, biarkan (untuk bikin baris baru)
+        if (target.tagName === "TEXTAREA" && e.shiftKey) return;
+
+        // 3. Selain itu (tekan Enter biasa, baik di dalam maupun di luar kotak), langsung Submit!
+        e.preventDefault();
+        if (onEnter) onEnter();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalEnter);
+    return () => window.removeEventListener("keydown", handleGlobalEnter);
+  }, [onEnter]);
+
   return (
     <AnimateOnScroll variant="fadeUp">
       <div className="mb-6">
@@ -26,8 +50,8 @@ export default function StepMotivasi({ form, set, inputCls, onEnter }: Props) {
             className={`${inputCls} resize-none`}
             placeholder="Ceritakan pengalaman, skill, atau alasan kamu ingin bergabung dengan MDPTV... (minimal 10 karakter)" 
             onKeyDown={(e) => {
-              // [PERBAIKAN]: Menggunakan Ctrl + Enter agar user tetap bisa membuat baris baru (Enter biasa)
-              if (e.key === "Enter" && e.ctrlKey && onEnter) {
+              // [PERBAIKAN]: Enter biasa untuk Submit, Shift + Enter untuk bikin baris baru
+              if (e.key === "Enter" && !e.shiftKey && onEnter) {
                 e.preventDefault();
                 onEnter();
               }
@@ -37,7 +61,7 @@ export default function StepMotivasi({ form, set, inputCls, onEnter }: Props) {
             <span className={`text-[10px] ${form.motivation.length >= 10 ? "text-green-500" : "text-on-surface-variant/30"}`}>
               {form.motivation.length >= 10 ? "✓ Cukup" : `Minimal 10 karakter`}
             </span>
-            <span className="text-[10px] text-on-surface-variant/30">{form.motivation.length} karakter (Gunakan Ctrl+Enter untuk submit)</span>
+            <span className="text-[10px] text-on-surface-variant/30">{form.motivation.length} karakter (Tekan Enter untuk kirim, Shift+Enter untuk baris baru)</span>
           </div>
         </div>
 
