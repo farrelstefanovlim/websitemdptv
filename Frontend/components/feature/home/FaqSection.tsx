@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Container from "@/components/layout/Container";
@@ -8,16 +8,38 @@ import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import Icon from "@/components/ui/Icon";
 import { useSectionContentStore, DEFAULTS } from "@/stores/sectionContent.store";
 import { useHydrated } from "@/hooks/useHydrated";
+import { faqService, FaqItem } from "@/services/faq.service";
 
 export default function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [dbFaqs, setDbFaqs] = useState<FaqItem[]>([]);
   const faqStore = useSectionContentStore((s) => s.faq);
   const hydrated = useHydrated();
   const f = hydrated ? faqStore : DEFAULTS.faq;
 
+  useEffect(() => {
+    async function loadActiveFaqs() {
+      try {
+        const res = await faqService.getAll();
+        if (res.success && res.data) {
+          const activeOnly = res.data.filter((item) => item.is_active !== false);
+          setDbFaqs(activeOnly);
+        }
+      } catch (err) {
+        console.error("Gagal memuat FAQ di landing page:", err);
+      }
+    }
+    loadActiveFaqs();
+  }, []);
+
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  const displayItems =
+    dbFaqs.length > 0
+      ? dbFaqs.map((item) => ({ question: item.question, answer: item.answer }))
+      : f.items;
 
   return (
     <section className="py-20 sm:py-28 md:py-[160px] relative" id="faq">
@@ -47,14 +69,10 @@ export default function FaqSection() {
 
         {/* FAQ Items */}
         <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-          {f.items.map((item, index) => {
+          {displayItems.map((item, index) => {
             const isOpen = openIndex === index;
             return (
-              <AnimateOnScroll
-                key={index}
-                variant="fadeUp"
-                delay={index * 0.08}
-              >
+              <AnimateOnScroll key={index} variant="fadeUp" delay={index * 0.08}>
                 <div
                   className={`
                     rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-500
@@ -76,7 +94,12 @@ export default function FaqSection() {
                   <div
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(index); } }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggle(index);
+                      }
+                    }}
                     className="w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left cursor-pointer gap-4 select-none outline-none focus-visible:bg-secondary/5 focus-visible:ring-2 focus-visible:ring-secondary/50"
                     onClick={() => toggle(index)}
                     aria-expanded={isOpen}
@@ -141,7 +164,7 @@ export default function FaqSection() {
                         <div className="px-5 sm:px-6 md:px-8 pb-5 sm:pb-6 md:pb-8">
                           <div className="pl-11 sm:pl-14">
                             <div className="h-px bg-gradient-to-r from-secondary/15 via-outline-variant/10 to-transparent mb-4 sm:mb-5" />
-                            <p className="text-sm sm:text-base text-on-surface-variant/75 leading-relaxed">
+                            <p className="text-sm sm:text-base text-on-surface-variant/75 leading-relaxed whitespace-pre-line">
                               {item.answer}
                             </p>
                           </div>

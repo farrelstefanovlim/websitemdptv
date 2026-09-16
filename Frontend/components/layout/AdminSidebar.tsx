@@ -1,12 +1,24 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Icon from "@/components/ui/Icon";
 import { usePathname } from "next/navigation";
+
+interface SubNavItem {
+  id: string;
+  label: string;
+  icon: string;
+  href: string;
+}
 
 interface NavItem {
   id: string;
   label: string;
   icon: string;
   href: string;
+  children?: SubNavItem[];
 }
 
 interface NavCategory {
@@ -26,6 +38,18 @@ const navCategories: NavCategory[] = [
     items: [
       { id: "members", label: "Data Anggota", icon: "badge", href: "/admin/members" },
       { id: "absensi", label: "Rekap Absensi", icon: "checklist", href: "/admin/absensi" },
+      { id: "kas", label: "Uang Kas", icon: "payments", href: "/admin/kas" },
+      {
+        id: "wawancara",
+        label: "Wawancara",
+        icon: "quiz",
+        href: "/admin/wawancara",
+        children: [
+          { id: "wawancara-pertanyaan", label: "Pertanyaan", icon: "help_outline", href: "/admin/wawancara/pertanyaan" },
+          { id: "wawancara-jawaban", label: "Form Jawaban", icon: "edit_note", href: "/admin/wawancara/jawaban" },
+          { id: "wawancara-log", label: "Log Dokumentasi", icon: "folder_shared", href: "/admin/wawancara/log" },
+        ],
+      },
       { id: "penerimaan", label: "Penerimaan", icon: "person_add", href: "/admin/penerimaan" },
       { id: "kegiatan", label: "Kegiatan & Event", icon: "event", href: "/admin/kegiatan" },
     ],
@@ -41,12 +65,12 @@ const navCategories: NavCategory[] = [
   {
     category: "Sistem & Akses",
     items: [
+      { id: "faq", label: "FAQ", icon: "live_help", href: "/admin/faq" },
       { id: "users", label: "Manajemen User", icon: "manage_accounts", href: "/admin/users" },
     ],
   },
 ];
 
-const allNavItems = navCategories.flatMap((cat) => cat.items);
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -61,10 +85,15 @@ export default function AdminSidebar({
   isCollapsed,
 }: AdminSidebarProps) {
   const pathname = usePathname();
-  const activeNav =
-    allNavItems.find(
-      (item) => pathname.startsWith(item.href) && item.href !== "#"
-    )?.id || "dashboard";
+
+  // State untuk melacak menu mana yang terbuka (expanded)
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    wawancara: pathname.startsWith("/admin/wawancara"),
+  });
+
+  const toggleExpand = (menuId: string) => {
+    setExpandedMenus((prev) => ({ ...prev, [menuId]: !prev[menuId] }));
+  };
 
   return (
     <>
@@ -86,15 +115,22 @@ export default function AdminSidebar({
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Continuous Logo Header (Exactly h-16 to unite with Navbar) */}
+        {/* Continuous Logo Header */}
         <div
           className={`h-16 px-4 border-b border-outline-variant/15 flex items-center transition-all shrink-0 ${
             isCollapsed ? "justify-center" : "justify-between"
           }`}
         >
           <Link href="/admin/dashboard" className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0 shadow-sm shadow-secondary/20">
-              <Icon name="tv" filled className="text-white" />
+            <div className="relative w-10 h-10 rounded-xl p-1 bg-black/60 border border-white/10 flex items-center justify-center shrink-0 shadow-sm shadow-secondary/20">
+              <div className="relative w-full h-full">
+                <Image
+                  src="/logo-mdptv.png"
+                  alt="MDPTV Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
             </div>
             {!isCollapsed && (
               <div className="min-w-0">
@@ -130,11 +166,83 @@ export default function AdminSidebar({
 
               {/* Items in this Category */}
               {group.items.map((item) => {
-                const isActive = activeNav === item.id;
+                const hasChildren = item.children && item.children.length > 0;
+                const isParentActive = pathname.startsWith(item.href);
+                const isExpanded = expandedMenus[item.id] || isParentActive;
+
+                if (hasChildren && !isCollapsed) {
+                  return (
+                    <div key={item.id} className="w-full flex flex-col gap-1">
+                      {/* Parent Item with Dropdown Toggle */}
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(item.id)}
+                        className={`
+                          w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200
+                          ${
+                            isParentActive
+                              ? "bg-secondary/10 text-secondary"
+                              : "text-on-surface-variant hover:bg-surface-container-low hover:text-primary"
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Icon
+                            name={item.icon}
+                            filled={isParentActive}
+                            size="sm"
+                            className={isParentActive ? "text-secondary" : "text-on-surface-variant/70"}
+                          />
+                          <span className="truncate">{item.label}</span>
+                        </div>
+                        <Icon
+                          name={isExpanded ? "expand_less" : "expand_more"}
+                          size="sm"
+                          className="text-on-surface-variant/50"
+                        />
+                      </button>
+
+                      {/* Dropdown Children */}
+                      {isExpanded && (
+                        <div className="ml-4 pl-3 border-l-2 border-outline-variant/15 flex flex-col gap-1 my-0.5">
+                          {item.children?.map((child) => {
+                            const isChildActive = pathname === child.href;
+                            return (
+                              <Link
+                                key={child.id}
+                                href={child.href}
+                                onClick={onClose}
+                                className={`
+                                  flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200
+                                  ${
+                                    isChildActive
+                                      ? "bg-secondary text-white shadow-sm shadow-secondary/30"
+                                      : "text-on-surface-variant/80 hover:bg-surface-container-low hover:text-primary"
+                                  }
+                                `}
+                              >
+                                <Icon
+                                  name={child.icon}
+                                  size="sm"
+                                  className={isChildActive ? "text-white" : "text-on-surface-variant/60"}
+                                />
+                                <span className="truncate">{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                // Normal single item
+                const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/admin/dashboard");
+
                 return (
                   <Link
                     key={item.id}
-                    href={item.href}
+                    href={hasChildren ? item.children![0].href : item.href}
                     onClick={onClose}
                     title={isCollapsed ? item.label : undefined}
                     className={`
@@ -155,13 +263,9 @@ export default function AdminSidebar({
                       name={item.icon}
                       filled={isActive}
                       size="sm"
-                      className={
-                        isActive ? "text-white" : "text-on-surface-variant/70"
-                      }
+                      className={isActive ? "text-white" : "text-on-surface-variant/70"}
                     />
-                    {!isCollapsed && (
-                      <span className="truncate">{item.label}</span>
-                    )}
+                    {!isCollapsed && <span className="truncate">{item.label}</span>}
                   </Link>
                 );
               })}

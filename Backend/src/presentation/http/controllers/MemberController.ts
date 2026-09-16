@@ -4,6 +4,9 @@ import { z } from "zod";
 
 const memberSchema = z.object({
   full_name: z.string().min(2, "Nama wajib diisi"),
+  npm: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
   division_id: z.string().uuid("Divisi tidak valid").optional().nullable(),
   angkatan: z.number().int().min(2000, "Angkatan tidak valid"),
   is_core: z.boolean().optional(),
@@ -34,6 +37,9 @@ export class MemberController {
       const newMember = await prisma.member.create({
         data: {
           full_name: parsed.full_name,
+          npm: parsed.npm || null,
+          phone: parsed.phone || null,
+          email: parsed.email || null,
           division_id: parsed.division_id || null,
           angkatan: parsed.angkatan,
           is_core: parsed.is_core ?? false,

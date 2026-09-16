@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Icon from "@/components/ui/Icon";
@@ -87,14 +88,22 @@ export default function Navbar() {
         `}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-500 ${isScrolled ? "bg-primary text-white" : "bg-white/15 text-white"}`}>
-            <Icon name="settings_input_component" size="sm" />
+        <Link href="#home" className="flex items-center gap-3 group">
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl p-1 bg-black/60 border border-white/10 flex items-center justify-center flex-shrink-0 shadow-md transition-transform duration-300 group-hover:scale-105">
+            <div className="relative w-full h-full">
+              <Image
+                src="/logo-mdptv.png"
+                alt="MDPTV Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </div>
-          <div className={`text-xl sm:text-2xl font-black tracking-tighter font-display transition-colors duration-500 ${isScrolled ? "text-primary" : "text-white"}`}>
+          <span className={`text-xl sm:text-2xl font-black tracking-tighter font-display transition-colors duration-500 ${isScrolled ? "text-primary" : "text-white"}`}>
             MDPTV
-          </div>
-        </div>
+          </span>
+        </Link>
 
         {/* Navigation Links — Desktop */}
         <nav className="hidden md:flex items-center gap-8 lg:gap-10">

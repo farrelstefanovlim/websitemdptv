@@ -5,7 +5,11 @@ import type { Member, AttendanceRecord, AttendanceStatus } from "@/components/fe
 const mapMember = (u: any): Member => ({
   id: u.id,
   name: u.full_name || u.fullName || u.username,
-  division: u.division?.name || "",
+  npm: u.npm || "-",
+  phone: u.phone || "-",
+  email: u.email || "-",
+  division_id: u.division_id,
+  division: u.division?.name || "Umum",
   angkatan: u.angkatan || 2024,
 });
 

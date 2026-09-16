@@ -35,11 +35,26 @@ export default function AbsensiPage() {
   }, [fetchMembers, fetchRecords]);
 
   const handleExport = () => {
+    const statusMap: Record<string, string> = {
+      present: "Hadir",
+      late: "Terlambat",
+      excused: "Izin",
+      absent: "Absen",
+    };
+
     const exportData = members.map((m) => {
       const record = records.find((r) => r.memberId === m.id && r.date === selectedDate);
-      return { name: m.name, division: m.division, date: selectedDate, status: record?.status || "belum" };
+      return {
+        npm: m.npm || "-",
+        name: m.name,
+        phone: m.phone || "-",
+        email: m.email || "-",
+        status: statusMap[record?.status || ""] || "Belum Absen",
+        division: m.division || "Umum",
+        date: selectedDate,
+      };
     });
-    exportToExcel(exportData, ABSENSI_COLUMNS, `absensi_${selectedDate}`);
+    exportToExcel(exportData, ABSENSI_COLUMNS, `absensi_mdptv_${selectedDate}`, "Absensi Harian");
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {

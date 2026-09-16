@@ -30,7 +30,10 @@ export default function AbsensiRekapModal({ onClose }: AbsensiRekapModalProps) {
       const excused = memberRecords.filter((r) => r.status === "excused").length;
       const absent = memberRecords.filter((r) => r.status === "absent").length;
       return {
+        npm: m.npm || "-",
         nama: m.name,
+        phone: m.phone || "-",
+        email: m.email || "-",
         divisi: m.division || "Umum",
         hadir: present,
         terlambat: late,
@@ -40,7 +43,10 @@ export default function AbsensiRekapModal({ onClose }: AbsensiRekapModalProps) {
     });
 
     const cols = [
-      { key: "nama", header: "Nama Lengkap" },
+      { key: "npm", header: "NPM" },
+      { key: "nama", header: "Nama Anggota" },
+      { key: "phone", header: "No HP" },
+      { key: "email", header: "Email" },
       { key: "divisi", header: "Divisi" },
       { key: "hadir", header: "Hadir" },
       { key: "terlambat", header: "Terlambat" },
