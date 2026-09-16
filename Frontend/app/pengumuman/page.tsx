@@ -62,7 +62,7 @@ export default function PengumumanPage() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       list = list.filter(
-        (a) => a.name.toLowerCase().includes(q) || a.nim.toLowerCase().includes(q)
+        (a) => a.name.toLowerCase().includes(q) || a.npm.toLowerCase().includes(q)
       );
     }
     return list;
@@ -83,7 +83,7 @@ export default function PengumumanPage() {
     if (!searchQuery.trim() || searchQuery.trim().length < 3) return null;
     const q = searchQuery.toLowerCase().trim();
     return allAccepted.find(
-      (a) => a.name.toLowerCase().includes(q) || a.nim.toLowerCase().includes(q)
+      (a) => a.name.toLowerCase().includes(q) || a.npm.toLowerCase().includes(q)
     );
   }, [allAccepted, searchQuery]);
 
@@ -235,7 +235,7 @@ export default function PengumumanPage() {
                         </div>
                       </div>
                       <span className="font-mono text-emerald-700 font-bold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-[11px] shrink-0">
-                        {searchMatch.nim}
+                        {searchMatch.npm}
                       </span>
                     </motion.div>
                   )}
@@ -320,11 +320,6 @@ export default function PengumumanPage() {
                         {/* List of Accepted Members */}
                         <div className="divide-y divide-outline-variant/10">
                           {apps.map((app, appIdx) => (
-<<<<<<< HEAD
-                            <div key={appIdx} className="px-6 py-4 flex items-center justify-between gap-4 hover:bg-surface-container-lowest transition-colors">
-                              <span className="font-bold text-primary truncate sm:text-lg">{app.name}</span>
-                              <span className="font-mono text-secondary tracking-widest text-sm bg-secondary/10 px-3 py-1 rounded-lg shrink-0">{app.npm}</span>
-=======
                             <div
                               key={appIdx}
                               className="px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4 hover:bg-surface-container-low/40 transition-colors"
@@ -338,9 +333,8 @@ export default function PengumumanPage() {
                                 </span>
                               </div>
                               <span className="font-mono text-xs font-bold text-secondary bg-secondary/10 px-2.5 py-1 rounded-lg border border-secondary/15 shrink-0 tracking-wider">
-                                {app.nim}
+                                {app.npm}
                               </span>
->>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
                             </div>
                           ))}
                         </div>

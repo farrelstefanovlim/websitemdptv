@@ -7,7 +7,7 @@ import Icon from "@/components/ui/Icon";
 interface Props {
   form: {
     name: string;
-    nim: string;
+    npm: string;
     email: string;
     phone: string;
   };
@@ -49,18 +49,12 @@ export default function StepDataDiri({ form, set, onEnter }: Props) {
         </p>
       </div>
 
-<<<<<<< HEAD
-      <Alert variant="info" className="mb-6 text-left">
-        Penting: Pastikan <strong>Nama Lengkap</strong> dan <strong>NPM</strong> yang diinput sesuai dengan Kartu Tanda Mahasiswa (KTM) yang terdaftar.
-      </Alert>
-=======
       <div className="p-3.5 sm:p-4 rounded-2xl bg-secondary/5 border border-secondary/15 flex items-start gap-3 mb-6">
         <Icon name="info" className="text-secondary shrink-0 mt-0.5" size="sm" filled />
         <p className="text-xs text-on-surface-variant/80 leading-relaxed">
-          Pastikan <strong>Nama Lengkap</strong>, <strong>NIM</strong>, dan <strong>Email Kampus</strong> yang digunakan adalah milik pribadi yang aktif untuk proses verifikasi.
+          Pastikan <strong>Nama Lengkap</strong>, <strong>NPM</strong>, dan <strong>Email Kampus</strong> yang digunakan adalah milik pribadi yang aktif untuk proses verifikasi.
         </p>
       </div>
->>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
 
       <div className="grid sm:grid-cols-2 gap-4">
         {/* Nama Lengkap */}
@@ -85,14 +79,10 @@ export default function StepDataDiri({ form, set, onEnter }: Props) {
           </div>
         </div>
 
-        {/* NIM */}
+        {/* NPM */}
         <div>
-<<<<<<< HEAD
-          <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">NPM *</label>
-          <input type="text" value={form.npm} onChange={(e) => set("npm", e.target.value)} className={inputCls} placeholder="Contoh: 2024001" autoComplete="off"/>
-=======
           <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
-            NIM Mahasiswa *
+            NPM Mahasiswa *
           </label>
           <div className="relative">
             <Icon
@@ -102,14 +92,13 @@ export default function StepDataDiri({ form, set, onEnter }: Props) {
             />
             <input
               type="text"
-              value={form.nim}
-              onChange={(e) => set("nim", e.target.value)}
+              value={form.npm}
+              onChange={(e) => set("npm", e.target.value)}
               className={fieldWrapperCls}
               placeholder="Contoh: 2428240153"
               autoComplete="off"
             />
           </div>
->>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
         </div>
 
         {/* Email Kampus */}
@@ -128,7 +117,7 @@ export default function StepDataDiri({ form, set, onEnter }: Props) {
               value={form.email}
               onChange={(e) => set("email", e.target.value)}
               className={fieldWrapperCls}
-              placeholder="nama_nim@mhs.mdp.ac.id"
+              placeholder="nama_npm@mhs.mdp.ac.id"
               autoComplete="email"
             />
           </div>

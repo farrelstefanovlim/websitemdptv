@@ -63,15 +63,9 @@ export default function ApplicantCard({ applicant }: { applicant: Applicant }) {
                 {applicant.name}
               </span>
             </div>
-<<<<<<< HEAD
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[9px] sm:text-[10px] text-on-surface-variant/45 uppercase tracking-widest font-medium">
-                {applicant.npm}
-=======
             <div className="flex items-center gap-2 mt-0.5 text-xs text-on-surface-variant/60 flex-wrap">
               <span className="font-mono font-semibold text-secondary">
-                {applicant.nim}
->>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
+                {applicant.npm}
               </span>
               <span className="opacity-30">•</span>
               <span className="truncate">{applicant.division}</span>

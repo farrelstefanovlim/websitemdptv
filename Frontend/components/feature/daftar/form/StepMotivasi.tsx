@@ -7,7 +7,7 @@ import Icon from "@/components/ui/Icon";
 interface Props {
   form: {
     name: string;
-    nim: string;
+    npm: string;
     email: string;
     phone: string;
     division: string;
@@ -113,20 +113,14 @@ export default function StepMotivasi({ form, set, onEnter }: Props) {
                 {form.name || "-"}
               </span>
             </div>
-<<<<<<< HEAD
-            <div className="flex justify-between">
-              <span className="text-on-surface-variant/50">NPM</span>
-              <span className="font-medium text-primary">{form.npm}</span>
-=======
 
             <div>
               <span className="text-on-surface-variant/50 block text-[10px] uppercase font-bold mb-0.5">
-                NIM Mahasiswa
+                NPM Mahasiswa
               </span>
               <span className="font-bold text-primary font-display block">
-                {form.nim || "-"}
+                {form.npm || "-"}
               </span>
->>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
             </div>
 
             <div>

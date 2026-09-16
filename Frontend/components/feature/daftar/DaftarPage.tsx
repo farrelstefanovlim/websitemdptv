@@ -37,21 +37,13 @@ export default function DaftarPage() {
   const handleNext = () => {
     setErrorMSG(null);
     if (step === 1) {
-<<<<<<< HEAD
-      if (!form.name.trim()) return setErrorMSG("Nama Lengkap harus diisi!");
-      if (!form.npm.trim() || !/^\d+$/.test(form.npm)) return setErrorMSG("NPM harus diisi dengan angka yang valid!");
-      const emailBersih = form.email.trim().toLowerCase();
-      if (!emailBersih || !/^[^\s@]+@mhs\.mdp\.ac\.id$/.test(emailBersih)) return setErrorMSG("Gunakan email kampus yang valid!");
-      if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone)) return setErrorMSG("Nomor WhatsApp harus diisi dengan angka (minimal 10 digit)!");
-=======
       if (!form.name.trim()) return setErrorMSG("Nama Lengkap wajib diisi!");
-      if (!form.nim.trim() || !/^\d+$/.test(form.nim.trim()))
-        return setErrorMSG("NIM wajib diisi dengan angka yang valid!");
+      if (!form.npm.trim() || !/^\d+$/.test(form.npm.trim()))
+        return setErrorMSG("NPM wajib diisi dengan angka yang valid!");
       if (!form.email.trim() || !/^[^\s@]+@mhs\.mdp\.ac\.id$/i.test(form.email.trim()))
         return setErrorMSG("Gunakan format email kampus resmi (@mhs.mdp.ac.id)!");
       if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone.trim().replace(/\D/g, "")))
         return setErrorMSG("Nomor WhatsApp minimal 10 digit angka!");
->>>>>>> 5681b4a0b57c3a8ed09be43be5d7fe9b1dced943
       setStep(2);
     } else if (step === 2) {
       if (!form.division) return setErrorMSG("Silakan pilih salah satu Divisi terlebih dahulu!");
@@ -70,12 +62,12 @@ export default function DaftarPage() {
       const success = await addApplicant({
         ...form,
         name: form.name.trim(),
-        nim: form.nim.trim(),
+        npm: form.npm.trim(),
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
       });
       if (!success) {
-        setErrorMSG("Pendaftaran gagal dikirim. Pastikan NIM/Email belum pernah terdaftar.");
+        setErrorMSG("Pendaftaran gagal dikirim. Pastikan NPM/Email belum pernah terdaftar.");
       }
     } catch {
       setErrorMSG("Terjadi gangguan saat mengirim formulir. Coba lagi.");
