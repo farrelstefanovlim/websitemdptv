@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const applicantSchema = z.object({
   name: z.string().min(1, "Nama wajib diisi."),
-  nim: z.string().min(1, "NIM wajib diisi."),
+  npm: z.string().min(1, "NPM wajib diisi."),
   email: z.string().email("Format email tidak valid.").regex(/@mhs\.mdp\.ac\.id$/, "Gunakan email kampus (@mhs.mdp.ac.id)."),
   phone: z.string().optional(),
   division_id: z.string().min(1, "Divisi wajib diisi."),
@@ -21,10 +21,10 @@ export class RecruitmentController {
         return;
       }
 
-      const { name, nim, email, phone, division_id, motivation } = validation.data;
+      const { name, npm, email, phone, division_id, motivation } = validation.data;
 
-      // Cek NIM duplikat
-      const existing = await prisma.applicant.findFirst({ where: { OR: [{ nim }, { email }] }});
+      // Cek NPM duplikat
+      const existing = await prisma.applicant.findFirst({ where: { OR: [{ npm }, { email }] }});
       if (existing) {
         res.status(409).json({ status: "error", message: "NPM atau Email sudah terdaftar." });
         return;
@@ -42,13 +42,13 @@ export class RecruitmentController {
       }
 
       await prisma.applicant.create({
-        data: { name, nim, email, phone, division_id: division.id, motivation }
+        data: { name, npm, email, phone, division_id: division.id, motivation }
       });
 
       res.status(201).json({ status: "success", message: "Pendaftaran berhasil dikumpulkan." });
     } catch (error:any) {
       if (error.code === "P2002") {
-    res.status(409).json({ status: "error", message: "NIM atau Email sudah terdaftar." });
+    res.status(409).json({ status: "error", message: "NPM atau Email sudah terdaftar." });
     return;
   }
   throw error;
@@ -67,7 +67,7 @@ export class RecruitmentController {
       if (search) {
         where.OR = [
           { name: { contains: search as string, mode: 'insensitive' } },
-          { nim: { contains: search as string, mode: 'insensitive' } },
+          { npm: { contains: search as string, mode: 'insensitive' } },
         ];
       }
 
@@ -154,7 +154,7 @@ export class RecruitmentController {
       const sanitized = accepted.map(a => ({
         name: a.name,
         divisionName: a.division.name,
-        nim: a.nim.substring(0, 4) + "****" // Mask sensitive part of NIM just to be safe
+        npm: a.npm.substring(0, 4) + "****" // Mask sensitive part of NPM just to be safe
       }));
 
       res.status(200).json({ status: "success", data: { isOpen: true, accepted: sanitized } });

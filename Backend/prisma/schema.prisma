@@ -76,7 +76,7 @@ model Division {
 model Applicant {
   id          String         @id @default(uuid()) @db.Uuid
   name        String         @db.VarChar(100)
-  nim         String         @unique @db.VarChar(20)
+  npm         String         @unique @db.VarChar(20)
   email       String         @db.VarChar(255)
   phone       String?        @db.VarChar(20)
   division_id String         @db.Uuid
