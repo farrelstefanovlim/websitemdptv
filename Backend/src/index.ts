@@ -56,6 +56,9 @@ async function bootstrap() {
     dashboardController,
   });
 
+  // 👉 WAJIB DITAMBAHKAN DI SINI UNTUK RENDER/VERCEL:
+  app.set('trust proxy', 1);
+
   // 6. Jalankan Server
   app.listen(env.PORT, () => {
     console.log(`\n======================================================`);
