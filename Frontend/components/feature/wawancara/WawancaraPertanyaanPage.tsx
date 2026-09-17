@@ -9,14 +9,14 @@ import Textarea from "@/components/ui/Textarea"
 import Modal from "@/components/ui/Modal"
 import Badge from "@/components/ui/Badge"
 import ConfirmModal from "@/components/ui/ConfirmModal"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { wawancaraService, InterviewQuestion } from "@/services/wawancara.service"
 import { toast } from "@/stores/toast.store"
 import { periodToYear, useRecruitmentPeriods } from "@/hooks/useRecruitmentPeriods"
 
 export default function WawancaraPertanyaanPage() {
   const { periods, activePeriod } = useRecruitmentPeriods()
-  const [selectedYear, setSelectedYear] = useState<number>(periodToYear("2026/2027"))
-  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2027])
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("2026/2027")
   const [questions, setQuestions] = useState<InterviewQuestion[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
@@ -27,12 +27,11 @@ export default function WawancaraPertanyaanPage() {
   const [questionText, setQuestionText] = useState("")
   const [questionType, setQuestionType] = useState<"MULTIPLE_CHOICE" | "ESSAY">("ESSAY")
   const [optionList, setOptionList] = useState<string[]>(["Sangat Siap", "Cukup Siap", "Perlu Pertimbangan"])
-  const periodLabel = (year: number) => periods.find((period) => periodToYear(period) === year) || `${year}/${year + 1}`
 
-  const loadQuestions = async (year: number) => {
+  const loadQuestions = async (period: string) => {
     setIsLoading(true)
     try {
-      const qRes = await wawancaraService.getQuestions(year)
+      const qRes = await wawancaraService.getQuestions(period)
       if (qRes.success) {
         setQuestions(qRes.data)
       }
@@ -44,13 +43,12 @@ export default function WawancaraPertanyaanPage() {
   }
 
   useEffect(() => {
-    loadQuestions(selectedYear)
-  }, [selectedYear])
+    loadQuestions(selectedPeriod)
+  }, [selectedPeriod])
 
   useEffect(() => {
-    if (activePeriod) setSelectedYear(periodToYear(activePeriod))
-    if (periods.length > 0) setAvailableYears(periods.map(periodToYear))
-  }, [activePeriod, periods])
+    if (activePeriod) setSelectedPeriod(activePeriod)
+  }, [activePeriod])
 
   const handleSaveQuestion = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,7 +69,8 @@ export default function WawancaraPertanyaanPage() {
         toast.success("Pertanyaan wawancara berhasil diperbarui!")
       } else {
         await wawancaraService.createQuestion({
-          year_period: selectedYear,
+          year_period: selectedPeriod,
+          period: selectedPeriod,
           question_text: questionText.trim(),
           type: questionType,
           options: validOptions,
@@ -85,7 +84,7 @@ export default function WawancaraPertanyaanPage() {
       setQuestionText("")
       setQuestionType("ESSAY")
       setOptionList(["Sangat Siap", "Cukup Siap", "Perlu Pertimbangan"])
-      await loadQuestions(selectedYear)
+      await loadQuestions(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menyimpan pertanyaan wawancara.")
     }
@@ -96,7 +95,7 @@ export default function WawancaraPertanyaanPage() {
     try {
       await wawancaraService.deleteQuestion(deleteTargetQuestion.id)
       toast.success("Pertanyaan berhasil dihapus.")
-      await loadQuestions(selectedYear)
+      await loadQuestions(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menghapus pertanyaan.")
     } finally {
@@ -107,29 +106,13 @@ export default function WawancaraPertanyaanPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
-        {/* Header & Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15 shadow-sm">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
-              <Icon name="help_outline" className="text-secondary" />
-              Kelola Pertanyaan Wawancara ({periodLabel(selectedYear)})
-            </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">Buat dan atur soal pertanyaan wawancara (Pilihan Ganda / Essay) untuk calon anggota baru.</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Period Selector Tabs */}
-            <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-              {availableYears.map((yr) => {
-                const isSelected = selectedYear === yr
-                return (
-                  <button key={yr} type="button" onClick={() => setSelectedYear(yr)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                    Periode {periodLabel(yr)}
-                  </button>
-                )
-              })}
-            </div>
-
+        {/* ── Page Header ────────────────────────────────────── */}
+        <AdminPageHeader
+          breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara", href: "/admin/wawancara" }, { label: "Pertanyaan" }]}
+          icon="help_outline"
+          title="Pertanyaan Wawancara"
+          description={`Kelola soal pilihan ganda dan essay • ${selectedPeriod}`}
+          actions={
             <Button
               variant="primary"
               size="sm"
@@ -140,18 +123,33 @@ export default function WawancaraPertanyaanPage() {
                 setOptionList(["Sangat Siap", "Cukup Siap", "Perlu Pertimbangan"])
                 setShowQuestionModal(true)
               }}
+              startIcon={<Icon name="add" size="sm" />}
             >
-              <Icon name="add" size="sm" />
-              <span>Buat Pertanyaan Baru</span>
+              Buat Soal Baru
             </Button>
+          }
+        >
+          {/* Period Selector Tabs placed below header */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Pilih Periode:</span>
+            <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
+              {periods.map((p) => {
+                const isSelected = selectedPeriod === p
+                return (
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
+                  </button>
+                )
+              })}
+            </div>
           </div>
-        </div>
+        </AdminPageHeader>
 
         {/* Main Questions Grid */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-primary font-display">
-              Daftar Soal Wawancara Periode {periodLabel(selectedYear)} ({questions.length} Soal)
+              Daftar Soal Wawancara Periode {selectedPeriod} ({questions.length} Soal)
             </h2>
             <Link href="/admin/wawancara/jawaban" className="text-xs font-bold text-secondary hover:underline flex items-center gap-1">
               <span>Buka Form Pengisian Jawaban</span>
@@ -164,7 +162,7 @@ export default function WawancaraPertanyaanPage() {
           ) : questions.length === 0 ? (
             <div className="p-12 text-center bg-surface-container-lowest rounded-3xl border border-dashed border-outline-variant/30 text-xs text-on-surface-variant flex flex-col items-center gap-3">
               <Icon name="quiz" size="lg" className="text-on-surface-variant/30" />
-              <p className="font-semibold text-primary">Belum ada pertanyaan wawancara untuk periode {periodLabel(selectedYear)}.</p>
+              <p className="font-semibold text-primary">Belum ada pertanyaan wawancara untuk periode {selectedPeriod}.</p>
               <p className="text-on-surface-variant/60 max-w-sm">
                 Klik tombol <b>Buat Pertanyaan Baru</b> di atas untuk menambahkan soal pilihan ganda atau essay.
               </p>
@@ -242,7 +240,7 @@ export default function WawancaraPertanyaanPage() {
           onClose={() => setShowQuestionModal(false)}
           size="lg"
           title={editingQuestion ? "Edit Pertanyaan Wawancara" : "Buat Pertanyaan Wawancara Baru"}
-          description={`Tentukan pertanyaan seleksi untuk periode wawancara ${periodLabel(selectedYear)}`}
+          description={`Tentukan pertanyaan seleksi untuk periode wawancara ${selectedPeriod}`}
           headerIcon="help_outline"
           footer={
             <>

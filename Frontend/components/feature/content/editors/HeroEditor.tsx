@@ -29,8 +29,8 @@ export default function HeroEditor() {
       <div>
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40">Stats ({h.stats.length})</span>
-          <Button variant="none" size="none" onClick={addStat} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider hover:bg-secondary/20 transition-all">
-            <Icon name="add" size="sm" className="!text-xs" /> Tambah Stat
+          <Button variant="subtle" size="xs" onClick={addStat} startIcon={<Icon name="add" size="sm" className="!text-xs" />}>
+            Tambah Stat
           </Button>
         </div>
         <div className="grid gap-2">
@@ -42,8 +42,8 @@ export default function HeroEditor() {
               <input type="text" value={stat.label} onChange={(e) => { const s = [...h.stats]; s[i] = { ...s[i], label: e.target.value }; updateHero({ stats: s }); }}
                 className="flex-1 px-3 py-2 rounded-lg border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary focus:outline-none focus:border-secondary/40 transition-all"
                 placeholder="Label" />
-              <Button variant="none" size="none" onClick={() => removeStat(i)} className="shrink-0 text-error/60 hover:text-error transition-colors px-2">
-                <Icon name="delete" size="sm" className="!text-sm" />
+              <Button variant="danger" size="xs" onClick={() => removeStat(i)} className="shrink-0 !h-9 !px-2.5">
+                <Icon name="delete" size="sm" className="!text-xs" />
               </Button>
             </div>
           ))}

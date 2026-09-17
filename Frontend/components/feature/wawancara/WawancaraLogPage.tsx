@@ -1,34 +1,39 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import Icon from "@/components/ui/Icon"
 import Button from "@/components/ui/Button"
 import Modal from "@/components/ui/Modal"
 import Badge from "@/components/ui/Badge"
+import EmptyState from "@/components/ui/EmptyState"
+import ActionMenu from "@/components/ui/ActionMenu"
 import ConfirmModal from "@/components/ui/ConfirmModal"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { toast } from "@/stores/toast.store"
 import { wawancaraService, InterviewQuestion, InterviewResponseLog } from "@/services/wawancara.service"
 import { exportToExcel } from "@/lib/excel"
 import { exportToPDF } from "@/lib/pdf"
-import { periodToYear, useRecruitmentPeriods } from "@/hooks/useRecruitmentPeriods"
+import { useRecruitmentPeriods } from "@/hooks/useRecruitmentPeriods"
 
 export default function WawancaraLogPage() {
+  const router = useRouter()
   const { periods, activePeriod } = useRecruitmentPeriods()
-  const [selectedYear, setSelectedYear] = useState<number>(periodToYear("2026/2027"))
-  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2027])
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("2026/2027")
   const [questions, setQuestions] = useState<InterviewQuestion[]>([])
   const [responses, setResponses] = useState<InterviewResponseLog[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [search, setSearch] = useState("")
+  const [interviewerFilter, setInterviewerFilter] = useState<string>("all")
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table")
   const [selectedResponseDetail, setSelectedResponseDetail] = useState<InterviewResponseLog | null>(null)
   const [deleteTargetResponse, setDeleteTargetResponse] = useState<InterviewResponseLog | null>(null)
-  const periodLabel = (year: number) => periods.find((period) => periodToYear(period) === year) || `${year}/${year + 1}`
 
-  const loadLogs = async (year: number) => {
+  const loadLogs = async (period: string) => {
     setIsLoading(true)
     try {
-      const [qRes, rRes] = await Promise.all([wawancaraService.getQuestions(year), wawancaraService.getResponses(year)])
+      const [qRes, rRes] = await Promise.all([wawancaraService.getQuestions(period), wawancaraService.getResponses(period)])
       if (qRes.success) setQuestions(qRes.data)
       if (rRes.success) setResponses(rRes.data)
     } catch (err) {
@@ -39,20 +44,28 @@ export default function WawancaraLogPage() {
   }
 
   useEffect(() => {
-    loadLogs(selectedYear)
-  }, [selectedYear])
+    loadLogs(selectedPeriod)
+  }, [selectedPeriod])
 
   useEffect(() => {
-    if (activePeriod) setSelectedYear(periodToYear(activePeriod))
-    if (periods.length > 0) setAvailableYears(periods.map(periodToYear))
-  }, [activePeriod, periods])
+    if (activePeriod) setSelectedPeriod(activePeriod)
+  }, [activePeriod])
+
+  // Unique interviewer list for filtering
+  const interviewerList = useMemo(() => {
+    const set = new Set<string>()
+    responses.forEach((r) => {
+      if (r.interviewer_name) set.add(r.interviewer_name)
+    })
+    return Array.from(set)
+  }, [responses])
 
   const handleDeleteResponseConfirm = async () => {
     if (!deleteTargetResponse) return
     try {
       await wawancaraService.deleteResponse(deleteTargetResponse.id)
       toast.success("Log hasil wawancara berhasil dihapus.")
-      await loadLogs(selectedYear)
+      await loadLogs(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menghapus log wawancara.")
     } finally {
@@ -98,7 +111,7 @@ export default function WawancaraLogPage() {
       return rowObj
     })
 
-    exportToExcel(exportRows, cols, `Dokumentasi_Wawancara_${selectedYear}_MDPTV`, `Wawancara ${selectedYear}`)
+    exportToExcel(exportRows, cols, `Dokumentasi_Wawancara_${selectedPeriod.replace(/[^a-zA-Z0-9]/g, "_")}_MDPTV`, `Wawancara ${selectedPeriod}`)
     toast.success("Dokumen Excel berhasil diekspor.")
   }
 
@@ -120,13 +133,13 @@ export default function WawancaraLogPage() {
     })
 
     exportToPDF({
-      title: `Dokumentasi Hasil Wawancara Anggota - Periode ${selectedYear}`,
+      title: `Dokumentasi Hasil Wawancara Anggota - Periode ${selectedPeriod}`,
       subtitle: `Total Peserta Terwawancara: ${responses.length} anggota`,
       headers,
       rows,
-      filename: `Dokumentasi_Wawancara_${selectedYear}`,
+      filename: `Dokumentasi_Wawancara_${selectedPeriod.replace(/[^a-zA-Z0-9]/g, "_")}`,
       summaryRows: [
-        { label: "Periode Log Wawancara", value: `Tahun ${selectedYear}` },
+        { label: "Periode Log Wawancara", value: `Periode ${selectedPeriod}` },
         { label: "Jumlah Soal Wawancara", value: `${questions.length} Soal` },
         { label: "Total Anggota Diwawancarai", value: `${responses.length} Orang` },
       ],
@@ -134,84 +147,206 @@ export default function WawancaraLogPage() {
     toast.success("Dokumen PDF berhasil diekspor.")
   }
 
-  const filteredResponses = responses.filter((r) => {
-    const s = search.toLowerCase()
-    return !s || r.candidate_name.toLowerCase().includes(s) || (r.interviewer_name && r.interviewer_name.toLowerCase().includes(s))
-  })
+  const filteredResponses = useMemo(() => {
+    return responses.filter((r) => {
+      const s = search.toLowerCase()
+      const matchesSearch = !s || r.candidate_name.toLowerCase().includes(s) || (r.interviewer_name && r.interviewer_name.toLowerCase().includes(s))
+      const matchesInterviewer = interviewerFilter === "all" || r.interviewer_name === interviewerFilter
+      return matchesSearch && matchesInterviewer
+    })
+  }, [responses, search, interviewerFilter])
+
+  const totalAnsweredCount = useMemo(() => {
+    return responses.reduce((acc, r) => acc + r.answers.length, 0)
+  }, [responses])
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
-        {/* Header & Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15 shadow-sm">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
-              <Icon name="folder_shared" className="text-secondary" />
-              Log Dokumentasi Wawancara ({periodLabel(selectedYear)})
-            </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">Arsip & dokumentasi lengkap hasil wawancara anggota per tahun.</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Period Selector Tabs */}
+        {/* ── Page Header ────────────────────────────────────── */}
+        <AdminPageHeader
+          breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara", href: "/admin/wawancara" }, { label: "Log Dokumentasi" }]}
+          icon="folder_shared"
+          title="Log Wawancara"
+          description={`Arsip hasil wawancara • ${selectedPeriod}`}
+          actions={
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0} startIcon={<Icon name="download" size="sm" />}>
+                Export Excel
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0} startIcon={<Icon name="picture_as_pdf" size="sm" />}>
+                Export PDF
+              </Button>
+              <Link href="/admin/wawancara/jawaban">
+                <Button variant="primary" size="sm" startIcon={<Icon name="edit_note" size="sm" />}>
+                  Isi Jawaban Baru
+                </Button>
+              </Link>
+            </div>
+          }
+        >
+          {/* Period Selector Tabs placed below header */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Pilih Periode:</span>
             <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-              {availableYears.map((yr) => {
-                const isSelected = selectedYear === yr
+              {periods.map((p) => {
+                const isSelected = selectedPeriod === p
                 return (
-                  <button key={yr} type="button" onClick={() => setSelectedYear(yr)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                    Periode {periodLabel(yr)}
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
                   </button>
                 )
               })}
             </div>
+          </div>
+        </AdminPageHeader>
 
-            <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0}>
-              <Icon name="download" size="sm" className="text-emerald-500" />
-              <span>Export Excel</span>
-            </Button>
+        {/* ── Stats Metric Cards Grid ──────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-4 sm:p-5 rounded-3xl border bg-surface-container-low border-outline-variant/15">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+                <Icon name="groups" filled size="sm" />
+              </div>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-on-surface-variant/60">Terwawancara</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-primary font-display">{responses.length}</div>
+          </div>
 
-            <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0}>
-              <Icon name="picture_as_pdf" size="sm" className="text-rose-500" />
-              <span>Export PDF</span>
-            </Button>
+          <div className="p-4 sm:p-5 rounded-3xl border bg-amber-500/5 border-amber-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-xl bg-amber-500/15 text-amber-600">
+                <Icon name="quiz" filled size="sm" />
+              </div>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-amber-700">Daftar Soal</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-amber-950 font-display">{questions.length}</div>
+          </div>
+
+          <div className="p-4 sm:p-5 rounded-3xl border bg-emerald-500/5 border-emerald-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-600">
+                <Icon name="check_circle" filled size="sm" />
+              </div>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-emerald-700">Jawaban Terisi</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-950 font-display">{totalAnsweredCount}</div>
+          </div>
+
+          <div className="p-4 sm:p-5 rounded-3xl border bg-secondary/5 border-secondary/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-xl bg-secondary/15 text-secondary">
+                <Icon name="record_voice_over" filled size="sm" />
+              </div>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-secondary">Pewawancara</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-primary font-display">{interviewerList.length}</div>
           </div>
         </div>
 
-        {/* Toolbar: Search */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-lowest p-3.5 rounded-2xl border border-outline-variant/15">
-          <div className="relative w-full sm:w-80">
-            <Icon name="search" size="sm" className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40" />
-            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama anggota / pewawancara..." className="w-full pl-9 pr-4 py-2 rounded-xl border border-outline-variant/20 bg-background text-xs text-primary focus:outline-none focus:border-secondary" />
+        {/* ── Toolbar: Search, Filter & View Mode Switcher ────── */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+          <div className="relative flex-1 w-full">
+            <Icon name="search" size="sm" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40" />
+            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama calon anggota atau pewawancara..." className="w-full h-full min-h-[46px] pl-11 pr-4 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest text-sm text-primary shadow-xs focus:outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10 transition-all placeholder:text-on-surface-variant/40" />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-on-surface-variant font-medium">
-              Menampilkan <b>{filteredResponses.length}</b> dari {responses.length} log
-            </span>
-            <Link href="/admin/wawancara/jawaban">
-              <Button variant="primary" size="sm">
-                <Icon name="add" size="sm" />
-                <span>+ Isi Jawaban Baru</span>
-              </Button>
-            </Link>
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+            {/* Filter Pewawancara Menu */}
+            <ActionMenu
+              triggerIcon="filter_list"
+              title="Saring Pewawancara"
+              actions={[
+                {
+                  label: "Semua Pewawancara",
+                  icon: "list",
+                  active: interviewerFilter === "all",
+                  onClick: () => setInterviewerFilter("all"),
+                },
+                ...interviewerList.map((name) => ({
+                  label: name,
+                  icon: "person",
+                  active: interviewerFilter === name,
+                  onClick: () => setInterviewerFilter(name),
+                })),
+              ]}
+            />
+
+            {/* View Mode Switcher */}
+            <div className="flex items-center bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 shadow-2xs">
+              <button type="button" onClick={() => setViewMode("table")} className={`p-1.5 rounded-xl transition-all cursor-pointer ${viewMode === "table" ? "bg-secondary text-white shadow-xs" : "text-on-surface-variant/60 hover:text-primary hover:bg-surface-container-high"}`} title="Tampilan Tabel">
+                <Icon name="table_rows" size="sm" />
+              </button>
+              <button type="button" onClick={() => setViewMode("grid")} className={`p-1.5 rounded-xl transition-all cursor-pointer ${viewMode === "grid" ? "bg-secondary text-white shadow-xs" : "text-on-surface-variant/60 hover:text-primary hover:bg-surface-container-high"}`} title="Tampilan Kartu">
+                <Icon name="grid_view" size="sm" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Grid Log Response Cards */}
+        {/* ── Main Data View ──────────────────────────────────── */}
         {isLoading ? (
-          <div className="p-12 text-center text-xs text-on-surface-variant">Memuat log dokumentasi...</div>
+          <div className="p-16 text-center bg-surface-container-lowest rounded-3xl border border-outline-variant/15 flex flex-col items-center justify-center gap-3">
+            <div className="w-8 h-8 border-3 border-secondary/30 border-t-secondary rounded-full animate-spin" />
+            <p className="text-xs text-on-surface-variant/60 font-semibold">Memuat log dokumentasi wawancara...</p>
+          </div>
         ) : filteredResponses.length === 0 ? (
-          <div className="p-12 text-center bg-surface-container-lowest rounded-3xl border border-outline-variant/15 text-xs text-on-surface-variant flex flex-col items-center gap-3">
-            <Icon name="folder_off" size="lg" className="text-on-surface-variant/30" />
-            <p className="font-semibold text-primary">Belum ada log dokumentasi wawancara untuk periode {periodLabel(selectedYear)}.</p>
-            <Link href="/admin/wawancara/jawaban">
-              <Button variant="primary" size="sm">
-                <Icon name="edit_note" size="sm" />
-                <span>Mulai Pengisian Jawaban Wawancara</span>
-              </Button>
-            </Link>
+          <EmptyState icon="folder_shared" title="Belum Ada Log Dokumentasi" description={`Belum ada arsip jawaban wawancara untuk periode ${selectedPeriod}. Mulai pengisian form wawancara untuk merekam hasil penilaian calon anggota.`} actionText="Mulai Pengisian Jawaban" actionIcon="edit_note" onAction={() => router.push("/admin/wawancara/jawaban")} />
+        ) : viewMode === "table" ? (
+          /* Table View */
+          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 overflow-hidden shadow-xs">
+            <div className="w-full overflow-x-auto">
+              <table className="min-w-[900px] w-full text-left text-xs text-on-surface-variant">
+                <thead className="bg-surface-container-low/50 text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/70 border-b border-outline-variant/15">
+                  <tr>
+                    <th className="py-3.5 px-4 w-12 text-center">No</th>
+                    <th className="py-3.5 px-4 font-bold text-primary">Nama Calon Anggota</th>
+                    <th className="py-3.5 px-4 font-bold">Pewawancara</th>
+                    <th className="py-3.5 px-4 font-bold">Tanggal Wawancara</th>
+                    <th className="py-3.5 px-4 font-bold text-center">Jawaban Terisi</th>
+                    <th className="py-3.5 px-4 font-bold">Catatan</th>
+                    <th className="py-3.5 px-4 text-right font-bold w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {filteredResponses.map((r, idx) => (
+                    <tr key={r.id} className="hover:bg-surface-container-low/40 transition-colors">
+                      <td className="py-3.5 px-4 text-center font-bold text-on-surface-variant/50">{idx + 1}</td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-primary text-xs sm:text-sm">{r.candidate_name}</div>
+                      </td>
+                      <td className="py-3.5 px-4 font-medium text-primary">{r.interviewer_name || "Admin"}</td>
+                      <td className="py-3.5 px-4 font-medium">
+                        {new Date(r.interview_date).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <Badge variant="default" size="sm">
+                          {r.answers.length} Jawaban
+                        </Badge>
+                      </td>
+                      <td className="py-3.5 px-4 max-w-xs truncate text-on-surface-variant/70">{r.notes || "-"}</td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button type="button" onClick={() => setSelectedResponseDetail(r)} className="p-1.5 text-on-surface-variant/60 hover:text-secondary hover:bg-surface-container-high rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
+                            <Icon name="visibility" size="sm" />
+                          </button>
+                          <button type="button" onClick={() => setDeleteTargetResponse(r)} className="p-1.5 text-on-surface-variant/60 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus Log">
+                            <Icon name="delete" size="sm" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
+          /* Grid Card View */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredResponses.map((resItem, idx) => (
               <div key={resItem.id} className="bg-surface-container-lowest border border-outline-variant/15 rounded-3xl p-5 shadow-xs hover:border-secondary/40 transition-all flex flex-col justify-between space-y-4">
@@ -253,9 +388,8 @@ export default function WawancaraLogPage() {
 
                 <div className="pt-2 border-t border-outline-variant/10 flex justify-between items-center">
                   <span className="text-[10px] text-on-surface-variant/60 font-medium">{resItem.answers.length} Pertanyaan Terjawab</span>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedResponseDetail(resItem)}>
-                    <Icon name="visibility" size="sm" />
-                    <span>Lihat Detail</span>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedResponseDetail(resItem)} startIcon={<Icon name="visibility" size="sm" />}>
+                    Lihat Detail
                   </Button>
                 </div>
               </div>

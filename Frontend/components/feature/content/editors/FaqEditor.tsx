@@ -20,8 +20,8 @@ export default function FaqEditor() {
       <div>
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40">FAQ Items ({faq.items.length})</span>
-          <Button variant="none" size="none" onClick={addItem} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider hover:bg-secondary/20 transition-all">
-            <Icon name="add" size="sm" className="!text-xs" /> Tambah
+          <Button variant="subtle" size="xs" onClick={addItem} startIcon={<Icon name="add" size="sm" className="!text-xs" />}>
+            Tambah
           </Button>
         </div>
         <div className="grid gap-2">
@@ -29,8 +29,8 @@ export default function FaqEditor() {
             <div key={i} className="p-3 rounded-xl border border-outline-variant/15 bg-surface-container-low/50 grid gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-[9px] uppercase tracking-widest font-bold text-secondary">FAQ #{i + 1}</span>
-                <Button variant="none" size="none" onClick={() => removeItem(i)} className="text-error/60 hover:text-error transition-colors">
-                  <Icon name="delete" size="sm" className="!text-sm" />
+                <Button variant="danger" size="xs" onClick={() => removeItem(i)} className="!h-7 !px-2">
+                  <Icon name="delete" size="sm" className="!text-xs" />
                 </Button>
               </div>
               <input type="text" value={item.question} onChange={(e) => { const items = [...faq.items]; items[i] = { ...items[i], question: e.target.value }; updateFaq({ items }); }}

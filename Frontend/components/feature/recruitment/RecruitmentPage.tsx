@@ -9,6 +9,7 @@ import Input from "@/components/ui/Input"
 import ConfirmModal from "@/components/ui/ConfirmModal"
 import ApplicantTable from "@/components/feature/recruitment/ApplicantTable"
 import RecruitmentStats from "@/components/feature/recruitment/RecruitmentStats"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { toast } from "@/stores/toast.store"
 import ActionMenu from "@/components/ui/ActionMenu"
 import { useRecruitmentStore } from "@/stores/recruitment.store"
@@ -20,7 +21,6 @@ import { usePortalTarget } from "@/hooks/usePortalTarget"
 
 export default function RecruitmentPage() {
   const portalTarget = usePortalTarget("mobile-topbar-actions")
-  const mobileTitlePortalTarget = usePortalTarget("mobile-topbar-title")
   const { applicants, addApplicant, registrationOpen, toggleRegistration, announcementOpen, announcementPeriod, toggleAnnouncement, fetchAnnouncementState, fetchApplicants, groupLink, setGroupLink, fetchGroupLink, saveGroupLinkToDb, selectedPeriod, availablePeriods, setSelectedPeriod, fetchPeriods, createPeriod, deletePeriod, isLoading } = useRecruitmentStore()
 
   const pendingCount = applicants.filter((a) => a.status === "pending").length
@@ -100,13 +100,6 @@ export default function RecruitmentPage() {
     )
   }
 
-  const topbarTitle = (
-    <div className="min-w-0 pr-2">
-      <h2 className="text-xs sm:text-sm font-bold text-primary truncate leading-tight">Penerimaan Anggota</h2>
-      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5 hidden sm:block">Kelola pendaftaran calon anggota MDPTV (Periode: {selectedPeriod})</p>
-    </div>
-  )
-
   const topbarActions = (
     <>
       {pendingCount > 0 && (
@@ -120,34 +113,44 @@ export default function RecruitmentPage() {
 
   return (
     <>
-      {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
       {hydrated && portalTarget && createPortal(topbarActions, portalTarget)}
 
       {/* Content */}
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-[1440px] mx-auto space-y-6">
-          {/* ── Period Selector & Management Bar ──────────────────────── */}
-          <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 border border-secondary/15">
-                <Icon name="event_note" filled size="sm" />
-              </div>
-              <div>
-                <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block">Periode Penerimaan</span>
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <h3 className="text-base sm:text-lg font-black text-primary font-display">Tahun {selectedPeriod}</h3>
-                  {announcementOpen && announcementPeriod === selectedPeriod && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/20">
-                      <Icon name="campaign" size="xs" />
-                      <span>Publik di /pengumuman</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+          <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
 
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              {/* Period Tabs */}
+          {/* ── Page Header ────────────────────────────────────── */}
+          <AdminPageHeader
+            breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Penerimaan" }]}
+            icon="person_add"
+            title="Penerimaan"
+            description={`Kelola pendaftaran dan seleksi • ${selectedPeriod}`}
+            badge={
+              announcementOpen && announcementPeriod === selectedPeriod ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/20">
+                  <Icon name="campaign" size="xs" />
+                  <span>Publik di /pengumuman</span>
+                </span>
+              ) : undefined
+            }
+            actions={
+              <>
+                <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
+                  Import Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExport} startIcon={<Icon name="download" size="sm" />}>
+                  Export Excel
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setShowAddPeriodModal(true)} startIcon={<Icon name="add" size="sm" />}>
+                  Periode Baru
+                </Button>
+              </>
+            }
+          >
+            {/* Period Selector Tabs placed below header */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Pilih Periode:</span>
               <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto">
                 {availablePeriods.map((p) => {
                   const isSelected = p === selectedPeriod
@@ -158,13 +161,8 @@ export default function RecruitmentPage() {
                   )
                 })}
               </div>
-
-              {/* Add Period Button */}
-              <Button variant="outline" size="sm" onClick={() => setShowAddPeriodModal(true)} startIcon={<Icon name="add" size="xs" />} className="shrink-0 text-xs font-bold">
-                <span>Periode Baru</span>
-              </Button>
             </div>
-          </div>
+          </AdminPageHeader>
 
           {/* Top 3 Control Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

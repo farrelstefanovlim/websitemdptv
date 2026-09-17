@@ -284,9 +284,8 @@ export default function ApplicantCard({ applicant }: { applicant: Applicant }) {
                 />
                 <Button
                   variant="primary"
-                  size="none"
+                  size="sm"
                   onClick={handleSaveNote}
-                  className="px-3.5 py-2 text-xs font-bold"
                 >
                   Simpan
                 </Button>

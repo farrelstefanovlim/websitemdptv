@@ -21,9 +21,12 @@ export const metadata: Metadata = {
     template: "%s | MDPTV",
   },
   icons: {
-    icon: [{ url: "/logo-mdptv.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo-mdptv.png", type: "image/png" },
+    ],
     apple: "/logo-mdptv.png",
-    shortcut: "/logo-mdptv.png",
+    shortcut: "/favicon.ico",
   },
   description: "Unit Kegiatan Mahasiswa MDPTV Universitas Multi Data Palembang — Wadah eksplorasi teknologi media, sinematografi, desain visual, dan penyiaran kreatif.",
   keywords: ["MDPTV", "MDP", "Universitas Multi Data Palembang", "Multimedia", "Sinematografi", "Fotografi", "Desain Grafis"],

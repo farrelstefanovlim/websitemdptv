@@ -79,7 +79,7 @@ export default function ActionMenu({
     <div className={`relative shrink-0 ${className}`} ref={ref}>
       <button
         onClick={handleToggle}
-        className="h-full min-h-[46px] px-3 sm:px-4 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low hover:text-primary active:scale-95 transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-secondary/20 shadow-sm"
+        className="h-10 px-3.5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low hover:text-primary active:scale-95 transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-secondary/20 shadow-xs cursor-pointer"
         title={title}
       >
         <Icon name={triggerIcon} size="sm" />

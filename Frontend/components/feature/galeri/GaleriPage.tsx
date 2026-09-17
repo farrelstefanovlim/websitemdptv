@@ -92,16 +92,23 @@ export default function GaleriPage() {
               {d.headingBold} <span className="font-extralight italic opacity-80">{d.headingItalic}</span>
             </h1>
             <p className="text-sm sm:text-lg text-on-surface-variant/80 max-w-2xl leading-relaxed">{d.description}</p>
-            <div className="mt-6 flex items-center gap-4 text-on-surface-variant/60 text-sm">
-              <div className="flex items-center gap-2">
-                <Icon name="photo_library" size="sm" />
-                <span>{items.length} foto</span>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-on-surface-variant/60 text-sm">
+                <div className="flex items-center gap-2">
+                  <Icon name="photo_library" size="sm" />
+                  <span>{items.length} foto</span>
+                </div>
+                <span className="text-outline-variant">·</span>
+                <div className="flex items-center gap-2">
+                  <Icon name="folder" size="sm" />
+                  <span>{grouped.length} album</span>
+                </div>
               </div>
-              <span className="text-outline-variant">·</span>
-              <div className="flex items-center gap-2">
-                <Icon name="folder" size="sm" />
-                <span>{grouped.length} album</span>
-              </div>
+              <Link href="/daftar">
+                <Button variant="secondary" size="sm" startIcon={<Icon name="how_to_reg" size="sm" />}>
+                  Join Us
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>

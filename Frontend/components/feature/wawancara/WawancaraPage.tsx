@@ -8,6 +8,7 @@ import Textarea from "@/components/ui/Textarea"
 import Modal from "@/components/ui/Modal"
 import Badge from "@/components/ui/Badge"
 import ConfirmModal from "@/components/ui/ConfirmModal"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { toast } from "@/stores/toast.store"
 import { wawancaraService, InterviewQuestion, InterviewResponseLog } from "@/services/wawancara.service"
 import { recruitmentService } from "@/services/recruitment.service"
@@ -18,8 +19,7 @@ import { periodToYear, useRecruitmentPeriods } from "@/hooks/useRecruitmentPerio
 
 export default function WawancaraPage() {
   const { periods, activePeriod } = useRecruitmentPeriods()
-  const [selectedYear, setSelectedYear] = useState<number>(periodToYear("2026/2027"))
-  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2027])
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("2026/2027")
   const [questions, setQuestions] = useState<InterviewQuestion[]>([])
   const [responses, setResponses] = useState<InterviewResponseLog[]>([])
   const [interviewCandidates, setInterviewCandidates] = useState<Applicant[]>([])
@@ -44,13 +44,12 @@ export default function WawancaraPage() {
 
   // Detail Modal Log Wawancara State
   const [selectedResponseDetail, setSelectedResponseDetail] = useState<InterviewResponseLog | null>(null)
-  const periodLabel = (year: number) => periods.find((period) => periodToYear(period) === year) || `${year}/${year + 1}`
 
-  // Load data untuk tahun terpilih
-  const loadData = async (year: number) => {
+  // Load data untuk periode terpilih
+  const loadData = async (period: string) => {
     setIsLoading(true)
     try {
-      const [qRes, rRes, appRes] = await Promise.all([wawancaraService.getQuestions(year), wawancaraService.getResponses(year), recruitmentService.fetchApplicants({ status: "interview" }).catch(() => ({ applicants: [] }))])
+      const [qRes, rRes, appRes] = await Promise.all([wawancaraService.getQuestions(period), wawancaraService.getResponses(period), recruitmentService.fetchApplicants({ status: "interview", period }).catch(() => ({ applicants: [] }))])
 
       if (qRes.success) {
         setQuestions(qRes.data)
@@ -69,13 +68,12 @@ export default function WawancaraPage() {
   }
 
   useEffect(() => {
-    loadData(selectedYear)
-  }, [selectedYear])
+    loadData(selectedPeriod)
+  }, [selectedPeriod])
 
   useEffect(() => {
-    if (activePeriod) setSelectedYear(periodToYear(activePeriod))
-    if (periods.length > 0) setAvailableYears(periods.map(periodToYear))
-  }, [activePeriod, periods])
+    if (activePeriod) setSelectedPeriod(activePeriod)
+  }, [activePeriod])
 
   // Handle Input Jawaban
   const handleAnswerChange = (questionId: string, val: string) => {
@@ -91,7 +89,7 @@ export default function WawancaraPage() {
     }
 
     if (questions.length === 0) {
-      toast.warning("Belum ada pertanyaan wawancara untuk tahun ini. Silakan buat pertanyaan terlebih dahulu.")
+      toast.warning("Belum ada pertanyaan wawancara untuk periode ini. Silakan buat pertanyaan terlebih dahulu.")
       return
     }
 
@@ -105,7 +103,8 @@ export default function WawancaraPage() {
     setIsSubmitting(true)
     try {
       await wawancaraService.submitResponse({
-        year_period: selectedYear,
+        year_period: selectedPeriod,
+        period: selectedPeriod,
         candidate_name: candidateName.trim(),
         interviewer_name: interviewerName.trim(),
         answers: payloadAnswers,
@@ -117,7 +116,7 @@ export default function WawancaraPage() {
       setCandidateName("")
       setAnswers({})
       setInterviewNotes("")
-      await loadData(selectedYear)
+      await loadData(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menyimpan data wawancara.")
     } finally {
@@ -145,7 +144,8 @@ export default function WawancaraPage() {
         toast.success("Pertanyaan wawancara berhasil diperbarui!")
       } else {
         await wawancaraService.createQuestion({
-          year_period: selectedYear,
+          year_period: selectedPeriod,
+          period: selectedPeriod,
           question_text: questionText.trim(),
           type: questionType,
           options: validOptions,
@@ -159,7 +159,7 @@ export default function WawancaraPage() {
       setQuestionText("")
       setQuestionType("ESSAY")
       setOptionList(["Sangat Siap", "Cukup Siap", "Perlu Pertimbangan"])
-      await loadData(selectedYear)
+      await loadData(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menyimpan pertanyaan.")
     }
@@ -170,7 +170,7 @@ export default function WawancaraPage() {
     try {
       await wawancaraService.deleteQuestion(deleteTargetQuestion.id)
       toast.success("Pertanyaan berhasil dihapus.")
-      await loadData(selectedYear)
+      await loadData(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menghapus pertanyaan.")
     } finally {
@@ -183,7 +183,7 @@ export default function WawancaraPage() {
     try {
       await wawancaraService.deleteResponse(deleteTargetResponse.id)
       toast.success("Log wawancara berhasil dihapus.")
-      await loadData(selectedYear)
+      await loadData(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menghapus log wawancara.")
     } finally {
@@ -191,7 +191,7 @@ export default function WawancaraPage() {
     }
   }
 
-  // Export Excel Rekap Wawancara per Tahun
+  // Export Excel Rekap Wawancara per Periode
   const handleExportExcel = () => {
     if (responses.length === 0) {
       toast.warning("Belum ada data dokumentasi wawancara untuk diexport.")
@@ -230,11 +230,11 @@ export default function WawancaraPage() {
       return rowObj
     })
 
-    exportToExcel(exportRows, cols, `Dokumentasi_Wawancara_${selectedYear}_MDPTV`, `Wawancara ${selectedYear}`)
+    exportToExcel(exportRows, cols, `Dokumentasi_Wawancara_${selectedPeriod.replace(/[^a-zA-Z0-9]/g, "_")}_MDPTV`, `Wawancara ${selectedPeriod}`)
     toast.success("Dokumen Excel berhasil diekspor.")
   }
 
-  // Export PDF Rekap Wawancara per Tahun
+  // Export PDF Rekap Wawancara per Periode
   const handleExportPDF = () => {
     if (responses.length === 0) {
       toast.warning("Belum ada data dokumentasi wawancara untuk diexport.")
@@ -252,13 +252,13 @@ export default function WawancaraPage() {
     })
 
     exportToPDF({
-      title: `Dokumentasi Wawancara Anggota Baru - ${selectedYear}`,
+      title: `Dokumentasi Wawancara Anggota Baru - ${selectedPeriod}`,
       subtitle: `Total Peserta Terwawancara: ${responses.length} anggota`,
       headers,
       rows,
-      filename: `Laporan_Wawancara_${selectedYear}_MDPTV`,
+      filename: `Laporan_Wawancara_${selectedPeriod.replace(/[^a-zA-Z0-9]/g, "_")}_MDPTV`,
       summaryRows: [
-        { label: "Periode Wawancara", value: `Tahun ${selectedYear}` },
+        { label: "Periode Wawancara", value: `Periode ${selectedPeriod}` },
         { label: "Jumlah Pertanyaan", value: `${questions.length} Pertanyaan` },
         { label: "Total Anggota Diwawancarai", value: `${responses.length} Orang` },
       ],
@@ -269,50 +269,51 @@ export default function WawancaraPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
-        {/* Header & Year Selector */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
-              <Icon name="quiz" className="text-secondary" />
-              Wawancara Anggota Baru
-            </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">Kelola pertanyaan wawancara, isi jawaban anggota secara langsung, dan akses dokumentasi log per tahun.</p>
-          </div>
+        {/* ── Page Header ────────────────────────────────────── */}
+        <AdminPageHeader
+          breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara" }]}
+          icon="quiz"
+          title="Wawancara"
+          description={`Kelola soal, penilaian, dan log • ${selectedPeriod}`}
+          actions={
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0} startIcon={<Icon name="download" size="sm" />}>
+                Export Excel
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0} startIcon={<Icon name="picture_as_pdf" size="sm" />}>
+                Export PDF
+              </Button>
+            </div>
+          }
+        >
+          {/* Sub-selectors placed below header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+            {/* Main View Tabs */}
+            <div className="flex gap-4">
+              <button onClick={() => setActiveTab("INTERVIEW_FORM")} className={`pb-1.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "INTERVIEW_FORM" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
+                <Icon name="assignment" size="sm" />
+                <span>Form Pewawancaraan</span>
+              </button>
 
-          {/* Year Log Selector Tabs & Export Controls */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 text-xs font-bold">
-              {availableYears.map((yr) => (
-                <button key={yr} type="button" onClick={() => setSelectedYear(yr)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${selectedYear === yr ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                  Periode {periodLabel(yr)}
-                </button>
-              ))}
+              <button onClick={() => setActiveTab("DOCUMENTATION")} className={`pb-1.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "DOCUMENTATION" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
+                <Icon name="folder_shared" size="sm" />
+                <span>Dokumentasi & Log ({responses.length})</span>
+              </button>
             </div>
 
-            <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0}>
-              <Icon name="download" size="sm" className="text-emerald-500" />
-              <span>Export Excel</span>
-            </Button>
-
-            <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0}>
-              <Icon name="picture_as_pdf" size="sm" className="text-rose-500" />
-              <span>Export PDF</span>
-            </Button>
+            {/* Period Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Periode:</span>
+              <div className="flex bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 text-xs font-bold">
+                {periods.map((p) => (
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${selectedPeriod === p ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Main View Tabs: Form vs Documentation Log */}
-        <div className="flex border-b border-outline-variant/15 gap-4">
-          <button onClick={() => setActiveTab("INTERVIEW_FORM")} className={`pb-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${activeTab === "INTERVIEW_FORM" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
-            <Icon name="assignment" size="sm" />
-            Form Pewawancaraan ({selectedYear})
-          </button>
-
-          <button onClick={() => setActiveTab("DOCUMENTATION")} className={`pb-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${activeTab === "DOCUMENTATION" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
-            <Icon name="folder_shared" size="sm" />
-            Dokumentasi & Log ({responses.length} Anggota)
-          </button>
-        </div>
+        </AdminPageHeader>
 
         {/* TAB 1: FORM PEWAWANCARAAN & MANAJEMEN PERTANYAAN */}
         {activeTab === "INTERVIEW_FORM" && (
@@ -323,7 +324,7 @@ export default function WawancaraPage() {
                 <div>
                   <h3 className="text-sm font-bold text-primary font-display">Daftar Pertanyaan</h3>
                   <p className="text-[11px] text-on-surface-variant">
-                    {questions.length} Soal untuk Log {selectedYear}
+                    {questions.length} Soal untuk Periode {selectedPeriod}
                   </p>
                 </div>
                 <Button
@@ -345,7 +346,7 @@ export default function WawancaraPage() {
               <div className="space-y-2">
                 {questions.length === 0 ? (
                   <div className="p-6 text-center bg-surface-container-low/40 rounded-2xl text-xs text-on-surface-variant border border-dashed border-outline-variant/20">
-                    Belum ada pertanyaan wawancara untuk tahun {selectedYear}. Klik <b>Buat Soal</b> untuk menambahkan pertanyaan.
+                    Belum ada pertanyaan wawancara untuk periode {selectedPeriod}. Klik <b>Buat Soal</b> untuk menambahkan pertanyaan.
                   </div>
                 ) : (
                   questions.map((q, idx) => (
@@ -459,7 +460,7 @@ export default function WawancaraPage() {
 
                 {/* Dynamic Questions & Answer Inputs */}
                 <div className="space-y-5">
-                  <h4 className="text-xs uppercase font-bold tracking-widest text-on-surface-variant/60">Daftar Pertanyaan Wawancara ({selectedYear})</h4>
+                  <h4 className="text-xs uppercase font-bold tracking-widest text-on-surface-variant/60">Daftar Pertanyaan Wawancara ({selectedPeriod})</h4>
 
                   {questions.length === 0 ? (
                     <div className="p-8 text-center text-xs text-on-surface-variant/70 border border-dashed rounded-2xl">Silakan buat minimal 1 pertanyaan wawancara di kolom sebelah kiri untuk mulai mengisi jawaban.</div>
@@ -518,9 +519,9 @@ export default function WawancaraPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/15">
               <div>
-                <h3 className="text-base font-bold text-primary font-display">Dokumentasi Wawancara - Log Tahun {selectedYear}</h3>
+                <h3 className="text-base font-bold text-primary font-display">Dokumentasi Wawancara - Log Periode {selectedPeriod}</h3>
                 <p className="text-xs text-on-surface-variant">
-                  Total {responses.length} hasil wawancara terdaftar pada tahun {selectedYear}
+                  Total {responses.length} hasil wawancara terdaftar pada periode {selectedPeriod}
                 </p>
               </div>
 
@@ -541,7 +542,7 @@ export default function WawancaraPage() {
             ) : responses.length === 0 ? (
               <div className="p-12 text-center bg-surface-container-lowest rounded-3xl border border-outline-variant/15 text-xs text-on-surface-variant flex flex-col items-center gap-2">
                 <Icon name="folder_off" size="lg" className="text-on-surface-variant/30" />
-                <p>Belum ada log dokumentasi wawancara untuk tahun {selectedYear}.</p>
+                <p>Belum ada log dokumentasi wawancara untuk periode {selectedPeriod}.</p>
                 <p className="text-[11px] text-on-surface-variant/50">
                   Gunakan tab <b>Form Pewawancaraan</b> untuk mulai menguji dan mengisi hasil wawancara anggota.
                 </p>
@@ -606,7 +607,7 @@ export default function WawancaraPage() {
           onClose={() => setShowQuestionModal(false)}
           size="lg"
           title={editingQuestion ? "Edit Pertanyaan Wawancara" : "Buat Pertanyaan Wawancara Baru"}
-          description={`Tentukan pertanyaan seleksi untuk periode tahun wawancara ${selectedYear}`}
+          description={`Tentukan pertanyaan seleksi untuk periode wawancara ${selectedPeriod}`}
           headerIcon="help_outline"
           footer={
             <>

@@ -1,46 +1,41 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from "react";
-import Icon from "@/components/ui/Icon";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
-import DatePicker from "@/components/ui/DatePicker";
-import Modal from "@/components/ui/Modal";
-import ConfirmModal from "@/components/ui/ConfirmModal";
-import { toast } from "@/stores/toast.store";
-import {
-  kasService,
-  KasRecord,
-  KasSummary,
-  KasUnpaidRecord,
-  KasUnpaidSummary,
-} from "@/services/kas.service";
-import { exportToExcel } from "@/lib/excel";
-import { exportToPDF } from "@/lib/pdf";
-import { memberService } from "@/services/member.service";
-import type { Member } from "@/components/feature/absensi/types/attendance.type";
-import * as XLSX from "xlsx";
+import { useState, useEffect, useRef } from "react"
+import Icon from "@/components/ui/Icon"
+import Button from "@/components/ui/Button"
+import Input from "@/components/ui/Input"
+import Select from "@/components/ui/Select"
+import DatePicker from "@/components/ui/DatePicker"
+import Modal from "@/components/ui/Modal"
+import ConfirmModal from "@/components/ui/ConfirmModal"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
+import { toast } from "@/stores/toast.store"
+import { kasService, KasRecord, KasSummary, KasUnpaidRecord, KasUnpaidSummary } from "@/services/kas.service"
+import { exportToExcel } from "@/lib/excel"
+import { exportToPDF } from "@/lib/pdf"
+import { memberService } from "@/services/member.service"
+import type { Member } from "@/components/feature/absensi/types/attendance.type"
+import * as XLSX from "xlsx"
 
 export default function KasPage() {
-  const [activeTab, setActiveTab] = useState<"LOG" | "UNPAID">("LOG");
+  const [activeTab, setActiveTab] = useState<"LOG" | "UNPAID">("LOG")
 
   // ================= TAB 1: LOG TRANSAKSI KAS STATE =================
-  const [records, setRecords] = useState<KasRecord[]>([]);
+  const [records, setRecords] = useState<KasRecord[]>([])
   const [summary, setSummary] = useState<KasSummary>({
     totalPemasukan: 0,
     totalPengeluaran: 0,
     saldoAkhir: 0,
     totalTransaksi: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"ALL" | "IN" | "OUT">("ALL");
+  })
+  const [isLoading, setIsLoading] = useState(true)
+  const [search, setSearch] = useState("")
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "IN" | "OUT">("ALL")
 
   // Form manual modal state - Log Transaksi
-  const [showManualModal, setShowManualModal] = useState(false);
-  const [deleteLogTarget, setDeleteLogTarget] = useState<KasRecord | null>(null);
-  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
+  const [showManualModal, setShowManualModal] = useState(false)
+  const [deleteLogTarget, setDeleteLogTarget] = useState<KasRecord | null>(null)
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false)
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
     description: "",
@@ -48,26 +43,26 @@ export default function KasPage() {
     type: "IN" as "IN" | "OUT",
     amount: "",
     notes: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // ================= TAB 2: UNPAID KAS STATE =================
-  const [unpaidRecords, setUnpaidRecords] = useState<KasUnpaidRecord[]>([]);
+  const [unpaidRecords, setUnpaidRecords] = useState<KasUnpaidRecord[]>([])
   const [unpaidSummary, setUnpaidSummary] = useState<KasUnpaidSummary>({
     totalBelumBayar: 0,
     totalLunas: 0,
     totalTunggakan: 0,
     totalAnggota: 0,
-  });
-  const [unpaidSearch, setUnpaidSearch] = useState("");
-  const [unpaidStatusFilter, setUnpaidStatusFilter] = useState<"ALL" | "BELUM_BAYAR" | "LUNAS">("ALL");
+  })
+  const [unpaidSearch, setUnpaidSearch] = useState("")
+  const [unpaidStatusFilter, setUnpaidStatusFilter] = useState<"ALL" | "BELUM_BAYAR" | "LUNAS">("ALL")
 
   // Form manual modal state - Unpaid Kas
-  const [showUnpaidModal, setShowUnpaidModal] = useState(false);
-  const [deleteUnpaidTarget, setDeleteUnpaidTarget] = useState<KasUnpaidRecord | null>(null);
-  const [availableMembers, setAvailableMembers] = useState<Member[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<string>("");
+  const [showUnpaidModal, setShowUnpaidModal] = useState(false)
+  const [deleteUnpaidTarget, setDeleteUnpaidTarget] = useState<KasUnpaidRecord | null>(null)
+  const [availableMembers, setAvailableMembers] = useState<Member[]>([])
+  const [selectedMemberId, setSelectedMemberId] = useState<string>("")
   const [unpaidFormData, setUnpaidFormData] = useState({
     member_name: "",
     npm: "",
@@ -76,139 +71,140 @@ export default function KasPage() {
     amount: "",
     status: "BELUM_BAYAR" as "BELUM_BAYAR" | "LUNAS",
     notes: "",
-  });
-  const unpaidFileInputRef = useRef<HTMLInputElement>(null);
+  })
+  const unpaidFileInputRef = useRef<HTMLInputElement>(null)
 
   // Load Data
   const loadKasData = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const res = await kasService.getAll();
+      const res = await kasService.getAll()
       if (res.success) {
-        setRecords(res.data);
-        setSummary(res.summary);
+        setRecords(res.data)
+        setSummary(res.summary)
       }
     } catch (err) {
-      console.error("Gagal memuat data kas:", err);
+      console.error("Gagal memuat data kas:", err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const loadUnpaidData = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const res = await kasService.getUnpaid();
+      const res = await kasService.getUnpaid()
       if (res.success) {
-        setUnpaidRecords(res.data);
-        setUnpaidSummary(res.summary);
+        setUnpaidRecords(res.data)
+        setUnpaidSummary(res.summary)
       }
     } catch (err) {
-      console.error("Gagal memuat data tunggakan kas:", err);
+      console.error("Gagal memuat data tunggakan kas:", err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
     if (activeTab === "LOG") {
-      loadKasData();
+      loadKasData()
     } else {
-      loadUnpaidData();
+      loadUnpaidData()
     }
-  }, [activeTab]);
+  }, [activeTab])
 
   useEffect(() => {
-    memberService.getAll()
+    memberService
+      .getAll()
       .then((data) => setAvailableMembers(data))
-      .catch(() => {});
-  }, []);
+      .catch(() => {})
+  }, [])
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
-    }).format(val || 0);
-  };
+    }).format(val || 0)
+  }
 
   // Upload Excel Transaksi
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
     try {
-      setIsLoading(true);
-      const reader = new FileReader();
+      setIsLoading(true)
+      const reader = new FileReader()
       reader.onload = async (evt) => {
         try {
-          const bstr = evt.target?.result;
-          const wb = XLSX.read(bstr, { type: "binary" });
-          const wsname = wb.SheetNames[0];
-          const ws = wb.Sheets[wsname];
-          const parsedData = XLSX.utils.sheet_to_json(ws);
+          const bstr = evt.target?.result
+          const wb = XLSX.read(bstr, { type: "binary" })
+          const wsname = wb.SheetNames[0]
+          const ws = wb.Sheets[wsname]
+          const parsedData = XLSX.utils.sheet_to_json(ws)
 
-          await kasService.uploadJSON(parsedData);
-          await loadKasData();
-          toast.success("File Excel transaksi kas berhasil di-upload!");
+          await kasService.uploadJSON(parsedData)
+          await loadKasData()
+          toast.success("File Excel transaksi kas berhasil di-upload!")
         } catch (err: any) {
-          toast.error("Gagal membaca file Excel. Pastikan format file sesuai.");
+          toast.error("Gagal membaca file Excel. Pastikan format file sesuai.")
         } finally {
-          setIsLoading(false);
+          setIsLoading(false)
         }
-      };
-      reader.readAsBinaryString(file);
+      }
+      reader.readAsBinaryString(file)
     } catch (err: any) {
-      toast.error("Gagal mengunggah file Excel.");
-      setIsLoading(false);
+      toast.error("Gagal mengunggah file Excel.")
+      setIsLoading(false)
     } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = ""
     }
-  };
+  }
 
   // Upload Excel Unpaid
   const handleUnpaidFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
     try {
-      setIsLoading(true);
-      const reader = new FileReader();
+      setIsLoading(true)
+      const reader = new FileReader()
       reader.onload = async (evt) => {
         try {
-          const bstr = evt.target?.result;
-          const wb = XLSX.read(bstr, { type: "binary" });
-          const wsname = wb.SheetNames[0];
-          const ws = wb.Sheets[wsname];
-          const parsedData = XLSX.utils.sheet_to_json(ws);
+          const bstr = evt.target?.result
+          const wb = XLSX.read(bstr, { type: "binary" })
+          const wsname = wb.SheetNames[0]
+          const ws = wb.Sheets[wsname]
+          const parsedData = XLSX.utils.sheet_to_json(ws)
 
-          await kasService.uploadUnpaidJSON(parsedData);
-          await loadUnpaidData();
-          toast.success("Data Excel anggota belum bayar kas berhasil di-upload!");
+          await kasService.uploadUnpaidJSON(parsedData)
+          await loadUnpaidData()
+          toast.success("Data Excel anggota belum bayar kas berhasil di-upload!")
         } catch (err: any) {
-          toast.error("Gagal membaca file Excel tunggakan kas.");
+          toast.error("Gagal membaca file Excel tunggakan kas.")
         } finally {
-          setIsLoading(false);
+          setIsLoading(false)
         }
-      };
-      reader.readAsBinaryString(file);
+      }
+      reader.readAsBinaryString(file)
     } catch (err: any) {
-      toast.error("Gagal mengunggah file Excel.");
-      setIsLoading(false);
+      toast.error("Gagal mengunggah file Excel.")
+      setIsLoading(false)
     } finally {
-      if (unpaidFileInputRef.current) unpaidFileInputRef.current.value = "";
+      if (unpaidFileInputRef.current) unpaidFileInputRef.current.value = ""
     }
-  };
+  }
 
   // Submit manual Log Transaksi
   const handleManualSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!formData.description || !formData.amount) {
-      toast.error("Mohon isi keterangan dan nominal transaksi.");
-      return;
+      toast.error("Mohon isi keterangan dan nominal transaksi.")
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       await kasService.create({
         date: formData.date,
@@ -217,9 +213,9 @@ export default function KasPage() {
         type: formData.type,
         amount: parseFloat(formData.amount),
         notes: formData.notes,
-      });
+      })
 
-      setShowManualModal(false);
+      setShowManualModal(false)
       setFormData({
         date: new Date().toISOString().split("T")[0],
         description: "",
@@ -227,25 +223,25 @@ export default function KasPage() {
         type: "IN",
         amount: "",
         notes: "",
-      });
-      await loadKasData();
-      toast.success("Transaksi kas berhasil dicatat!");
+      })
+      await loadKasData()
+      toast.success("Transaksi kas berhasil dicatat!")
     } catch (err) {
-      toast.error("Gagal menambah transaksi kas.");
+      toast.error("Gagal menambah transaksi kas.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   // Submit manual Unpaid Kas
   const handleUnpaidSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!unpaidFormData.member_name || !unpaidFormData.period) {
-      toast.error("Mohon isi nama anggota dan periode.");
-      return;
+      toast.error("Mohon isi nama anggota dan periode.")
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       await kasService.createUnpaid({
         member_name: unpaidFormData.member_name,
@@ -255,10 +251,10 @@ export default function KasPage() {
         amount: parseFloat(unpaidFormData.amount || "0"),
         status: unpaidFormData.status,
         notes: unpaidFormData.notes,
-      });
+      })
 
-      setShowUnpaidModal(false);
-      setSelectedMemberId("");
+      setShowUnpaidModal(false)
+      setSelectedMemberId("")
       setUnpaidFormData({
         member_name: "",
         npm: "",
@@ -267,65 +263,65 @@ export default function KasPage() {
         amount: "",
         status: "BELUM_BAYAR",
         notes: "",
-      });
-      await loadUnpaidData();
-      toast.success("Data tunggakan kas berhasil disimpan!");
+      })
+      await loadUnpaidData()
+      toast.success("Data tunggakan kas berhasil disimpan!")
     } catch (err) {
-      toast.error("Gagal menambah data tunggakan.");
+      toast.error("Gagal menambah data tunggakan.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   // Toggle Status Unpaid (BELUM_BAYAR <-> LUNAS)
   const handleToggleStatus = async (item: KasUnpaidRecord) => {
-    const nextStatus = item.status === "BELUM_BAYAR" ? "LUNAS" : "BELUM_BAYAR";
+    const nextStatus = item.status === "BELUM_BAYAR" ? "LUNAS" : "BELUM_BAYAR"
     try {
-      await kasService.updateUnpaid(item.id, { status: nextStatus });
-      toast.success(`Status ${item.member_name} diubah menjadi ${nextStatus}`);
-      await loadUnpaidData();
+      await kasService.updateUnpaid(item.id, { status: nextStatus })
+      toast.success(`Status ${item.member_name} diubah menjadi ${nextStatus}`)
+      await loadUnpaidData()
     } catch (err) {
-      toast.error("Gagal memperbarui status bayar.");
+      toast.error("Gagal memperbarui status bayar.")
     }
-  };
+  }
 
   const handleDeleteLogConfirm = async () => {
-    if (!deleteLogTarget) return;
+    if (!deleteLogTarget) return
     try {
-      await kasService.delete(deleteLogTarget.id);
-      toast.success("Transaksi kas berhasil dihapus.");
-      await loadKasData();
+      await kasService.delete(deleteLogTarget.id)
+      toast.success("Transaksi kas berhasil dihapus.")
+      await loadKasData()
     } catch (err) {
-      toast.error("Gagal menghapus transaksi.");
+      toast.error("Gagal menghapus transaksi.")
     } finally {
-      setDeleteLogTarget(null);
+      setDeleteLogTarget(null)
     }
-  };
+  }
 
   const handleDeleteUnpaidConfirm = async () => {
-    if (!deleteUnpaidTarget) return;
+    if (!deleteUnpaidTarget) return
     try {
-      await kasService.deleteUnpaid(deleteUnpaidTarget.id);
-      toast.success("Data tunggakan kas berhasil dihapus.");
-      await loadUnpaidData();
+      await kasService.deleteUnpaid(deleteUnpaidTarget.id)
+      toast.success("Data tunggakan kas berhasil dihapus.")
+      await loadUnpaidData()
     } catch (err) {
-      toast.error("Gagal menghapus data tunggakan.");
+      toast.error("Gagal menghapus data tunggakan.")
     } finally {
-      setDeleteUnpaidTarget(null);
+      setDeleteUnpaidTarget(null)
     }
-  };
+  }
 
   const handleResetAllConfirm = async () => {
     try {
-      await kasService.deleteAll();
-      toast.success("Semua log transaksi kas berhasil dibersihkan.");
-      await loadKasData();
+      await kasService.deleteAll()
+      toast.success("Semua log transaksi kas berhasil dibersihkan.")
+      await loadKasData()
     } catch (err) {
-      toast.error("Gagal membersihkan log kas.");
+      toast.error("Gagal membersihkan log kas.")
     } finally {
-      setShowClearAllConfirm(false);
+      setShowClearAllConfirm(false)
     }
-  };
+  }
 
   // Export Log Transaksi
   const handleExportExcel = () => {
@@ -338,7 +334,7 @@ export default function KasPage() {
       { key: "Nominal", header: "Nominal" },
       { key: "Saldo_Akumulasi", header: "Saldo Akumulasi" },
       { key: "Catatan", header: "Catatan" },
-    ];
+    ]
     const exportData = filteredRecords.map((r, idx) => ({
       No: idx + 1,
       Tanggal: new Date(r.date).toLocaleDateString("id-ID"),
@@ -348,28 +344,21 @@ export default function KasPage() {
       Nominal: r.amount,
       Saldo_Akumulasi: r.balance,
       Catatan: r.notes || "-",
-    }));
-    exportToExcel(exportData, columns, `Pencatatan_Kas_MDPTV_${new Date().toISOString().split("T")[0]}`);
-  };
+    }))
+    exportToExcel(exportData, columns, `Pencatatan_Kas_MDPTV_${new Date().toISOString().split("T")[0]}`)
+  }
 
   const handleExportPDF = () => {
-    const headers = ["No", "Tanggal", "Keterangan", "Tipe", "Nominal (Rp)", "Saldo (Rp)"];
-    const body = filteredRecords.map((r, idx) => [
-      (idx + 1).toString(),
-      new Date(r.date).toLocaleDateString("id-ID"),
-      r.description,
-      r.type === "IN" ? "Masuk" : "Keluar",
-      formatRupiah(r.amount),
-      formatRupiah(r.balance),
-    ]);
+    const headers = ["No", "Tanggal", "Keterangan", "Tipe", "Nominal (Rp)", "Saldo (Rp)"]
+    const body = filteredRecords.map((r, idx) => [(idx + 1).toString(), new Date(r.date).toLocaleDateString("id-ID"), r.description, r.type === "IN" ? "Masuk" : "Keluar", formatRupiah(r.amount), formatRupiah(r.balance)])
 
     exportToPDF({
       title: "Laporan Pencatatan Log Uang Kas MDPTV",
       headers,
       rows: body,
       filename: `Laporan_Kas_MDPTV_${new Date().toISOString().split("T")[0]}`,
-    });
-  };
+    })
+  }
 
   // Export Unpaid
   const handleExportUnpaidExcel = () => {
@@ -382,7 +371,7 @@ export default function KasPage() {
       { key: "Jumlah_Tunggakan", header: "Jumlah Tunggakan" },
       { key: "Status", header: "Status" },
       { key: "Keterangan", header: "Keterangan" },
-    ];
+    ]
     const exportData = filteredUnpaid.map((r, idx) => ({
       No: idx + 1,
       Nama_Anggota: r.member_name,
@@ -392,799 +381,546 @@ export default function KasPage() {
       Jumlah_Tunggakan: r.amount,
       Status: r.status,
       Keterangan: r.notes || "-",
-    }));
-    exportToExcel(exportData, columns, `Tunggakan_Kas_Anggota_${new Date().toISOString().split("T")[0]}`);
-  };
+    }))
+    exportToExcel(exportData, columns, `Tunggakan_Kas_Anggota_${new Date().toISOString().split("T")[0]}`)
+  }
 
   const handleExportUnpaidPDF = () => {
-    const headers = ["No", "Nama Anggota", "NPM", "Divisi", "Periode", "Tunggakan (Rp)", "Status"];
-    const body = filteredUnpaid.map((r, idx) => [
-      (idx + 1).toString(),
-      r.member_name,
-      r.npm || "-",
-      r.division || "-",
-      r.period,
-      formatRupiah(r.amount),
-      r.status === "LUNAS" ? "LUNAS" : "BELUM BAYAR",
-    ]);
+    const headers = ["No", "Nama Anggota", "NPM", "Divisi", "Periode", "Tunggakan (Rp)", "Status"]
+    const body = filteredUnpaid.map((r, idx) => [(idx + 1).toString(), r.member_name, r.npm || "-", r.division || "-", r.period, formatRupiah(r.amount), r.status === "LUNAS" ? "LUNAS" : "BELUM BAYAR"])
 
     exportToPDF({
       title: "Laporan Anggota Belum Bayar Kas MDPTV",
       headers,
       rows: body,
       filename: `Laporan_Tunggakan_Kas_${new Date().toISOString().split("T")[0]}`,
-    });
-  };
-
+    })
+  }
 
   // Filter Log Transaksi
   const filteredRecords = records.filter((r) => {
-    const matchesSearch =
-      r.description.toLowerCase().includes(search.toLowerCase()) ||
-      (r.category && r.category.toLowerCase().includes(search.toLowerCase())) ||
-      (r.notes && r.notes.toLowerCase().includes(search.toLowerCase()));
-    const matchesType = typeFilter === "ALL" || r.type === typeFilter;
-    return matchesSearch && matchesType;
-  });
+    const matchesSearch = r.description.toLowerCase().includes(search.toLowerCase()) || (r.category && r.category.toLowerCase().includes(search.toLowerCase())) || (r.notes && r.notes.toLowerCase().includes(search.toLowerCase()))
+    const matchesType = typeFilter === "ALL" || r.type === typeFilter
+    return matchesSearch && matchesType
+  })
 
   // Filter Unpaid
   const filteredUnpaid = unpaidRecords.filter((r) => {
-    const matchesSearch =
-      r.member_name.toLowerCase().includes(unpaidSearch.toLowerCase()) ||
-      (r.npm && r.npm.toLowerCase().includes(unpaidSearch.toLowerCase())) ||
-      (r.division && r.division.toLowerCase().includes(unpaidSearch.toLowerCase())) ||
-      r.period.toLowerCase().includes(unpaidSearch.toLowerCase());
-    const matchesStatus = unpaidStatusFilter === "ALL" || r.status === unpaidStatusFilter;
-    return matchesSearch && matchesStatus;
-  });
+    const matchesSearch = r.member_name.toLowerCase().includes(unpaidSearch.toLowerCase()) || (r.npm && r.npm.toLowerCase().includes(unpaidSearch.toLowerCase())) || (r.division && r.division.toLowerCase().includes(unpaidSearch.toLowerCase())) || r.period.toLowerCase().includes(unpaidSearch.toLowerCase())
+    const matchesStatus = unpaidStatusFilter === "ALL" || r.status === unpaidStatusFilter
+    return matchesSearch && matchesStatus
+  })
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
-        {/* Header & Sub-Tab Switcher */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15 shadow-sm">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
-            <Icon name="account_balance_wallet" className="text-secondary" />
-            Manajemen Uang Kas MDPTV
-          </h1>
-          <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
-            Kelola transaksi pencatatan arus kas dan pendataan anggota yang belum membayar kas.
-          </p>
-        </div>
+        <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".xlsx, .xls" className="hidden" />
+        <input type="file" ref={unpaidFileInputRef} onChange={handleUnpaidFileUpload} accept=".xlsx, .xls" className="hidden" />
 
-        {/* Tab Selector */}
-        <div className="flex items-center gap-2 bg-surface-container-low p-1.5 rounded-2xl border border-outline-variant/15 text-xs font-bold">
-          <button
-            onClick={() => setActiveTab("LOG")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-              activeTab === "LOG"
-                ? "bg-secondary text-white shadow-sm"
-                : "text-on-surface-variant/70 hover:text-primary hover:bg-background"
-            }`}
-          >
-            <Icon name="receipt_long" size="sm" />
-            <span>Log Transaksi Kas</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("UNPAID")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-              activeTab === "UNPAID"
-                ? "bg-secondary text-white shadow-sm"
-                : "text-on-surface-variant/70 hover:text-primary hover:bg-background"
-            }`}
-          >
-            <Icon name="person_remove" size="sm" />
-            <span>Belum Bayar Kas ({unpaidSummary.totalBelumBayar})</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ================= TAB 1: LOG TRANSAKSI KAS ================= */}
-      {activeTab === "LOG" && (
-        <div className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                <Icon name="arrow_downward" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">
-                  Total Pemasukan
-                </p>
-                <p className="text-lg font-black text-emerald-600 font-display">
-                  {formatRupiah(summary.totalPemasukan)}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
-                <Icon name="arrow_upward" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">
-                  Total Pengeluaran
-                </p>
-                <p className="text-lg font-black text-rose-600 font-display">
-                  {formatRupiah(summary.totalPengeluaran)}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                <Icon name="account_balance" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">
-                  Saldo Akhir
-                </p>
-                <p className="text-lg font-black text-secondary font-display">
-                  {formatRupiah(summary.saldoAkhir)}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
-                <Icon name="format_list_bulleted" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">
-                  Total Transaksi
-                </p>
-                <p className="text-lg font-black text-primary font-display">
-                  {summary.totalTransaksi} Record
-                </p>
-              </div>
-            </div>
+        {/* ── Page Header & Sub-Tab Switcher ────────────────────── */}
+        <AdminPageHeader
+          breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Uang Kas" }]}
+          icon="payments"
+          title="Uang Kas"
+          description="Kelola transaksi dan tunggakan kas."
+          actions={
+            activeTab === "LOG" ? (
+              <>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
+                  Import Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportExcel} startIcon={<Icon name="download" size="sm" />}>
+                  Export Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportPDF} startIcon={<Icon name="picture_as_pdf" size="sm" />}>
+                  Export PDF
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setShowManualModal(true)} startIcon={<Icon name="add" size="sm" />}>
+                  Catat Kas
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={() => unpaidFileInputRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
+                  Import Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportUnpaidExcel} startIcon={<Icon name="download" size="sm" />}>
+                  Export Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportUnpaidPDF} startIcon={<Icon name="picture_as_pdf" size="sm" />}>
+                  Export PDF
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setShowUnpaidModal(true)} startIcon={<Icon name="add" size="sm" />}>
+                  Tambah Tunggakan
+                </Button>
+              </>
+            )
+          }
+        >
+          {/* Tab Selector placed below header */}
+          <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 text-xs font-bold w-fit">
+            <button type="button" onClick={() => setActiveTab("LOG")} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${activeTab === "LOG" ? "bg-secondary text-white shadow-xs" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+              <Icon name="receipt_long" size="sm" />
+              <span>Log Transaksi</span>
+            </button>
+            <button type="button" onClick={() => setActiveTab("UNPAID")} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${activeTab === "UNPAID" ? "bg-secondary text-white shadow-xs" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+              <Icon name="person_remove" size="sm" />
+              <span>Tunggakan ({unpaidSummary.totalBelumBayar})</span>
+            </button>
           </div>
+        </AdminPageHeader>
 
-          {/* Action Toolbar */}
-          <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/15 shadow-sm space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  accept=".xlsx, .xls"
-                  className="hidden"
-                />
-                <Button
-                  onClick={() => fileInputRef.current?.click()}
-                  variant="primary"
-                  className="!rounded-xl"
-                >
-                  <Icon name="upload_file" size="sm" />
-                  <span>Upload Excel Transaksi</span>
-                </Button>
+        {/* ================= TAB 1: LOG TRANSAKSI KAS ================= */}
+        {activeTab === "LOG" && (
+          <div className="space-y-6">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                  <Icon name="arrow_downward" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">Total Pemasukan</p>
+                  <p className="text-lg font-black text-emerald-600 font-display">{formatRupiah(summary.totalPemasukan)}</p>
+                </div>
+              </div>
 
-                <Button
-                  onClick={() => setShowManualModal(true)}
-                  variant="outline"
-                  className="!rounded-xl"
-                >
-                  <Icon name="add" size="sm" />
-                  <span>Tambah Manual</span>
-                </Button>
+              <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+                  <Icon name="arrow_upward" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">Total Pengeluaran</p>
+                  <p className="text-lg font-black text-rose-600 font-display">{formatRupiah(summary.totalPengeluaran)}</p>
+                </div>
+              </div>
 
-                {records.length > 0 && (
-                  <button
-                    onClick={() => setShowClearAllConfirm(true)}
-                    className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1 px-3 py-2 cursor-pointer"
-                  >
-                    <Icon name="delete_sweep" size="sm" />
-                    <span>Reset Log</span>
+              <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                  <Icon name="account_balance" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">Saldo Akhir</p>
+                  <p className="text-lg font-black text-secondary font-display">{formatRupiah(summary.saldoAkhir)}</p>
+                </div>
+              </div>
+
+              <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+                  <Icon name="format_list_bulleted" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">Total Transaksi</p>
+                  <p className="text-lg font-black text-primary font-display">{summary.totalTransaksi} Record</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Toolbar */}
+            <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/15 shadow-sm space-y-4">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".xlsx, .xls" className="hidden" />
+                  <Button onClick={() => fileInputRef.current?.click()} variant="primary" size="sm">
+                    <Icon name="upload_file" size="sm" />
+                    <span>Upload Excel Transaksi</span>
+                  </Button>
+
+                  <Button onClick={() => setShowManualModal(true)} variant="outline" size="sm">
+                    <Icon name="add" size="sm" />
+                    <span>Tambah Manual</span>
+                  </Button>
+
+                  {records.length > 0 && (
+                    <button onClick={() => setShowClearAllConfirm(true)} className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1 px-3 py-2 cursor-pointer">
+                      <Icon name="delete_sweep" size="sm" />
+                      <span>Reset Log</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Exports */}
+                <div className="flex items-center gap-2">
+                  <Button onClick={handleExportExcel} variant="outline" size="sm">
+                    <Icon name="table_view" size="sm" className="text-emerald-600" />
+                    <span>Export Excel</span>
+                  </Button>
+                  <Button onClick={handleExportPDF} variant="outline" size="sm">
+                    <Icon name="picture_as_pdf" size="sm" className="text-rose-600" />
+                    <span>Export PDF</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Filter & Search */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-outline-variant/10">
+                <div className="relative flex-1">
+                  <Icon name="search" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40" size="sm" />
+                  <input type="text" placeholder="Cari transaksi berdasarkan keterangan / kategori..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-xl border border-outline-variant/20 bg-background text-xs font-medium text-primary focus:outline-none focus:border-secondary" />
+                </div>
+
+                <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl text-xs font-bold shrink-0">
+                  <button onClick={() => setTypeFilter("ALL")} className={`px-3 py-1.5 rounded-lg transition-all ${typeFilter === "ALL" ? "bg-background text-primary shadow-xs" : "text-on-surface-variant/60"}`}>
+                    Semua ({records.length})
                   </button>
-                )}
-              </div>
-
-              {/* Exports */}
-              <div className="flex items-center gap-2">
-                <Button onClick={handleExportExcel} variant="outline" size="sm">
-                  <Icon name="table_view" size="sm" className="text-emerald-600" />
-                  <span>Export Excel</span>
-                </Button>
-                <Button onClick={handleExportPDF} variant="outline" size="sm">
-                  <Icon name="picture_as_pdf" size="sm" className="text-rose-600" />
-                  <span>Export PDF</span>
-                </Button>
+                  <button onClick={() => setTypeFilter("IN")} className={`px-3 py-1.5 rounded-lg transition-all ${typeFilter === "IN" ? "bg-background text-emerald-600 shadow-xs" : "text-on-surface-variant/60"}`}>
+                    Masuk (IN)
+                  </button>
+                  <button onClick={() => setTypeFilter("OUT")} className={`px-3 py-1.5 rounded-lg transition-all ${typeFilter === "OUT" ? "bg-background text-rose-600 shadow-xs" : "text-on-surface-variant/60"}`}>
+                    Keluar (OUT)
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Filter & Search */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-outline-variant/10">
-              <div className="relative flex-1">
-                <Icon
-                  name="search"
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
-                  size="sm"
-                />
-                <input
-                  type="text"
-                  placeholder="Cari transaksi berdasarkan keterangan / kategori..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-outline-variant/20 bg-background text-xs font-medium text-primary focus:outline-none focus:border-secondary"
-                />
-              </div>
-
-              <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl text-xs font-bold shrink-0">
-                <button
-                  onClick={() => setTypeFilter("ALL")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    typeFilter === "ALL" ? "bg-background text-primary shadow-xs" : "text-on-surface-variant/60"
-                  }`}
-                >
-                  Semua ({records.length})
-                </button>
-                <button
-                  onClick={() => setTypeFilter("IN")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    typeFilter === "IN" ? "bg-background text-emerald-600 shadow-xs" : "text-on-surface-variant/60"
-                  }`}
-                >
-                  Masuk (IN)
-                </button>
-                <button
-                  onClick={() => setTypeFilter("OUT")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    typeFilter === "OUT" ? "bg-background text-rose-600 shadow-xs" : "text-on-surface-variant/60"
-                  }`}
-                >
-                  Keluar (OUT)
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Records Table */}
-          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 shadow-sm overflow-hidden">
-            {isLoading ? (
-              <div className="p-12 text-center text-xs font-bold text-on-surface-variant/60">
-                Memuat data kas...
-              </div>
-            ) : filteredRecords.length === 0 ? (
-              <div className="p-12 text-center space-y-3">
-                <Icon name="receipt_long" size="lg" className="text-on-surface-variant/30" />
-                <p className="text-xs font-bold text-on-surface-variant/60">
-                  Belum ada log transaksi kas. Unggah file Excel atau tambah manual.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-surface-container-low/60 border-b border-outline-variant/15 text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/70">
-                      <th className="p-4">No</th>
-                      <th className="p-4">Tanggal</th>
-                      <th className="p-4">Keterangan</th>
-                      <th className="p-4">Kategori</th>
-                      <th className="p-4">Tipe</th>
-                      <th className="p-4 text-right">Nominal</th>
-                      <th className="p-4 text-right">Saldo Akumulasi</th>
-                      <th className="p-4 text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-outline-variant/10 font-medium">
-                    {filteredRecords.map((r, idx) => {
-                      const isIncome = r.type === "IN";
-                      return (
-                        <tr key={r.id} className="hover:bg-surface-container-low/30 transition-colors">
-                          <td className="p-4 font-bold text-on-surface-variant/50">{idx + 1}</td>
-                          <td className="p-4 whitespace-nowrap text-on-surface-variant">
-                            {new Date(r.date).toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </td>
-                          <td className="p-4 font-bold text-primary max-w-xs truncate">{r.description}</td>
-                          <td className="p-4 text-on-surface-variant/70">{r.category || "Umum"}</td>
-                          <td className="p-4 whitespace-nowrap">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold ${
-                                isIncome
-                                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                                  : "bg-rose-500/10 text-rose-600 border border-rose-500/20"
-                              }`}
-                            >
-                              <Icon name={isIncome ? "arrow_downward" : "arrow_upward"} size="sm" className="!text-[12px]" />
-                              {isIncome ? "MASUK" : "KELUAR"}
-                            </span>
-                          </td>
-                          <td className={`p-4 text-right font-bold whitespace-nowrap ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
-                            {isIncome ? "+" : "-"}{formatRupiah(r.amount)}
-                          </td>
-                          <td className="p-4 text-right font-black text-primary whitespace-nowrap">
-                            {formatRupiah(r.balance)}
-                          </td>
-                          <td className="p-4 text-center">
-                            <button
-                              onClick={() => setDeleteLogTarget(r)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                              title="Hapus Transaksi"
-                            >
-                              <Icon name="delete" size="sm" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ================= TAB 2: UNPAID KAS (BELUM BAYAR) ================= */}
-      {activeTab === "UNPAID" && (
-        <div className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
-                <Icon name="person_remove" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">
-                  Belum Bayar
-                </p>
-                <p className="text-xl font-black text-rose-600 font-display">
-                  {unpaidSummary.totalBelumBayar} Anggota
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
-                <Icon name="payments" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">
-                  Total Tunggakan
-                </p>
-                <p className="text-xl font-black text-amber-600 font-display">
-                  {formatRupiah(unpaidSummary.totalTunggakan)}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                <Icon name="check_circle" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">
-                  Sudah Lunas
-                </p>
-                <p className="text-xl font-black text-emerald-600 font-display">
-                  {unpaidSummary.totalLunas} Anggota
-                </p>
-              </div>
+            {/* Records Table */}
+            <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 shadow-sm overflow-hidden">
+              {isLoading ? (
+                <div className="p-12 text-center text-xs font-bold text-on-surface-variant/60">Memuat data kas...</div>
+              ) : filteredRecords.length === 0 ? (
+                <div className="p-12 text-center space-y-3">
+                  <Icon name="receipt_long" size="lg" className="text-on-surface-variant/30" />
+                  <p className="text-xs font-bold text-on-surface-variant/60">Belum ada log transaksi kas. Unggah file Excel atau tambah manual.</p>
+                </div>
+              ) : (
+                <div className="w-full overflow-x-auto">
+                  <table className="min-w-[760px] w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-surface-container-low/60 border-b border-outline-variant/15 text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/70">
+                        <th className="p-4">No</th>
+                        <th className="p-4">Tanggal</th>
+                        <th className="p-4">Keterangan</th>
+                        <th className="p-4">Kategori</th>
+                        <th className="p-4">Tipe</th>
+                        <th className="p-4 text-right">Nominal</th>
+                        <th className="p-4 text-right">Saldo Akumulasi</th>
+                        <th className="p-4 text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/10 font-medium">
+                      {filteredRecords.map((r, idx) => {
+                        const isIncome = r.type === "IN"
+                        return (
+                          <tr key={r.id} className="hover:bg-surface-container-low/30 transition-colors">
+                            <td className="p-4 font-bold text-on-surface-variant/50">{idx + 1}</td>
+                            <td className="p-4 whitespace-nowrap text-on-surface-variant">
+                              {new Date(r.date).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </td>
+                            <td className="p-4 font-bold text-primary max-w-xs truncate">{r.description}</td>
+                            <td className="p-4 text-on-surface-variant/70">{r.category || "Umum"}</td>
+                            <td className="p-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold ${isIncome ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-rose-500/10 text-rose-600 border border-rose-500/20"}`}>
+                                <Icon name={isIncome ? "arrow_downward" : "arrow_upward"} size="sm" className="!text-[12px]" />
+                                {isIncome ? "MASUK" : "KELUAR"}
+                              </span>
+                            </td>
+                            <td className={`p-4 text-right font-bold whitespace-nowrap ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
+                              {isIncome ? "+" : "-"}
+                              {formatRupiah(r.amount)}
+                            </td>
+                            <td className="p-4 text-right font-black text-primary whitespace-nowrap">{formatRupiah(r.balance)}</td>
+                            <td className="p-4 text-center">
+                              <button onClick={() => setDeleteLogTarget(r)} className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer" title="Hapus Transaksi">
+                                <Icon name="delete" size="sm" />
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
+        )}
 
-          {/* Action Toolbar Unpaid */}
-          <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/15 shadow-sm space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <input
-                  type="file"
-                  ref={unpaidFileInputRef}
-                  onChange={handleUnpaidFileUpload}
-                  accept=".xlsx, .xls"
-                  className="hidden"
-                />
-                <Button
-                  onClick={() => unpaidFileInputRef.current?.click()}
-                  variant="primary"
-                  className="!rounded-xl"
-                >
-                  <Icon name="upload_file" size="sm" />
-                  <span>Upload Excel Belum Bayar</span>
-                </Button>
-
-                <Button
-                  onClick={() => setShowUnpaidModal(true)}
-                  variant="outline"
-                  className="!rounded-xl"
-                >
-                  <Icon name="person_add" size="sm" />
-                  <span>Tambah Anggota</span>
-                </Button>
+        {/* ================= TAB 2: UNPAID KAS (BELUM BAYAR) ================= */}
+        {activeTab === "UNPAID" && (
+          <div className="space-y-6">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+                  <Icon name="person_remove" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">Belum Bayar</p>
+                  <p className="text-xl font-black text-rose-600 font-display">{unpaidSummary.totalBelumBayar} Anggota</p>
+                </div>
               </div>
 
-              {/* Exports */}
-              <div className="flex items-center gap-2">
-                <Button onClick={handleExportUnpaidExcel} variant="outline" size="sm">
-                  <Icon name="table_view" size="sm" className="text-emerald-600" />
-                  <span>Export Excel</span>
-                </Button>
-                <Button onClick={handleExportUnpaidPDF} variant="outline" size="sm">
-                  <Icon name="picture_as_pdf" size="sm" className="text-rose-600" />
-                  <span>Export PDF</span>
-                </Button>
+              <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+                  <Icon name="payments" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">Total Tunggakan</p>
+                  <p className="text-xl font-black text-amber-600 font-display">{formatRupiah(unpaidSummary.totalTunggakan)}</p>
+                </div>
+              </div>
+
+              <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                  <Icon name="check_circle" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wider">Sudah Lunas</p>
+                  <p className="text-xl font-black text-emerald-600 font-display">{unpaidSummary.totalLunas} Anggota</p>
+                </div>
               </div>
             </div>
 
-            {/* Search & Filter */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-outline-variant/10">
-              <div className="relative flex-1">
-                <Icon
-                  name="search"
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
-                  size="sm"
-                />
-                <input
-                  type="text"
-                  placeholder="Cari nama anggota, NPM, divisi, atau periode..."
-                  value={unpaidSearch}
-                  onChange={(e) => setUnpaidSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-outline-variant/20 bg-background text-xs font-medium text-primary focus:outline-none focus:border-secondary"
-                />
+            {/* Action Toolbar Unpaid */}
+            <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/15 shadow-sm space-y-4">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <input type="file" ref={unpaidFileInputRef} onChange={handleUnpaidFileUpload} accept=".xlsx, .xls" className="hidden" />
+                  <Button onClick={() => unpaidFileInputRef.current?.click()} variant="primary" size="sm">
+                    <Icon name="upload_file" size="sm" />
+                    <span>Upload Excel Belum Bayar</span>
+                  </Button>
+
+                  <Button onClick={() => setShowUnpaidModal(true)} variant="outline" size="sm">
+                    <Icon name="person_add" size="sm" />
+                    <span>Tambah Anggota</span>
+                  </Button>
+                </div>
+
+                {/* Exports */}
+                <div className="flex items-center gap-2">
+                  <Button onClick={handleExportUnpaidExcel} variant="outline" size="sm">
+                    <Icon name="table_view" size="sm" className="text-emerald-600" />
+                    <span>Export Excel</span>
+                  </Button>
+                  <Button onClick={handleExportUnpaidPDF} variant="outline" size="sm">
+                    <Icon name="picture_as_pdf" size="sm" className="text-rose-600" />
+                    <span>Export PDF</span>
+                  </Button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl text-xs font-bold shrink-0">
-                <button
-                  onClick={() => setUnpaidStatusFilter("ALL")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    unpaidStatusFilter === "ALL" ? "bg-background text-primary shadow-xs" : "text-on-surface-variant/60"
-                  }`}
-                >
-                  Semua ({unpaidRecords.length})
-                </button>
-                <button
-                  onClick={() => setUnpaidStatusFilter("BELUM_BAYAR")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    unpaidStatusFilter === "BELUM_BAYAR" ? "bg-background text-rose-600 shadow-xs" : "text-on-surface-variant/60"
-                  }`}
-                >
-                  Belum Bayar ({unpaidSummary.totalBelumBayar})
-                </button>
-                <button
-                  onClick={() => setUnpaidStatusFilter("LUNAS")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    unpaidStatusFilter === "LUNAS" ? "bg-background text-emerald-600 shadow-xs" : "text-on-surface-variant/60"
-                  }`}
-                >
-                  Lunas ({unpaidSummary.totalLunas})
-                </button>
+              {/* Search & Filter */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-outline-variant/10">
+                <div className="relative flex-1">
+                  <Icon name="search" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40" size="sm" />
+                  <input type="text" placeholder="Cari nama anggota, NPM, divisi, atau periode..." value={unpaidSearch} onChange={(e) => setUnpaidSearch(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-xl border border-outline-variant/20 bg-background text-xs font-medium text-primary focus:outline-none focus:border-secondary" />
+                </div>
+
+                <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl text-xs font-bold shrink-0">
+                  <button onClick={() => setUnpaidStatusFilter("ALL")} className={`px-3 py-1.5 rounded-lg transition-all ${unpaidStatusFilter === "ALL" ? "bg-background text-primary shadow-xs" : "text-on-surface-variant/60"}`}>
+                    Semua ({unpaidRecords.length})
+                  </button>
+                  <button onClick={() => setUnpaidStatusFilter("BELUM_BAYAR")} className={`px-3 py-1.5 rounded-lg transition-all ${unpaidStatusFilter === "BELUM_BAYAR" ? "bg-background text-rose-600 shadow-xs" : "text-on-surface-variant/60"}`}>
+                    Belum Bayar ({unpaidSummary.totalBelumBayar})
+                  </button>
+                  <button onClick={() => setUnpaidStatusFilter("LUNAS")} className={`px-3 py-1.5 rounded-lg transition-all ${unpaidStatusFilter === "LUNAS" ? "bg-background text-emerald-600 shadow-xs" : "text-on-surface-variant/60"}`}>
+                    Lunas ({unpaidSummary.totalLunas})
+                  </button>
+                </div>
               </div>
             </div>
+
+            {/* Unpaid Table */}
+            <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 shadow-sm overflow-hidden">
+              {isLoading ? (
+                <div className="p-12 text-center text-xs font-bold text-on-surface-variant/60">Memuat data anggota belum bayar kas...</div>
+              ) : filteredUnpaid.length === 0 ? (
+                <div className="p-12 text-center space-y-3">
+                  <Icon name="check_circle" size="lg" className="text-emerald-500/40" />
+                  <p className="text-xs font-bold text-on-surface-variant/60">Tidak ada data anggota belum bayar kas. Silakan upload Excel atau tambah manual.</p>
+                </div>
+              ) : (
+                <div className="w-full overflow-x-auto">
+                  <table className="min-w-[760px] w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-surface-container-low/60 border-b border-outline-variant/15 text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/70">
+                        <th className="p-4">No</th>
+                        <th className="p-4">Nama Anggota</th>
+                        <th className="p-4">NPM</th>
+                        <th className="p-4">Divisi</th>
+                        <th className="p-4">Periode</th>
+                        <th className="p-4 text-right">Jumlah Tunggakan</th>
+                        <th className="p-4 text-center">Status</th>
+                        <th className="p-4 text-center">Aksi Status</th>
+                        <th className="p-4 text-center">Hapus</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/10 font-medium">
+                      {filteredUnpaid.map((r, idx) => {
+                        const isLunas = r.status === "LUNAS"
+                        return (
+                          <tr key={r.id} className="hover:bg-surface-container-low/30 transition-colors">
+                            <td className="p-4 font-bold text-on-surface-variant/50">{idx + 1}</td>
+                            <td className="p-4 font-bold text-primary">{r.member_name}</td>
+                            <td className="p-4 text-on-surface-variant">{r.npm || "-"}</td>
+                            <td className="p-4 text-on-surface-variant">{r.division || "-"}</td>
+                            <td className="p-4 font-bold text-secondary">{r.period}</td>
+                            <td className="p-4 text-right font-black text-rose-600 whitespace-nowrap">{formatRupiah(r.amount)}</td>
+                            <td className="p-4 text-center whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold ${isLunas ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-rose-500/10 text-rose-600 border border-rose-500/20"}`}>
+                                <Icon name={isLunas ? "check_circle" : "pending"} size="sm" className="!text-[12px]" />
+                                {isLunas ? "LUNAS" : "BELUM BAYAR"}
+                              </span>
+                            </td>
+                            <td className="p-4 text-center">
+                              <button onClick={() => handleToggleStatus(r)} className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all flex items-center justify-center gap-1 mx-auto ${isLunas ? "bg-rose-500/10 text-rose-600 hover:bg-rose-500/20" : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"}`}>
+                                <Icon name={isLunas ? "undo" : "check"} size="sm" />
+                                <span>{isLunas ? "Ubah Belum Bayar" : "Tandai Lunas"}</span>
+                              </button>
+                            </td>
+                            <td className="p-4 text-center">
+                              <button onClick={() => setDeleteUnpaidTarget(r)} className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer" title="Hapus Data Tunggakan">
+                                <Icon name="delete" size="sm" />
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
+        )}
 
-          {/* Unpaid Table */}
-          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/15 shadow-sm overflow-hidden">
-            {isLoading ? (
-              <div className="p-12 text-center text-xs font-bold text-on-surface-variant/60">
-                Memuat data anggota belum bayar kas...
-              </div>
-            ) : filteredUnpaid.length === 0 ? (
-              <div className="p-12 text-center space-y-3">
-                <Icon name="check_circle" size="lg" className="text-emerald-500/40" />
-                <p className="text-xs font-bold text-on-surface-variant/60">
-                  Tidak ada data anggota belum bayar kas. Silakan upload Excel atau tambah manual.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-surface-container-low/60 border-b border-outline-variant/15 text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/70">
-                      <th className="p-4">No</th>
-                      <th className="p-4">Nama Anggota</th>
-                      <th className="p-4">NPM</th>
-                      <th className="p-4">Divisi</th>
-                      <th className="p-4">Periode</th>
-                      <th className="p-4 text-right">Jumlah Tunggakan</th>
-                      <th className="p-4 text-center">Status</th>
-                      <th className="p-4 text-center">Aksi Status</th>
-                      <th className="p-4 text-center">Hapus</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-outline-variant/10 font-medium">
-                    {filteredUnpaid.map((r, idx) => {
-                      const isLunas = r.status === "LUNAS";
-                      return (
-                        <tr key={r.id} className="hover:bg-surface-container-low/30 transition-colors">
-                          <td className="p-4 font-bold text-on-surface-variant/50">{idx + 1}</td>
-                          <td className="p-4 font-bold text-primary">{r.member_name}</td>
-                          <td className="p-4 text-on-surface-variant">{r.npm || "-"}</td>
-                          <td className="p-4 text-on-surface-variant">{r.division || "-"}</td>
-                          <td className="p-4 font-bold text-secondary">{r.period}</td>
-                          <td className="p-4 text-right font-black text-rose-600 whitespace-nowrap">
-                            {formatRupiah(r.amount)}
-                          </td>
-                          <td className="p-4 text-center whitespace-nowrap">
-                            <span
-                              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold ${
-                                isLunas
-                                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                                  : "bg-rose-500/10 text-rose-600 border border-rose-500/20"
-                              }`}
-                            >
-                              <Icon name={isLunas ? "check_circle" : "pending"} size="sm" className="!text-[12px]" />
-                              {isLunas ? "LUNAS" : "BELUM BAYAR"}
-                            </span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <button
-                              onClick={() => handleToggleStatus(r)}
-                              className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all flex items-center justify-center gap-1 mx-auto ${
-                                isLunas
-                                  ? "bg-rose-500/10 text-rose-600 hover:bg-rose-500/20"
-                                  : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                              }`}
-                            >
-                              <Icon name={isLunas ? "undo" : "check"} size="sm" />
-                              <span>{isLunas ? "Ubah Belum Bayar" : "Tandai Lunas"}</span>
-                            </button>
-                          </td>
-                          <td className="p-4 text-center">
-                            <button
-                              onClick={() => setDeleteUnpaidTarget(r)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                              title="Hapus Data Tunggakan"
-                            >
-                              <Icon name="delete" size="sm" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        {/* Modal Manual Form - Log Transaksi */}
+        <Modal
+          isOpen={showManualModal}
+          onClose={() => setShowManualModal(false)}
+          size="md"
+          title="Tambah Transaksi Kas"
+          description="Catat mutasi pemasukan atau pengeluaran keuangan kas MDPTV"
+          headerIcon="account_balance_wallet"
+          footer={
+            <>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowManualModal(false)} disabled={isSubmitting}>
+                Batal
+              </Button>
+              <Button type="button" variant="primary" size="sm" onClick={handleManualSubmit as any} isLoading={isSubmitting}>
+                Simpan Transaksi
+              </Button>
+            </>
+          }
+        >
+          <form onSubmit={handleManualSubmit} className="space-y-4">
+            <DatePicker label="Tanggal Transaksi" required value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
 
-      {/* Modal Manual Form - Log Transaksi */}
-      <Modal
-        isOpen={showManualModal}
-        onClose={() => setShowManualModal(false)}
-        size="md"
-        title="Tambah Transaksi Kas"
-        description="Catat mutasi pemasukan atau pengeluaran keuangan kas MDPTV"
-        headerIcon="account_balance_wallet"
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowManualModal(false)}
-              disabled={isSubmitting}
-            >
-              Batal
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={handleManualSubmit as any}
-              isLoading={isSubmitting}
-            >
-              Simpan Transaksi
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleManualSubmit} className="space-y-4">
-          <DatePicker
-            label="Tanggal Transaksi"
-            required
-            value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-          />
+            <Input label="Keterangan Transaksi" required startIcon="description" placeholder="Misal: Uang Kas Bulan Januari" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
 
-          <Input
-            label="Keterangan Transaksi"
-            required
-            startIcon="description"
-            placeholder="Misal: Uang Kas Bulan Januari"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <Select
+                label="Tipe Transaksi"
+                startIcon="swap_horiz"
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as "IN" | "OUT" })}
+                options={[
+                  { label: "Masuk (IN)", value: "IN" },
+                  { label: "Keluar (OUT)", value: "OUT" },
+                ]}
+              />
 
-          <div className="grid sm:grid-cols-2 gap-3">
+              <Input label="Nominal (Rp)" required type="number" startIcon="payments" placeholder="20000" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} />
+            </div>
+
+            <Input label="Kategori" startIcon="category" placeholder="Kas Anggota, Peralatan, dll" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} />
+          </form>
+        </Modal>
+
+        {/* Modal Manual Form - Unpaid Kas */}
+        <Modal
+          isOpen={showUnpaidModal}
+          onClose={() => setShowUnpaidModal(false)}
+          size="md"
+          title="Tambah Anggota Belum Bayar"
+          description="Catat tagihan iuran kas anggota yang belum dibayarkan"
+          headerIcon="person_add"
+          footer={
+            <>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowUnpaidModal(false)} disabled={isSubmitting}>
+                Batal
+              </Button>
+              <Button type="button" variant="primary" size="sm" onClick={handleUnpaidSubmit as any} isLoading={isSubmitting}>
+                Simpan Tagihan
+              </Button>
+            </>
+          }
+        >
+          <form onSubmit={handleUnpaidSubmit} className="space-y-4">
+            {/* Quick Member Selector */}
             <Select
-              label="Tipe Transaksi"
-              startIcon="swap_horiz"
-              value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value as "IN" | "OUT" })}
+              label="Pilih dari Data Anggota Terdaftar (Otomatis Isi Data)"
+              startIcon="badge"
+              value={selectedMemberId}
+              placeholder="-- Cari & Pilih Anggota (Opsional) --"
+              onChange={(e) => {
+                const memId = e.target.value
+                setSelectedMemberId(memId)
+                const found = availableMembers.find((m) => m.id === memId)
+                if (found) {
+                  setUnpaidFormData((prev) => ({
+                    ...prev,
+                    member_name: found.name,
+                    npm: found.npm || "",
+                    division: found.division || "",
+                  }))
+                }
+              }}
               options={[
-                { label: "Masuk (IN)", value: "IN" },
-                { label: "Keluar (OUT)", value: "OUT" },
+                { label: "-- Reset / Input Manual Kosong --", value: "" },
+                ...availableMembers.map((m) => ({
+                  label: `${m.name} (${m.npm || "-"}) • ${m.division || "Umum"}`,
+                  value: m.id,
+                })),
               ]}
             />
 
-            <Input
-              label="Nominal (Rp)"
-              required
-              type="number"
-              startIcon="payments"
-              placeholder="20000"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-            />
-          </div>
+            <Input label="Nama Lengkap Anggota" required startIcon="person" placeholder="Masukkan nama anggota..." value={unpaidFormData.member_name} onChange={(e) => setUnpaidFormData({ ...unpaidFormData, member_name: e.target.value })} />
 
-          <Input
-            label="Kategori"
-            startIcon="category"
-            placeholder="Kas Anggota, Peralatan, dll"
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          />
-        </form>
-      </Modal>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <Input label="NPM" startIcon="badge" placeholder="2226250001" value={unpaidFormData.npm} onChange={(e) => setUnpaidFormData({ ...unpaidFormData, npm: e.target.value })} />
 
-      {/* Modal Manual Form - Unpaid Kas */}
-      <Modal
-        isOpen={showUnpaidModal}
-        onClose={() => setShowUnpaidModal(false)}
-        size="md"
-        title="Tambah Anggota Belum Bayar"
-        description="Catat tagihan iuran kas anggota yang belum dibayarkan"
-        headerIcon="person_add"
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowUnpaidModal(false)}
-              disabled={isSubmitting}
-            >
-              Batal
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={handleUnpaidSubmit as any}
-              isLoading={isSubmitting}
-            >
-              Simpan Tagihan
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleUnpaidSubmit} className="space-y-4">
-          {/* Quick Member Selector */}
-          <Select
-            label="Pilih dari Data Anggota Terdaftar (Otomatis Isi Data)"
-            startIcon="badge"
-            value={selectedMemberId}
-            placeholder="-- Cari & Pilih Anggota (Opsional) --"
-            onChange={(e) => {
-              const memId = e.target.value;
-              setSelectedMemberId(memId);
-              const found = availableMembers.find((m) => m.id === memId);
-              if (found) {
-                setUnpaidFormData((prev) => ({
-                  ...prev,
-                  member_name: found.name,
-                  npm: found.npm || "",
-                  division: found.division || "",
-                }));
+              <Input label="Divisi" startIcon="category" placeholder="Broadcasting, Tim Kreatif" value={unpaidFormData.division} onChange={(e) => setUnpaidFormData({ ...unpaidFormData, division: e.target.value })} />
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              <Input label="Periode / Bulan" required startIcon="event" placeholder="Januari 2026" value={unpaidFormData.period} onChange={(e) => setUnpaidFormData({ ...unpaidFormData, period: e.target.value })} />
+
+              <Input label="Jumlah Tunggakan (Rp)" type="number" startIcon="payments" placeholder="10000" value={unpaidFormData.amount} onChange={(e) => setUnpaidFormData({ ...unpaidFormData, amount: e.target.value })} />
+            </div>
+
+            <Select
+              label="Status Awal"
+              startIcon="flag"
+              value={unpaidFormData.status}
+              onChange={(e) =>
+                setUnpaidFormData({
+                  ...unpaidFormData,
+                  status: e.target.value as "BELUM_BAYAR" | "LUNAS",
+                })
               }
-            }}
-            options={[
-              { label: "-- Reset / Input Manual Kosong --", value: "" },
-              ...availableMembers.map((m) => ({
-                label: `${m.name} (${m.npm || "-"}) • ${m.division || "Umum"}`,
-                value: m.id,
-              })),
-            ]}
-          />
-
-          <Input
-            label="Nama Lengkap Anggota"
-            required
-            startIcon="person"
-            placeholder="Masukkan nama anggota..."
-            value={unpaidFormData.member_name}
-            onChange={(e) => setUnpaidFormData({ ...unpaidFormData, member_name: e.target.value })}
-          />
-
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Input
-              label="NPM"
-              startIcon="badge"
-              placeholder="2226250001"
-              value={unpaidFormData.npm}
-              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, npm: e.target.value })}
+              options={[
+                { label: "BELUM BAYAR", value: "BELUM_BAYAR" },
+                { label: "LUNAS", value: "LUNAS" },
+              ]}
             />
+          </form>
+        </Modal>
 
-            <Input
-              label="Divisi"
-              startIcon="category"
-              placeholder="Broadcasting, Tim Kreatif"
-              value={unpaidFormData.division}
-              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, division: e.target.value })}
-            />
-          </div>
+        {/* Delete Log Confirmation Modal */}
+        <ConfirmModal isOpen={Boolean(deleteLogTarget)} onClose={() => setDeleteLogTarget(null)} onConfirm={handleDeleteLogConfirm} title="Hapus Transaksi Kas" message={`Apakah Anda yakin ingin menghapus catatan transaksi "${deleteLogTarget?.description}"? Tindakan ini akan memperbarui kalkulasi akumulasi saldo.`} confirmText="Hapus Transaksi" variant="danger" />
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Input
-              label="Periode / Bulan"
-              required
-              startIcon="event"
-              placeholder="Januari 2026"
-              value={unpaidFormData.period}
-              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, period: e.target.value })}
-            />
+        {/* Delete Unpaid Confirmation Modal */}
+        <ConfirmModal isOpen={Boolean(deleteUnpaidTarget)} onClose={() => setDeleteUnpaidTarget(null)} onConfirm={handleDeleteUnpaidConfirm} title="Hapus Data Tunggakan Kas" message={`Apakah Anda yakin ingin menghapus data tagihan kas untuk "${deleteUnpaidTarget?.member_name}" (${deleteUnpaidTarget?.period})?`} confirmText="Hapus Tagihan" variant="danger" />
 
-            <Input
-              label="Jumlah Tunggakan (Rp)"
-              type="number"
-              startIcon="payments"
-              placeholder="10000"
-              value={unpaidFormData.amount}
-              onChange={(e) => setUnpaidFormData({ ...unpaidFormData, amount: e.target.value })}
-            />
-          </div>
-
-          <Select
-            label="Status Awal"
-            startIcon="flag"
-            value={unpaidFormData.status}
-            onChange={(e) =>
-              setUnpaidFormData({
-                ...unpaidFormData,
-                status: e.target.value as "BELUM_BAYAR" | "LUNAS",
-              })
-            }
-            options={[
-              { label: "BELUM BAYAR", value: "BELUM_BAYAR" },
-              { label: "LUNAS", value: "LUNAS" },
-            ]}
-          />
-        </form>
-      </Modal>
-
-      {/* Delete Log Confirmation Modal */}
-      <ConfirmModal
-        isOpen={Boolean(deleteLogTarget)}
-        onClose={() => setDeleteLogTarget(null)}
-        onConfirm={handleDeleteLogConfirm}
-        title="Hapus Transaksi Kas"
-        message={`Apakah Anda yakin ingin menghapus catatan transaksi "${deleteLogTarget?.description}"? Tindakan ini akan memperbarui kalkulasi akumulasi saldo.`}
-        confirmText="Hapus Transaksi"
-        variant="danger"
-      />
-
-      {/* Delete Unpaid Confirmation Modal */}
-      <ConfirmModal
-        isOpen={Boolean(deleteUnpaidTarget)}
-        onClose={() => setDeleteUnpaidTarget(null)}
-        onConfirm={handleDeleteUnpaidConfirm}
-        title="Hapus Data Tunggakan Kas"
-        message={`Apakah Anda yakin ingin menghapus data tagihan kas untuk "${deleteUnpaidTarget?.member_name}" (${deleteUnpaidTarget?.period})?`}
-        confirmText="Hapus Tagihan"
-        variant="danger"
-      />
-
-      {/* Reset All Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showClearAllConfirm}
-        onClose={() => setShowClearAllConfirm(false)}
-        onConfirm={handleResetAllConfirm}
-        title="Reset Seluruh Log Transaksi Kas"
-        message="⚠️ PERINGATAN: Semua riwayat transaksi kas akan dihapus secara permanen dari sistem. Anda yakin ingin melanjutkan?"
-        confirmText="Bersihkan Semua Log"
-        variant="danger"
-      />
+        {/* Reset All Confirmation Modal */}
+        <ConfirmModal isOpen={showClearAllConfirm} onClose={() => setShowClearAllConfirm(false)} onConfirm={handleResetAllConfirm} title="Reset Seluruh Log Transaksi Kas" message="⚠️ PERINGATAN: Semua riwayat transaksi kas akan dihapus secara permanen dari sistem. Anda yakin ingin melanjutkan?" confirmText="Bersihkan Semua Log" variant="danger" />
       </div>
     </div>
-  );
+  )
 }

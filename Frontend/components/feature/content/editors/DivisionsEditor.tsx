@@ -66,8 +66,8 @@ export default function DivisionsEditor() {
       <div>
         <div className="flex items-center justify-between mb-2 pt-2">
           <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40">Divisi ({divisions.divisions.length})</span>
-          <Button variant="none" size="none" onClick={addDivision} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider hover:bg-secondary/20 transition-all">
-            <Icon name="add" size="sm" className="!text-xs" /> Tambah Divisi
+          <Button variant="subtle" size="xs" onClick={addDivision} startIcon={<Icon name="add" size="sm" className="!text-xs" />}>
+            Tambah Divisi
           </Button>
         </div>
         
@@ -83,8 +83,8 @@ export default function DivisionsEditor() {
                     Divisi {i + 1}
                   </span>
                 </div>
-                <Button variant="none" size="none" onClick={() => removeDivision(i)} className="text-error/60 hover:text-error transition-colors">
-                  <Icon name="delete" size="sm" className="!text-sm" />
+                <Button variant="danger" size="xs" onClick={() => removeDivision(i)} className="!h-7 !px-2">
+                  <Icon name="delete" size="sm" className="!text-xs" />
                 </Button>
               </div>
 
@@ -153,8 +153,8 @@ export default function DivisionsEditor() {
                   <div key={fi} className="flex gap-2">
                     <input type="text" value={feat} onChange={(e) => { const d = [...divisions.divisions]; const feats = [...d[i].features]; feats[fi] = e.target.value; d[i] = { ...d[i], features: feats }; updateDivisions({ divisions: d }); }}
                       className="flex-1 px-3 py-2 rounded-lg border border-outline-variant/20 bg-surface-container-lowest text-xs text-primary focus:outline-none focus:border-secondary/40 transition-all" placeholder={`Fitur ${fi + 1}`} />
-                    <Button variant="none" size="none" onClick={() => removeFeature(i, fi)} className="shrink-0 text-error/60 hover:text-error transition-colors px-2">
-                      <Icon name="delete" size="sm" className="!text-sm" />
+                    <Button variant="danger" size="xs" onClick={() => removeFeature(i, fi)} className="shrink-0 !h-8 !px-2">
+                      <Icon name="delete" size="sm" className="!text-xs" />
                     </Button>
                   </div>
                 ))}
