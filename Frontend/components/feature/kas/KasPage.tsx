@@ -414,25 +414,61 @@ export default function KasPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
+        <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".xlsx, .xls" className="hidden" />
+        <input type="file" ref={unpaidFileInputRef} onChange={handleUnpaidFileUpload} accept=".xlsx, .xls" className="hidden" />
+
         {/* ── Page Header & Sub-Tab Switcher ────────────────────── */}
         <AdminPageHeader
           breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Uang Kas" }]}
           icon="payments"
-          title="Manajemen Uang Kas MDPTV"
-          description="Kelola transaksi pencatatan arus kas dan pendataan anggota yang belum membayar kas."
+          title="Uang Kas"
+          description="Kelola transaksi dan tunggakan kas."
           actions={
-            <div className="flex items-center gap-2 bg-surface-container-low p-1.5 rounded-2xl border border-outline-variant/15 text-xs font-bold">
-              <button type="button" onClick={() => setActiveTab("LOG")} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${activeTab === "LOG" ? "bg-secondary text-white shadow-sm" : "text-on-surface-variant/70 hover:text-primary hover:bg-background"}`}>
-                <Icon name="receipt_long" size="sm" />
-                <span>Log Transaksi</span>
-              </button>
-              <button type="button" onClick={() => setActiveTab("UNPAID")} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${activeTab === "UNPAID" ? "bg-secondary text-white shadow-sm" : "text-on-surface-variant/70 hover:text-primary hover:bg-background"}`}>
-                <Icon name="person_remove" size="sm" />
-                <span>Tunggakan ({unpaidSummary.totalBelumBayar})</span>
-              </button>
-            </div>
+            activeTab === "LOG" ? (
+              <>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
+                  Import Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportExcel} startIcon={<Icon name="download" size="sm" />}>
+                  Export Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportPDF} startIcon={<Icon name="picture_as_pdf" size="sm" />}>
+                  Export PDF
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setShowManualModal(true)} startIcon={<Icon name="add" size="sm" />}>
+                  Catat Kas
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={() => unpaidFileInputRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
+                  Import Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportUnpaidExcel} startIcon={<Icon name="download" size="sm" />}>
+                  Export Excel
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportUnpaidPDF} startIcon={<Icon name="picture_as_pdf" size="sm" />}>
+                  Export PDF
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setShowUnpaidModal(true)} startIcon={<Icon name="add" size="sm" />}>
+                  Tambah Tunggakan
+                </Button>
+              </>
+            )
           }
-        />
+        >
+          {/* Tab Selector placed below header */}
+          <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 text-xs font-bold w-fit">
+            <button type="button" onClick={() => setActiveTab("LOG")} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${activeTab === "LOG" ? "bg-secondary text-white shadow-xs" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+              <Icon name="receipt_long" size="sm" />
+              <span>Log Transaksi</span>
+            </button>
+            <button type="button" onClick={() => setActiveTab("UNPAID")} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${activeTab === "UNPAID" ? "bg-secondary text-white shadow-xs" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+              <Icon name="person_remove" size="sm" />
+              <span>Tunggakan ({unpaidSummary.totalBelumBayar})</span>
+            </button>
+          </div>
+        </AdminPageHeader>
 
         {/* ================= TAB 1: LOG TRANSAKSI KAS ================= */}
         {activeTab === "LOG" && (
@@ -547,8 +583,8 @@ export default function KasPage() {
                   <p className="text-xs font-bold text-on-surface-variant/60">Belum ada log transaksi kas. Unggah file Excel atau tambah manual.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                <div className="w-full overflow-x-auto">
+                  <table className="min-w-[760px] w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="bg-surface-container-low/60 border-b border-outline-variant/15 text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/70">
                         <th className="p-4">No</th>
@@ -699,8 +735,8 @@ export default function KasPage() {
                   <p className="text-xs font-bold text-on-surface-variant/60">Tidak ada data anggota belum bayar kas. Silakan upload Excel atau tambah manual.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                <div className="w-full overflow-x-auto">
+                  <table className="min-w-[760px] w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="bg-surface-container-low/60 border-b border-outline-variant/15 text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/70">
                         <th className="p-4">No</th>

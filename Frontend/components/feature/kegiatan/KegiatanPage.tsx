@@ -88,8 +88,8 @@ export default function KegiatanPage() {
           <AdminPageHeader
             breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Kegiatan & Event" }]}
             icon="event"
-            title="Kegiatan & Program Kerja"
-            description="Kelola jadwal program kerja studio, dokumentasi kegiatan, dan proposal kegiatan."
+            title="Kegiatan"
+            description="Kelola agenda, dokumentasi, dan proposal."
             actions={
               <>
                 <Button variant="outline" size="sm" onClick={() => excelImportRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>

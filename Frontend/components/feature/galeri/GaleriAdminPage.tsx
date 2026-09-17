@@ -84,16 +84,17 @@ export default function GaleriAdminPage() {
           <AdminPageHeader
             breadcrumbs={[{ label: "CMS & Media" }, { label: "Galeri Foto" }]}
             icon="photo_library"
-            title="Manajemen Galeri & Dokumentasi"
-            description={`Upload karya visual, momen kegiatan studio, dan kelola arsip foto (${items.length} foto tersimpan).`}
+            title="Galeri"
+            description={`Kelola dokumentasi foto • ${items.length} foto tersimpan`}
             actions={
               <div className="flex items-center gap-2">
-                <a href="/galeri" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:bg-surface-container-high text-xs font-semibold transition-all shrink-0">
-                  <Icon name="open_in_new" size="sm" className="!text-xs" />
-                  <span>Buka Galeri Publik</span>
+                <a href="/galeri" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" startIcon={<Icon name="open_in_new" size="sm" />}>
+                    Buka Galeri Publik
+                  </Button>
                 </a>
-                <Button variant="primary" size="sm" onClick={() => setShowForm(true)} startIcon={<Icon name="add_photo_alternate" size="sm" />}>
-                  Tambah Foto Baru
+                <Button variant="primary" size="sm" onClick={() => setShowForm(true)} startIcon={<Icon name="add" size="sm" />}>
+                  Tambah Foto
                 </Button>
               </div>
             }

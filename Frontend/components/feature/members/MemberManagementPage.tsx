@@ -131,8 +131,8 @@ export default function MemberManagementPage() {
           <AdminPageHeader
             breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Data Anggota" }]}
             icon="badge"
-            title="Data Anggota"
-            description="Daftar anggota aktif, pengurus inti, dan riwayat per angkatan."
+            title="Anggota"
+            description="Kelola anggota, pengurus, dan angkatan."
             actions={
               <>
                 <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>

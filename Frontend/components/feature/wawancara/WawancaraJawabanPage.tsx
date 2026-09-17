@@ -140,31 +140,31 @@ export default function WawancaraJawabanPage() {
         <AdminPageHeader
           breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara", href: "/admin/wawancara" }, { label: "Form Jawaban" }]}
           icon="edit_note"
-          title="Pengisian Jawaban Wawancara"
-          description={`Panggil calon anggota berstatus Interview dan simpan jawaban wawancara (Periode: Tahun ${selectedPeriod}).`}
+          title="Form Jawaban"
+          description={`Isi jawaban calon anggota • ${selectedPeriod}`}
           actions={
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Period Selector Tabs */}
-              <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-                {periods.map((p) => {
-                  const isSelected = selectedPeriod === p
-                  return (
-                    <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                      {p}
-                    </button>
-                  )
-                })}
-              </div>
-
-              <Link href="/admin/wawancara/log">
-                <Button variant="outline" size="sm">
-                  <Icon name="folder_shared" size="sm" />
-                  <span>Lihat Log Dokumentasi</span>
-                </Button>
-              </Link>
-            </div>
+            <Link href="/admin/wawancara/log">
+              <Button variant="outline" size="sm" startIcon={<Icon name="folder_shared" size="sm" />}>
+                Log Dokumentasi
+              </Button>
+            </Link>
           }
-        />
+        >
+          {/* Period Selector Tabs placed below header */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Pilih Periode:</span>
+            <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
+              {periods.map((p) => {
+                const isSelected = selectedPeriod === p
+                return (
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </AdminPageHeader>
 
         {/* Main Form */}
         <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant/15 shadow-sm space-y-6">

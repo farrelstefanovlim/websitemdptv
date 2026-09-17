@@ -13,13 +13,9 @@ import { useHydrated } from "@/hooks/useHydrated"
 import { exportToExcel, importFromExcel, ABSENSI_COLUMNS } from "@/lib/excel"
 import { toast } from "@/stores/toast.store"
 import ActionMenu from "@/components/ui/ActionMenu"
-
-import { createPortal } from "react-dom"
-import { usePortalTarget } from "@/hooks/usePortalTarget"
 import { formatDateDisplay, getToday } from "./utils"
 
 export default function AbsensiPage() {
-  const portalTarget = usePortalTarget("mobile-topbar-actions")
   const [selectedDate, setSelectedDate] = useState(getToday())
   const [showRekapModal, setShowRekapModal] = useState(false)
   const { members, records, setAttendance, fetchMembers, fetchRecords, toggleLockDate, isDateLocked } = useAttendanceStore()
@@ -86,60 +82,8 @@ export default function AbsensiPage() {
     )
   }
 
-  const topbarTitle = (
-    <div className="min-w-0 pr-2">
-      <h2 className="text-xs sm:text-sm font-bold text-primary truncate leading-tight">Rekap Absensi</h2>
-      <p className="text-[10px] text-on-surface-variant/60 truncate leading-tight mt-0.5">{formatDateDisplay(selectedDate)}</p>
-    </div>
-  )
-
-  const topbarActions = (
-    <div className="flex items-center gap-1 bg-surface-container-low border border-outline-variant/15 rounded-xl p-0.5 shadow-2xs">
-      <Button
-        variant="none"
-        size="none"
-        onClick={() => {
-          const d = new Date(selectedDate + "T00:00:00")
-          d.setDate(d.getDate() - 1)
-          setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`)
-        }}
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-lowest hover:text-primary transition-colors cursor-pointer shrink-0"
-        title="Hari Sebelumnya"
-      >
-        <Icon name="chevron_left" size="sm" className="!text-xs" />
-      </Button>
-
-      <div className="w-36 sm:w-44">
-        <DatePicker
-          value={selectedDate}
-          clearable={false}
-          showChevron={false}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="!py-0 !px-1.5 !h-7 w-full !border-none !shadow-none !bg-transparent !ring-0 text-center font-bold text-xs text-primary"
-        />
-      </div>
-
-      <Button
-        variant="none"
-        size="none"
-        onClick={() => {
-          const d = new Date(selectedDate + "T00:00:00")
-          d.setDate(d.getDate() + 1)
-          setSelectedDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`)
-        }}
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/60 hover:bg-surface-container-lowest hover:text-primary transition-colors cursor-pointer shrink-0"
-        title="Hari Berikutnya"
-      >
-        <Icon name="chevron_right" size="sm" className="!text-xs" />
-      </Button>
-    </div>
-  )
-
   return (
     <>
-      {hydrated && portalTarget && createPortal(topbarActions, portalTarget)}
-
-      {/* Content */}
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-[1440px] mx-auto space-y-6">
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
@@ -148,8 +92,8 @@ export default function AbsensiPage() {
           <AdminPageHeader
             breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Rekap Absensi" }]}
             icon="checklist"
-            title="Rekap Absensi Kegiatan"
-            description={`Presensi kehadiran kegiatan anggota MDPTV (${formatDateDisplay(selectedDate)}).`}
+            title="Absensi"
+            description={`Presensi anggota • ${formatDateDisplay(selectedDate)}`}
             badge={
               <div className="inline-flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1.5 rounded-2xl border border-outline-variant/15 shadow-2xs">
                 <Button
@@ -167,13 +111,7 @@ export default function AbsensiPage() {
                 </Button>
 
                 <div className="w-44 sm:w-52">
-                  <DatePicker
-                    value={selectedDate}
-                    clearable={false}
-                    showChevron={true}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="!py-1 !px-2.5 !h-8 w-full !border-none !shadow-none !bg-surface-container-lowest hover:!bg-surface-container-high rounded-xl text-center font-bold text-xs !ring-0 text-primary"
-                  />
+                  <DatePicker value={selectedDate} clearable={false} showChevron={true} onChange={(e) => setSelectedDate(e.target.value)} className="!py-1 !px-2.5 !h-8 w-full !border-none !shadow-none !bg-surface-container-lowest hover:!bg-surface-container-high rounded-xl text-center font-bold text-xs !ring-0 text-primary" />
                 </div>
 
                 <Button
@@ -193,14 +131,14 @@ export default function AbsensiPage() {
             }
             actions={
               <>
-                <Button variant={isLocked ? "outline" : "outline"} size="sm" onClick={() => toggleLockDate(selectedDate)} startIcon={<Icon name={isLocked ? "lock_open" : "lock"} size="sm" />}>
+                <Button variant="outline" size="sm" onClick={() => toggleLockDate(selectedDate)} startIcon={<Icon name={isLocked ? "lock_open" : "lock"} size="sm" />}>
                   {isLocked ? "Buka Kunci" : "Kunci Tanggal"}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
-                  Import
+                  Import Excel
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleExport} startIcon={<Icon name="download" size="sm" />}>
-                  Export Harian
+                  Export Excel
                 </Button>
                 <Button variant="primary" size="sm" onClick={() => setShowRekapModal(true)} startIcon={<Icon name="date_range" size="sm" />}>
                   Rekap Data

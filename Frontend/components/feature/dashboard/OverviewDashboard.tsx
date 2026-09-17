@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import Icon from "@/components/ui/Icon"
+import Button from "@/components/ui/Button"
 import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { dashboardService, DashboardMetrics } from "@/services/dashboard.service"
 import { useAuthStore } from "@/stores/auth.store"
@@ -140,8 +141,8 @@ export default function OverviewDashboard() {
       <AdminPageHeader
         breadcrumbs={[]}
         icon="space_dashboard"
-        title={`Selamat Datang, ${user?.username || "Admin"}`}
-        description={`${todayFormatted} • Pusat Pengelolaan & Operasional MDPTV`}
+        title="Dashboard"
+        description={`Selamat datang, ${user?.username || "Admin"} • ${todayFormatted}`}
         badge={
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -149,21 +150,23 @@ export default function OverviewDashboard() {
           </span>
         }
         actions={
-          <>
-            <Link href="/admin/absensi" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-surface-container-low text-primary border border-outline-variant/20 hover:border-secondary/40 hover:text-secondary transition-all">
-              <Icon name="today" size="sm" />
-              <span>Presensi</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href="/admin/absensi">
+              <Button variant="outline" size="sm" startIcon={<Icon name="today" size="sm" />}>
+                Presensi
+              </Button>
             </Link>
-            <Link href="/admin/kegiatan" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-surface-container-low text-primary border border-outline-variant/20 hover:border-secondary/40 hover:text-secondary transition-all">
-              <Icon name="event" size="sm" />
-              <span>Event Baru</span>
+            <Link href="/admin/kegiatan">
+              <Button variant="outline" size="sm" startIcon={<Icon name="event" size="sm" />}>
+                Event Baru
+              </Button>
             </Link>
-            <Link href="/admin/penerimaan" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-surface-container-low text-primary border border-outline-variant/20 hover:border-secondary/40 hover:text-secondary transition-all">
-              <Icon name="how_to_reg" size="sm" />
-              <span>Pelamar</span>
-              {pendingApplicants > 0 && <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-secondary text-white font-bold">{pendingApplicants}</span>}
+            <Link href="/admin/penerimaan">
+              <Button variant="outline" size="sm" startIcon={<Icon name="how_to_reg" size="sm" />} endIcon={pendingApplicants > 0 ? <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-secondary text-white font-bold">{pendingApplicants}</span> : undefined}>
+                Pelamar
+              </Button>
             </Link>
-          </>
+          </div>
         }
       />
 

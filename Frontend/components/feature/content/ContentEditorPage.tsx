@@ -67,16 +67,17 @@ export default function ContentEditorPage() {
           <AdminPageHeader
             breadcrumbs={[{ label: "CMS & Media" }, { label: "Konten Landing" }]}
             icon="edit_note"
-            title="Editor Konten Landing Page"
-            description="Kelola teks copywriting, gambar, divisi, FAQ, dan informasi website MDPTV."
+            title="Konten Landing"
+            description="Kelola teks, gambar, FAQ, dan informasi website."
             actions={
               <div className="flex items-center gap-2">
-                <Button variant="danger" size="sm" onClick={() => setShowResetAllConfirm(true)} startIcon={<Icon name="restart_alt" size="sm" />}>
+                <Button variant="outline" size="sm" onClick={() => setShowResetAllConfirm(true)} startIcon={<Icon name="restart_alt" size="sm" />}>
                   Reset Semua
                 </Button>
-                <a href="/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-secondary text-white text-xs font-semibold hover:brightness-110 shadow-xs transition-all shrink-0">
-                  <Icon name="open_in_new" size="sm" className="!text-xs" />
-                  <span>Buka Preview</span>
+                <a href="/" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" startIcon={<Icon name="open_in_new" size="sm" />}>
+                    Buka Preview
+                  </Button>
                 </a>
               </div>
             }

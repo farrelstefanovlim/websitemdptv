@@ -273,10 +273,37 @@ export default function WawancaraPage() {
         <AdminPageHeader
           breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara" }]}
           icon="quiz"
-          title="Wawancara Calon Anggota"
-          description={`Kelola pertanyaan wawancara, form penilaian, dan dokumentasi log (Periode: Tahun ${selectedPeriod}).`}
+          title="Wawancara"
+          description={`Kelola soal, penilaian, dan log • ${selectedPeriod}`}
           actions={
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0} startIcon={<Icon name="download" size="sm" />}>
+                Export Excel
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0} startIcon={<Icon name="picture_as_pdf" size="sm" />}>
+                Export PDF
+              </Button>
+            </div>
+          }
+        >
+          {/* Sub-selectors placed below header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+            {/* Main View Tabs */}
+            <div className="flex gap-4">
+              <button onClick={() => setActiveTab("INTERVIEW_FORM")} className={`pb-1.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "INTERVIEW_FORM" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
+                <Icon name="assignment" size="sm" />
+                <span>Form Pewawancaraan</span>
+              </button>
+
+              <button onClick={() => setActiveTab("DOCUMENTATION")} className={`pb-1.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "DOCUMENTATION" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
+                <Icon name="folder_shared" size="sm" />
+                <span>Dokumentasi & Log ({responses.length})</span>
+              </button>
+            </div>
+
+            {/* Period Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Periode:</span>
               <div className="flex bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 text-xs font-bold">
                 {periods.map((p) => (
                   <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${selectedPeriod === p ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
@@ -284,30 +311,7 @@ export default function WawancaraPage() {
                   </button>
                 ))}
               </div>
-
-              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0}>
-                <Icon name="download" size="sm" className="text-emerald-500" />
-                <span>Export Excel</span>
-              </Button>
-
-              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0}>
-                <Icon name="picture_as_pdf" size="sm" className="text-rose-500" />
-                <span>Export PDF</span>
-              </Button>
             </div>
-          }
-        >
-          {/* Main View Tabs: Form vs Documentation Log */}
-          <div className="flex gap-4 pt-1">
-            <button onClick={() => setActiveTab("INTERVIEW_FORM")} className={`pb-2 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "INTERVIEW_FORM" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
-              <Icon name="assignment" size="sm" />
-              <span>Form Pewawancaraan ({selectedPeriod})</span>
-            </button>
-
-            <button onClick={() => setActiveTab("DOCUMENTATION")} className={`pb-2 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "DOCUMENTATION" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
-              <Icon name="folder_shared" size="sm" />
-              <span>Dokumentasi & Log ({responses.length} Anggota)</span>
-            </button>
           </div>
         </AdminPageHeader>
 

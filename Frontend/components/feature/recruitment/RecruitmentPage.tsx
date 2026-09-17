@@ -118,12 +118,14 @@ export default function RecruitmentPage() {
       {/* Content */}
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-[1440px] mx-auto space-y-6">
+          <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+
           {/* ── Page Header ────────────────────────────────────── */}
           <AdminPageHeader
             breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Penerimaan" }]}
             icon="person_add"
-            title="Penerimaan Anggota Baru"
-            description={`Kelola pendaftaran calon anggota, seleksi berkas, dan status kelulusan (Periode: Tahun ${selectedPeriod}).`}
+            title="Penerimaan"
+            description={`Kelola pendaftaran dan seleksi • ${selectedPeriod}`}
             badge={
               announcementOpen && announcementPeriod === selectedPeriod ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/20">
@@ -133,26 +135,34 @@ export default function RecruitmentPage() {
               ) : undefined
             }
             actions={
-              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                {/* Period Tabs */}
-                <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto">
-                  {availablePeriods.map((p) => {
-                    const isSelected = p === selectedPeriod
-                    return (
-                      <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-highest"}`}>
-                        {p}
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {/* Add Period Button */}
-                <Button variant="outline" size="sm" onClick={() => setShowAddPeriodModal(true)} startIcon={<Icon name="add" size="xs" />} className="shrink-0 text-xs font-bold">
-                  <span>Periode Baru</span>
+              <>
+                <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
+                  Import Excel
                 </Button>
-              </div>
+                <Button variant="outline" size="sm" onClick={handleExport} startIcon={<Icon name="download" size="sm" />}>
+                  Export Excel
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setShowAddPeriodModal(true)} startIcon={<Icon name="add" size="sm" />}>
+                  Periode Baru
+                </Button>
+              </>
             }
-          />
+          >
+            {/* Period Selector Tabs placed below header */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Pilih Periode:</span>
+              <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto">
+                {availablePeriods.map((p) => {
+                  const isSelected = p === selectedPeriod
+                  return (
+                    <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-highest"}`}>
+                      {p}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </AdminPageHeader>
 
           {/* Top 3 Control Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

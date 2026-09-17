@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import SectionEditor from "@/components/feature/layoutEditor/SectionEditor"
 import SectionPreview from "@/components/feature/layoutEditor/SectionPreview"
 import Icon from "@/components/ui/Icon"
+import Button from "@/components/ui/Button"
 import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { useLayoutConfigStore } from "@/stores/layoutConfig.store"
 import { useHydrated } from "@/hooks/useHydrated"
@@ -33,21 +34,22 @@ export default function Page() {
         <AdminPageHeader
           breadcrumbs={[{ label: "CMS & Media" }, { label: "Layout Editor" }]}
           icon="dashboard_customize"
-          title="Layout Editor Halaman Utama"
-          description="Atur visibilitas, urutan tampilan section, dan pratinjau landing page MDPTV."
-          actions={
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low rounded-xl border border-outline-variant/10 shrink-0">
-                <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-                <span className="text-[11px] font-semibold text-on-surface-variant/70">
-                  {visibleCount}/{sections.length} Section Aktif
-                </span>
-              </div>
-              <a href="/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary text-white text-xs font-semibold hover:brightness-110 transition-all shrink-0 shadow-sm shadow-secondary/20">
-                <Icon name="open_in_new" size="sm" className="!text-xs" />
-                <span>Buka Preview</span>
-              </a>
+          title="Layout Editor"
+          description="Atur urutan dan visibilitas section."
+          badge={
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-low border border-outline-variant/10 shrink-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+              <span className="text-[11px] font-semibold text-on-surface-variant/70">
+                {visibleCount}/{sections.length} Section Aktif
+              </span>
             </div>
+          }
+          actions={
+            <a href="/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm" startIcon={<Icon name="open_in_new" size="sm" />}>
+                Buka Preview
+              </Button>
+            </a>
           }
         />
 

@@ -111,38 +111,39 @@ export default function WawancaraPertanyaanPage() {
           breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara", href: "/admin/wawancara" }, { label: "Pertanyaan" }]}
           icon="help_outline"
           title="Pertanyaan Wawancara"
-          description={`Buat dan atur soal pertanyaan wawancara (Pilihan Ganda / Essay) untuk calon anggota (Periode: Tahun ${selectedPeriod}).`}
+          description={`Kelola soal pilihan ganda dan essay • ${selectedPeriod}`}
           actions={
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Period Selector Tabs */}
-              <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-                {periods.map((p) => {
-                  const isSelected = selectedPeriod === p
-                  return (
-                    <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                      {p}
-                    </button>
-                  )
-                })}
-              </div>
-
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => {
-                  setEditingQuestion(null)
-                  setQuestionText("")
-                  setQuestionType("ESSAY")
-                  setOptionList(["Sangat Siap", "Cukup Siap", "Perlu Pertimbangan"])
-                  setShowQuestionModal(true)
-                }}
-              >
-                <Icon name="add" size="sm" />
-                <span>Buat Pertanyaan Baru</span>
-              </Button>
-            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setEditingQuestion(null)
+                setQuestionText("")
+                setQuestionType("ESSAY")
+                setOptionList(["Sangat Siap", "Cukup Siap", "Perlu Pertimbangan"])
+                setShowQuestionModal(true)
+              }}
+              startIcon={<Icon name="add" size="sm" />}
+            >
+              Buat Soal Baru
+            </Button>
           }
-        />
+        >
+          {/* Period Selector Tabs placed below header */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/50">Pilih Periode:</span>
+            <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
+              {periods.map((p) => {
+                const isSelected = selectedPeriod === p
+                return (
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </AdminPageHeader>
 
         {/* Main Questions Grid */}
         <div className="space-y-4">

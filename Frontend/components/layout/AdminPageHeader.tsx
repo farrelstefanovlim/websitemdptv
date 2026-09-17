@@ -35,7 +35,7 @@ export default function AdminPageHeader({ title, description, icon, iconClass = 
     <>
       {syncTopbarTitle && hydrated && mobileTitlePortalTarget && createPortal(topbarTitleElement, mobileTitlePortalTarget)}
 
-      <div className={`bg-surface-container-lowest border border-outline-variant/15 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4 ${className}`}>
+      <div className={`w-full min-w-0 overflow-hidden bg-surface-container-lowest border border-outline-variant/15 rounded-3xl p-4 sm:p-6 shadow-xs space-y-4 ${className}`}>
         {/* Top: Breadcrumbs & Badge */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1 border-b border-outline-variant/10">
           <Breadcrumb items={breadcrumbs} />
@@ -44,23 +44,23 @@ export default function AdminPageHeader({ title, description, icon, iconClass = 
 
         {/* Middle: Title, Description & Action Buttons */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5 min-w-0">
+          <div className="flex items-start gap-3.5 min-w-0 flex-1">
             {icon && (
               <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 border ${iconClass}`}>
                 <Icon name={icon} filled size="md" />
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2 flex-wrap">{title}</h1>
-              {description && <p className="text-xs sm:text-sm text-on-surface-variant/70 mt-1 font-medium leading-relaxed">{description}</p>}
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display break-words">{title}</h1>
+              {description && <p className="text-xs sm:text-sm text-on-surface-variant/70 mt-1 font-medium leading-relaxed break-words">{description}</p>}
             </div>
           </div>
 
-          {actions && <div className="flex items-center gap-2 flex-wrap shrink-0">{actions}</div>}
+          {actions && <div className="flex w-full lg:w-auto items-center gap-2 flex-wrap shrink-0">{actions}</div>}
         </div>
 
         {/* Bottom Slot: Sub-tabs, Period Switchers, or Search/Filters */}
-        {children && <div className="pt-2 border-t border-outline-variant/10">{children}</div>}
+        {children && <div className="w-full min-w-0 overflow-x-auto pt-3 border-t border-outline-variant/10 flex flex-wrap items-center justify-between gap-3">{children}</div>}
       </div>
     </>
   )

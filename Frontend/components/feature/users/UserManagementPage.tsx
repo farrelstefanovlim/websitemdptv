@@ -97,8 +97,8 @@ export default function UserManagementPage() {
           <AdminPageHeader
             breadcrumbs={[{ label: "Sistem & Akses" }, { label: "Manajemen User" }]}
             icon="manage_accounts"
-            title="Manajemen Akun Administrator"
-            description="Kelola data pengguna, hak akses peran (Superadmin / Admin), dan status akun."
+            title="Manajemen User"
+            description="Kelola akun dan hak akses admin."
             actions={
               <>
                 <Button variant="outline" size="sm" onClick={() => importRef.current?.click()} startIcon={<Icon name="upload" size="sm" />}>
