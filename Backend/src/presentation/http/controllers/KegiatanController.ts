@@ -11,7 +11,7 @@ export class KegiatanController {
 
       const kegiatans = await prisma.kegiatan.findMany({
         where,
-        include: { division: true, proposal_file: true },
+        include: { division: true, proposal_file: true, pic: true },
         orderBy: { event_date: "desc" },
       });
 
@@ -23,23 +23,71 @@ export class KegiatanController {
 
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { title, description, division_id, event_date, location, budget } = req.body;
-      const picId = (req as any).user?.id;
+      const { title, description, division_id, event_date, location, budget, pic, pic_name, status, notes } = req.body;
+      const userId = (req as any).user?.id;
 
       const kegiatan = await prisma.kegiatan.create({
         data: {
           title,
-          description,
+          description: description || null,
           division_id: division_id || null,
           event_date: new Date(event_date),
-          location,
-          budget,
-          pic_id: picId || null,
-          status: "draft",
-        }
+          location: location || null,
+          budget: budget || null,
+          pic_id: userId || null,
+          pic_name: pic || pic_name || null,
+          status: status || "draft",
+          notes: notes || null,
+        },
+        include: { division: true, proposal_file: true, pic: true }
       });
 
       res.status(201).json({ status: "success", data: kegiatan, message: "Kegiatan berhasil dibuat." });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { title, description, division_id, event_date, location, budget, pic, pic_name, status, notes } = req.body;
+
+      const updated = await prisma.kegiatan.update({
+        where: { id },
+        data: {
+          ...(title !== undefined && { title }),
+          ...(description !== undefined && { description }),
+          ...(division_id !== undefined && { division_id: division_id || null }),
+          ...(event_date !== undefined && { event_date: new Date(event_date) }),
+          ...(location !== undefined && { location }),
+          ...(budget !== undefined && { budget }),
+          ...((pic !== undefined || pic_name !== undefined) && { pic_name: pic || pic_name || null }),
+          ...(status !== undefined && { status }),
+          ...(notes !== undefined && { notes }),
+        },
+        include: { division: true, proposal_file: true, pic: true }
+      });
+
+      res.status(200).json({ status: "success", data: updated, message: "Kegiatan berhasil diperbarui." });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      await prisma.proposalFile.deleteMany({
+        where: { kegiatan_id: id }
+      });
+
+      await prisma.kegiatan.delete({
+        where: { id }
+      });
+
+      res.status(200).json({ status: "success", message: "Kegiatan berhasil dihapus." });
     } catch (error) {
       next(error);
     }
@@ -64,8 +112,6 @@ export class KegiatanController {
   public uploadProposal = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      // Placeholder: Di production, file akan diupload ke S3/Cloud Storage
-      // dan hanya URL yang disimpan di database
       const { file_name, file_type, file_size, file_url } = req.body;
 
       await prisma.proposalFile.upsert({

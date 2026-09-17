@@ -1,5 +1,22 @@
 export type RecruitmentStatus = "pending" | "interview" | "accepted" | "rejected";
 
+export interface InterviewAnswerItem {
+  question_id?: string;
+  question_text: string;
+  type?: string;
+  answer_text: string;
+}
+
+export interface InterviewResult {
+  id: string;
+  candidate_name: string;
+  interviewer_name?: string | null;
+  interview_date: string;
+  answers: InterviewAnswerItem[];
+  notes?: string | null;
+  year_period?: number;
+}
+
 export interface Applicant {
   id: string;
   name: string;
@@ -8,9 +25,28 @@ export interface Applicant {
   phone: string;
   division: string;
   motivation: string;
+  cv_url?: string | null;
+  portfolio_url?: string | null;
+  period: string;
   status: RecruitmentStatus;
   adminNote: string;
   appliedAt: string;
+  interviewResult?: InterviewResult | null;
+}
+
+export interface RecruitmentPeriodItem {
+  id: string;
+  period: string;
+  title?: string | null;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface RecruitmentPeriodResponse {
+  periods: string[];
+  activePeriod: string;
+  announcementPeriod: string;
+  details: RecruitmentPeriodItem[];
 }
 
 export const STATUS_LABELS: Record<RecruitmentStatus, string> = {

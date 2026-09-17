@@ -16,16 +16,23 @@ export function createRecruitmentRoutes(recruitmentController: RecruitmentContro
   // Public
   router.post("/apply", applyLimiter, recruitmentController.apply);
   router.get("/announcement", recruitmentController.getAnnouncement);
+  router.get("/periods", recruitmentController.getPeriods);
 
-  // Endpoint baru: Mengambil link WhatsApp di halaman RegistrationSuccess
+  // Endpoint: Mengambil link WhatsApp di halaman RegistrationSuccess
   router.get("/whatsapp-link", recruitmentController.getWhatsAppLink);
 
   // Protected (Admin/Superadmin)
   router.patch("/announcement/toggle", authMiddleware, recruitmentController.toggleAnnouncement);
   router.get("/applicants", authMiddleware, recruitmentController.getApplicants);
   router.patch("/applicants/:id/status", authMiddleware, recruitmentController.updateStatus);
+  router.delete("/applicants/:id", authMiddleware, recruitmentController.deleteApplicant);
 
-  // Endpoint baru: Admin menyimpan link WhatsApp dari dashboard
+  // Periode Penerimaan
+  router.post("/periods", authMiddleware, recruitmentController.createPeriod);
+  router.patch("/periods/active", authMiddleware, recruitmentController.setActivePeriod);
+  router.delete("/periods/:period", authMiddleware, recruitmentController.deletePeriod);
+
+  // Admin menyimpan link WhatsApp dari dashboard
   router.put("/whatsapp-link", authMiddleware, recruitmentController.updateWhatsAppLink);
   
   return router;

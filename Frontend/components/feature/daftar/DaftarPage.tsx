@@ -1,26 +1,26 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import Icon from "@/components/ui/Icon";
-import Button from "@/components/ui/Button";
-import Alert from "@/components/ui/Alert";
-import { useRecruitmentStore } from "@/stores/recruitment.store";
+import { useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import Icon from "@/components/ui/Icon"
+import Button from "@/components/ui/Button"
+import Alert from "@/components/ui/Alert"
+import { useRecruitmentStore } from "@/stores/recruitment.store"
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3
 
-import RegistrationClosed from "./RegistrationClosed";
-import RegistrationSuccess from "./RegistrationSuccess";
-import StepDataDiri from "./form/StepDataDiri";
-import StepPilihDivisi from "./form/StepPilihDivisi";
-import StepMotivasi from "./form/StepMotivasi";
+import RegistrationClosed from "./RegistrationClosed"
+import RegistrationSuccess from "./RegistrationSuccess"
+import StepDataDiri from "./form/StepDataDiri"
+import StepPilihDivisi from "./form/StepPilihDivisi"
+import StepMotivasi from "./form/StepMotivasi"
 
 export default function DaftarPage() {
-  const { addApplicant, registrationOpen, hasRegistered, isLoading, error: storeError } =
-    useRecruitmentStore();
-  const [step, setStep] = useState<Step>(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMSG, setErrorMSG] = useState<string | null>(null);
+  const { addApplicant, registrationOpen, hasRegistered, isLoading, error: storeError, selectedPeriod } = useRecruitmentStore()
+  const [step, setStep] = useState<Step>(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMSG, setErrorMSG] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     name: "",
@@ -29,35 +29,32 @@ export default function DaftarPage() {
     phone: "",
     division: "",
     motivation: "",
-  });
+    cv_url: "",
+    portfolio_url: "",
+  })
 
-  const set = (field: string, value: string) =>
-    setForm((f) => ({ ...f, [field]: value }));
+  const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }))
 
   const handleNext = () => {
-    setErrorMSG(null);
+    setErrorMSG(null)
     if (step === 1) {
-      if (!form.name.trim()) return setErrorMSG("Nama Lengkap wajib diisi!");
-      if (!form.npm.trim() || !/^\d+$/.test(form.npm.trim()))
-        return setErrorMSG("NPM wajib diisi dengan angka yang valid!");
-      if (!form.email.trim() || !/^[^\s@]+@mhs\.mdp\.ac\.id$/i.test(form.email.trim()))
-        return setErrorMSG("Gunakan format email kampus resmi (@mhs.mdp.ac.id)!");
-      if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone.trim().replace(/\D/g, "")))
-        return setErrorMSG("Nomor WhatsApp minimal 10 digit angka!");
-      setStep(2);
+      if (!form.name.trim()) return setErrorMSG("Nama Lengkap wajib diisi!")
+      if (!form.npm.trim() || !/^\d+$/.test(form.npm.trim())) return setErrorMSG("NPM wajib diisi dengan angka yang valid!")
+      if (!form.email.trim() || !/^[^\s@]+@mhs\.mdp\.ac\.id$/i.test(form.email.trim())) return setErrorMSG("Gunakan format email kampus resmi!")
+      if (!form.phone.trim() || !/^\d{10,}$/.test(form.phone.trim().replace(/\D/g, ""))) return setErrorMSG("Nomor WhatsApp minimal 10 digit angka!")
+      setStep(2)
     } else if (step === 2) {
-      if (!form.division) return setErrorMSG("Silakan pilih salah satu Divisi terlebih dahulu!");
-      setStep(3);
+      if (!form.division) return setErrorMSG("Silakan pilih salah satu Divisi terlebih dahulu!")
+      setStep(3)
     }
-  };
+  }
 
   const attemptSubmit = async () => {
-    if (isLoading || isSubmitting) return;
-    setErrorMSG(null);
-    if (form.motivation.trim().length < 10)
-      return setErrorMSG("Motivasi harus diisi minimal 10 karakter!");
+    if (isLoading || isSubmitting) return
+    setErrorMSG(null)
+    if (form.motivation.trim().length < 10) return setErrorMSG("Motivasi harus diisi minimal 10 karakter!")
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       const success = await addApplicant({
         ...form,
@@ -65,21 +62,24 @@ export default function DaftarPage() {
         npm: form.npm.trim(),
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
-      });
+        period: selectedPeriod,
+        cv_url: form.cv_url.trim() || undefined,
+        portfolio_url: form.portfolio_url.trim() || undefined,
+      })
       if (!success) {
-        setErrorMSG("Pendaftaran gagal dikirim. Pastikan NPM/Email belum pernah terdaftar.");
+        setErrorMSG("Pendaftaran gagal dikirim. Pastikan NPM/Email belum pernah terdaftar.")
       }
     } catch {
-      setErrorMSG("Terjadi gangguan saat mengirim formulir. Coba lagi.");
+      setErrorMSG("Terjadi gangguan saat mengirim formulir. Coba lagi.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  if (hasRegistered) return <RegistrationSuccess />;
-  if (!registrationOpen) return <RegistrationClosed />;
+  if (hasRegistered) return <RegistrationSuccess />
+  if (!registrationOpen) return <RegistrationClosed />
 
-  const displayError = errorMSG || (step === 3 ? storeError : null);
+  const displayError = errorMSG || (step === 3 ? storeError : null)
 
   return (
     <div className="min-h-screen bg-background relative flex flex-col justify-between">
@@ -90,21 +90,16 @@ export default function DaftarPage() {
       {/* ── Top Studio Header ─────────────────────────────────── */}
       <header className="relative z-10 pt-6 pb-2 px-4 sm:px-8">
         <div className="max-w-xl mx-auto flex items-center justify-between">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-on-surface-variant/70 hover:text-primary transition-colors py-2"
-          >
+          <Link href="/" className="inline-flex items-center gap-2 text-xs font-semibold text-on-surface-variant/70 hover:text-primary transition-colors py-2">
             <Icon name="arrow_back" size="sm" className="!text-xs" />
             <span>Beranda</span>
           </Link>
 
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-secondary text-white flex items-center justify-center shadow-sm shadow-secondary/20">
-              <Icon name="tv" filled size="sm" className="!text-sm" />
+            <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
+              <Image src="/logo-mdptv.png" alt="MDPTV Logo" width={32} height={32} className="w-full h-full object-contain" />
             </div>
-            <span className="text-sm font-black tracking-tight text-primary font-display">
-              MDPTV
-            </span>
+            <span className="text-sm font-black tracking-tight text-primary font-display">MDPTV</span>
           </div>
         </div>
       </header>
@@ -119,33 +114,9 @@ export default function DaftarPage() {
               { num: 3, label: "Motivasi & Kirim" },
             ].map((s) => (
               <div key={s.num} className="flex-1 flex items-center gap-2">
-                <div
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                    step >= s.num
-                      ? "bg-secondary text-white shadow-sm shadow-secondary/30"
-                      : "bg-surface-container-high text-on-surface-variant/40"
-                  }`}
-                >
-                  {step > s.num ? (
-                    <Icon name="check" size="sm" className="!text-xs font-bold" />
-                  ) : (
-                    s.num
-                  )}
-                </div>
-                <span
-                  className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider hidden sm:block transition-colors ${
-                    step >= s.num ? "text-primary" : "text-on-surface-variant/30"
-                  }`}
-                >
-                  {s.label}
-                </span>
-                {s.num < 3 && (
-                  <div
-                    className={`flex-1 h-0.5 rounded-full transition-colors duration-300 ${
-                      step > s.num ? "bg-secondary" : "bg-outline-variant/15"
-                    }`}
-                  />
-                )}
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold transition-all duration-300 ${step >= s.num ? "bg-secondary text-white shadow-sm shadow-secondary/30" : "bg-surface-container-high text-on-surface-variant/40"}`}>{step > s.num ? <Icon name="check" size="sm" className="!text-xs font-bold" /> : s.num}</div>
+                <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider hidden sm:block transition-colors ${step >= s.num ? "text-primary" : "text-on-surface-variant/30"}`}>{s.label}</span>
+                {s.num < 3 && <div className={`flex-1 h-0.5 rounded-full transition-colors duration-300 ${step > s.num ? "bg-secondary" : "bg-outline-variant/15"}`} />}
               </div>
             ))}
           </div>
@@ -174,8 +145,8 @@ export default function DaftarPage() {
                   variant="outline"
                   size="none"
                   onClick={() => {
-                    setErrorMSG(null);
-                    setStep((s) => (s - 1) as Step);
+                    setErrorMSG(null)
+                    setStep((s) => (s - 1) as Step)
                   }}
                   className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center"
                 >
@@ -184,24 +155,11 @@ export default function DaftarPage() {
               )}
 
               {step < 3 ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="none"
-                  onClick={handleNext}
-                  className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center shadow-md shadow-secondary/20"
-                >
+                <Button type="button" variant="secondary" size="none" onClick={handleNext} className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center shadow-md shadow-secondary/20">
                   Selanjutnya
                 </Button>
               ) : (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="none"
-                  onClick={attemptSubmit}
-                  disabled={isSubmitting || isLoading}
-                  className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center shadow-lg shadow-secondary/30 disabled:opacity-50"
-                >
+                <Button type="button" variant="secondary" size="none" onClick={attemptSubmit} disabled={isSubmitting || isLoading} className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center shadow-lg shadow-secondary/30 disabled:opacity-50">
                   {isSubmitting || isLoading ? (
                     <span className="inline-flex items-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -218,15 +176,11 @@ export default function DaftarPage() {
             </div>
           </div>
 
-          <p className="text-center text-[10px] text-on-surface-variant/40 mt-5 px-4 font-medium">
-            Data pendaftaran hanya digunakan untuk kepentingan verifikasi seleksi internal UKM MDPTV Universitas Multi Data Palembang.
-          </p>
+          <p className="text-center text-[10px] text-on-surface-variant/40 mt-5 px-4 font-medium">Data pendaftaran hanya digunakan untuk kepentingan verifikasi seleksi internal UKM MDPTV Universitas Multi Data Palembang.</p>
         </div>
       </main>
 
-      <footer className="relative z-10 py-4 text-center text-xs text-on-surface-variant/40">
-        © {new Date().getFullYear()} MDPTV • Creative Media & Television
-      </footer>
+      <footer className="relative z-10 py-4 text-center text-xs text-on-surface-variant/40">© {new Date().getFullYear()} MDPTV • Creative Media & Television</footer>
     </div>
-  );
+  )
 }

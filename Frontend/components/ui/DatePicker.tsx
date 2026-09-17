@@ -1,30 +1,40 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useLayoutEffect, InputHTMLAttributes } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, InputHTMLAttributes, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Icon from "./Icon";
 import { motion, AnimatePresence } from "framer-motion";
 
 export interface DatePickerProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
   label?: string;
+  error?: string | null;
+  helperText?: string;
   containerClassName?: string;
   value?: string;
-  onChange?: (e: any) => void;
+  clearable?: boolean;
+  startIcon?: string | ReactNode;
+  onChange?: (e: { target: { value: string } }) => void;
 }
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
-const DAY_NAMES = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export default function DatePicker({
   label,
+  error,
+  helperText,
   className = "",
   containerClassName = "",
   value,
   onChange,
   disabled,
+  clearable = true,
+  startIcon,
+  required,
+  placeholder = "Pilih tanggal...",
   ...props
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,13 +56,12 @@ export default function DatePicker({
   const updatePosition = () => {
     if (buttonRef.current && isOpen) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const popupHeight = 350; // approximate height of the calendar popup
+      const popupHeight = 360;
       const isBottomSpace = window.innerHeight - rect.bottom > popupHeight;
       
       const desiredWidth = Math.max(300, rect.width);
       let newLeft = rect.left;
 
-      // Prevent X-overflow on mobile devices
       if (newLeft + desiredWidth > window.innerWidth - 16) {
         newLeft = window.innerWidth - desiredWidth - 16;
       }
@@ -61,7 +70,7 @@ export default function DatePicker({
       }
       
       setDropdownPos({
-        top: isBottomSpace ? rect.bottom + 8 : rect.top - 8 - popupHeight,
+        top: isBottomSpace ? rect.bottom + 6 : rect.top - 6 - popupHeight,
         left: newLeft,
         width: desiredWidth,
       });
@@ -81,8 +90,10 @@ export default function DatePicker({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (dropdownRef.current && !dropdownRef.current.contains(target) && 
-          buttonRef.current && !buttonRef.current.contains(target)) {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(target) &&
+        buttonRef.current && !buttonRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -93,12 +104,16 @@ export default function DatePicker({
   const handleDateSelect = (d: Date) => {
     setIsOpen(false);
     if (onChange) {
-      // format as YYYY-MM-DD
       const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
       onChange({ target: { value: `${y}-${m}-${day}` } });
     }
+  };
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onChange) onChange({ target: { value: "" } });
   };
 
   // Calendar logic
@@ -120,26 +135,19 @@ export default function DatePicker({
   };
 
   // Format display value
-  const displayValue = parsedValue 
-    ? `${parsedValue.getDate()} ${MONTH_NAMES[parsedValue.getMonth()].slice(0, 3)} ${parsedValue.getFullYear()}`
-    : "Pilih tanggal...";
-
-  const baseInputCls = `
-    w-full px-3 py-2.5 rounded-xl border border-outline-variant/20 
-    bg-surface-container-lowest text-sm text-primary font-medium
-    focus:outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/10 
-    transition-all text-left flex items-center justify-between hover:border-outline-variant/40 shadow-sm
-    ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-    ${isOpen ? "border-secondary/40 ring-2 ring-secondary/10 bg-surface-container-low" : ""}
-  `;
+  const displayValue = parsedValue && !isNaN(parsedValue.getTime())
+    ? `${parsedValue.getDate()} ${MONTH_NAMES[parsedValue.getMonth()]} ${parsedValue.getFullYear()}`
+    : "";
 
   return (
     <div className={`relative w-full ${containerClassName}`}>
       {label && (
-        <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 block mb-1.5">
+        <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 block mb-1.5">
           {label}
+          {required && <span className="text-rose-500 ml-0.5">*</span>}
         </label>
       )}
+
       <button
         ref={buttonRef}
         type="button"
@@ -148,26 +156,78 @@ export default function DatePicker({
           e.preventDefault();
           if (!disabled) {
             setIsOpen(!isOpen);
-            if (!isOpen && parsedValue) setViewDate(parsedValue);
+            if (!isOpen && parsedValue && !isNaN(parsedValue.getTime())) {
+              setViewDate(parsedValue);
+            }
           }
         }}
-        className={`${baseInputCls} ${className}`}
+        className={`
+          w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium
+          bg-surface-container-lowest text-primary text-left
+          flex items-center justify-between transition-all duration-200
+          focus:outline-none focus:ring-4
+          ${error 
+            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/10 text-rose-900" 
+            : "border-outline-variant/20 focus:border-secondary/50 focus:ring-secondary/10 hover:border-outline-variant/40"
+          }
+          ${disabled ? "opacity-50 cursor-not-allowed bg-surface-container-low" : "cursor-pointer"}
+          ${isOpen ? "border-secondary/50 ring-4 ring-secondary/10 bg-surface-container-low" : ""}
+          ${className}
+        `}
         {...(props as any)}
       >
-        <span className="truncate pr-4 leading-none">{displayValue}</span>
-        <div className={`text-on-surface-variant/40 transition-colors duration-300 ${isOpen ? "text-secondary" : ""}`}>
-          <Icon name="calendar_today" size="sm" />
+        <div className="flex items-center gap-2 truncate pr-2">
+          <span className="text-on-surface-variant/40 shrink-0">
+            {typeof startIcon === "string" ? (
+              <Icon name={startIcon} size="sm" />
+            ) : startIcon ? (
+              startIcon
+            ) : (
+              <Icon name="calendar_today" size="sm" />
+            )}
+          </span>
+          <span className={`truncate ${!displayValue ? "text-on-surface-variant/40 font-normal" : "text-primary font-medium"}`}>
+            {displayValue || placeholder}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          {clearable && value && !disabled && (
+            <div
+              onClick={handleClear}
+              className="w-5 h-5 rounded-md hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant/40 hover:text-rose-500 transition-colors"
+              title="Hapus Tanggal"
+            >
+              <Icon name="close" size="xs" />
+            </div>
+          )}
+          <div className={`text-on-surface-variant/40 transition-colors duration-200 ${isOpen ? "text-secondary" : ""}`}>
+            <Icon name="expand_more" size="sm" className={isOpen ? "rotate-180" : ""} />
+          </div>
         </div>
       </button>
+
+      {error && (
+        <p className="text-[11px] font-semibold text-rose-500 mt-1 flex items-center gap-1">
+          <Icon name="error" size="xs" />
+          <span>{error}</span>
+        </p>
+      )}
+
+      {!error && helperText && (
+        <p className="text-[10px] text-on-surface-variant/50 mt-1 leading-normal">
+          {helperText}
+        </p>
+      )}
 
       {typeof window !== "undefined" && createPortal(
         <AnimatePresence>
           {isOpen && (
             <motion.div
               ref={dropdownRef}
-              initial={{ opacity: 0, y: -5, scale: 0.98 }}
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -5, scale: 0.98 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
               style={{
                 position: "fixed",
@@ -175,40 +235,50 @@ export default function DatePicker({
                 left: dropdownPos.left,
                 width: dropdownPos.width,
               }}
-              className="z-[99999] bg-surface-container-lowest border border-outline-variant/15 rounded-xl shadow-2xl overflow-hidden p-4 backdrop-blur-xl"
+              className="z-[99999] bg-surface-container-lowest border border-outline-variant/15 rounded-2xl shadow-2xl overflow-hidden p-4 backdrop-blur-xl"
             >
-              <div className="flex items-center justify-between mb-4">
-                <button type="button" onClick={handlePrevMonth} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors">
+              <div className="flex items-center justify-between mb-3">
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors"
+                >
                   <Icon name="chevron_left" size="sm" />
                 </button>
-                <div className="text-sm font-bold text-primary">
+                <div className="text-xs font-bold text-primary">
                   {MONTH_NAMES[month]} {year}
                 </div>
-                <button type="button" onClick={handleNextMonth} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors">
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors"
+                >
                   <Icon name="chevron_right" size="sm" />
                 </button>
               </div>
               
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="grid grid-cols-7 gap-1 mb-2 border-b border-outline-variant/10 pb-1">
                 {DAY_NAMES.map((d) => (
-                  <div key={d} className="text-center text-[10px] sm:text-xs font-bold text-on-surface-variant/50 uppercase tracking-wider py-1">
+                  <div key={d} className="text-center text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-wider py-0.5">
                     {d}
                   </div>
                 ))}
               </div>
               
               <div className="grid grid-cols-7 gap-1">
-                {/* Previous month trailing days */}
                 {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                  <div key={`prev-${i}`} className="h-8 flex items-center justify-center text-xs text-on-surface-variant/20">
+                  <div key={`prev-${i}`} className="h-7.5 flex items-center justify-center text-xs text-on-surface-variant/20">
                     {daysInPrevMonth - firstDayOfMonth + i + 1}
                   </div>
                 ))}
 
-                {/* Current month days */}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const date = i + 1;
-                  const isSelected = parsedValue?.getDate() === date && parsedValue?.getMonth() === month && parsedValue?.getFullYear() === year;
+                  const isSelected = parsedValue && !isNaN(parsedValue.getTime()) &&
+                    parsedValue.getDate() === date &&
+                    parsedValue.getMonth() === month &&
+                    parsedValue.getFullYear() === year;
+                  
                   const today = new Date();
                   const isToday = today.getDate() === date && today.getMonth() === month && today.getFullYear() === year;
 
@@ -218,9 +288,9 @@ export default function DatePicker({
                       type="button"
                       onClick={() => handleDateSelect(new Date(year, month, date))}
                       className={`
-                        h-8 rounded-lg flex items-center justify-center text-xs transition-all relative
+                        h-7.5 rounded-lg flex items-center justify-center text-xs transition-all relative font-medium
                         ${isSelected 
-                          ? "bg-secondary text-white font-bold shadow-md shadow-secondary/20 scale-105" 
+                          ? "bg-secondary text-white font-bold shadow-xs shadow-secondary/30 scale-105" 
                           : "text-primary hover:bg-surface-container-low hover:font-bold"
                         }
                         ${!isSelected && isToday ? "text-secondary font-bold" : ""}
@@ -234,9 +304,8 @@ export default function DatePicker({
                   );
                 })}
 
-                {/* Next month leading days */}
                 {Array.from({ length: (7 - ((firstDayOfMonth + daysInMonth) % 7)) % 7 }).map((_, i) => (
-                  <div key={`next-${i}`} className="h-8 flex items-center justify-center text-xs text-on-surface-variant/20">
+                  <div key={`next-${i}`} className="h-7.5 flex items-center justify-center text-xs text-on-surface-variant/20">
                     {i + 1}
                   </div>
                 ))}

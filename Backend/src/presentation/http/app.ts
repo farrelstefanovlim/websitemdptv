@@ -1,6 +1,4 @@
 import express, { Express } from "express";
-import path from "path";
-import fs from "fs";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -12,11 +10,6 @@ export function createExpressApp(controllers: AppControllers): Express {
   const app = express();
 
   app.set("trust proxy", 1);
-
-  const uploadsDir = path.join(process.cwd(), "uploads");
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-  }
 
   // Helmet - Proteksi Web Vulnerability Standard
   app.use(helmet({
@@ -58,9 +51,6 @@ export function createExpressApp(controllers: AppControllers): Express {
   );
   app.use(express.json({ limit: "10mb" }));
   app.use(cookieParser());
-
-  // Serve uploaded files statically
-  app.use("/uploads", express.static(uploadsDir));
 
   // Rate limiting (Global)
   const globalLimiter = rateLimit({

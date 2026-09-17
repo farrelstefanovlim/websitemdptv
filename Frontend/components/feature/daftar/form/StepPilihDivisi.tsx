@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Icon from "@/components/ui/Icon";
+import Badge from "@/components/ui/Badge";
 import AnimateOnScroll from "@/components/ui/AnimateOnScroll";
 import { useSectionContentStore } from "@/stores/sectionContent.store";
 
@@ -94,9 +95,10 @@ export default function StepPilihDivisi({ selectedDivision, set, onEnter }: Prop
   return (
     <AnimateOnScroll variant="fadeUp">
       <div className="mb-6 text-left">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold uppercase tracking-wider mb-2">
-          <Icon name="diversity_3" size="sm" className="!text-xs" />
-          Langkah 2 dari 3
+        <div className="mb-2">
+          <Badge variant="default" size="sm" icon="diversity_3">
+            Langkah 2 dari 3
+          </Badge>
         </div>
         <h2 className="text-2xl sm:text-3xl font-black text-primary font-display mb-1">
           Pilih Spesialisasi Divisi
@@ -143,9 +145,9 @@ export default function StepPilihDivisi({ selectedDivision, set, onEnter }: Prop
                     {div.title}
                   </span>
                   {div.subtitle && (
-                    <span className="text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant/60">
+                    <Badge variant="neutral" size="sm">
                       {div.subtitle}
-                    </span>
+                    </Badge>
                   )}
                 </div>
 
@@ -171,7 +173,7 @@ export default function StepPilihDivisi({ selectedDivision, set, onEnter }: Prop
               <div
                 className={`w-6 h-6 rounded-full border-2 shrink-0 flex items-center justify-center transition-all mt-1 sm:mt-0 ${
                   isSelected
-                    ? "border-secondary bg-secondary shadow-sm shadow-secondary/30"
+                    ? "border-secondary bg-secondary shadow-xs shadow-secondary/30"
                     : "border-outline-variant/30 bg-surface-container-lowest"
                 }`}
               >

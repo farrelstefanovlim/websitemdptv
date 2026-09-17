@@ -15,7 +15,7 @@ export class KasController {
       let currentBalance = 0;
 
       // Hitung ulang akumulasi saldo secara berurutan
-      const formattedRecords = records.map((r) => {
+      const formattedRecords = records.map((r: any) => {
         const amt = r.amount || 0;
         const isIncome = r.type.toUpperCase() === "IN" || r.type.toLowerCase().includes("masuk") || r.type.toLowerCase().includes("pemasukan");
         
@@ -189,7 +189,7 @@ export class KasController {
       let totalBelumBayar = 0;
       let totalLunas = 0;
 
-      records.forEach((r) => {
+      records.forEach((r: any) => {
         if (r.status === "BELUM_BAYAR") {
           totalBelumBayar++;
           totalTunggakan += r.amount || 0;

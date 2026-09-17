@@ -8,10 +8,21 @@ const memberSchema = z.object({
   phone: z.string().optional().nullable(),
   email: z.string().optional().nullable(),
   division_id: z.string().uuid("Divisi tidak valid").optional().nullable(),
-  angkatan: z.number().int().min(2000, "Angkatan tidak valid"),
+  angkatan: z.number().int().min(2000, "Angkatan mahasiswa tidak valid").optional(),
+  tahun_masuk: z.number().int().min(2000, "Tahun masuk MDPTV tidak valid").optional(),
   is_core: z.boolean().optional(),
   is_active: z.boolean().optional(),
 });
+
+function deriveAngkatanFromNpm(npm?: string | null): number {
+  if (npm && npm.trim().length >= 2) {
+    const prefix = parseInt(npm.trim().substring(0, 2), 10);
+    if (!isNaN(prefix) && prefix >= 10 && prefix <= 99) {
+      return 2000 + prefix;
+    }
+  }
+  return new Date().getFullYear();
+}
 
 export class MemberController {
   async getAll(req: Request, res: Response) {
@@ -34,6 +45,13 @@ export class MemberController {
   async create(req: Request, res: Response) {
     try {
       const parsed = memberSchema.parse(req.body);
+      const angkatan = parsed.angkatan && parsed.angkatan >= 2000 
+        ? parsed.angkatan 
+        : deriveAngkatanFromNpm(parsed.npm);
+      const tahunMasuk = parsed.tahun_masuk && parsed.tahun_masuk >= 2000 
+        ? parsed.tahun_masuk 
+        : new Date().getFullYear();
+
       const newMember = await prisma.member.create({
         data: {
           full_name: parsed.full_name,
@@ -41,7 +59,8 @@ export class MemberController {
           phone: parsed.phone || null,
           email: parsed.email || null,
           division_id: parsed.division_id || null,
-          angkatan: parsed.angkatan,
+          angkatan,
+          tahun_masuk: tahunMasuk,
           is_core: parsed.is_core ?? false,
           is_active: parsed.is_active ?? true,
         },
@@ -81,10 +100,14 @@ export class MemberController {
   async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await prisma.member.delete({ where: { id } });
-      res.json({ success: true, message: "Berhasil menghapus Anggota" });
+      await prisma.$transaction([
+        prisma.attendanceRecord.deleteMany({ where: { member_id: id } }),
+        prisma.member.delete({ where: { id } }),
+      ]);
+      res.json({ success: true, message: "Berhasil menghapus Anggota beserta data absensinya" });
     } catch (error: any) {
-      res.status(400).json({ success: false, message: "Gagal menghapus anggota, mungkin masih tertaut ke absensi." });
+      console.error("[MemberController.delete] Error:", error);
+      res.status(500).json({ success: false, message: "Gagal menghapus data anggota." });
     }
   }
 

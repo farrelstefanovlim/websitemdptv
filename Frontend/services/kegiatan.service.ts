@@ -10,7 +10,7 @@ const mapKegiatan = (k: any): Kegiatan => ({
   date: k.event_date ? new Date(k.event_date).toISOString().split("T")[0] : "",
   location: k.location || "",
   status: k.status as KegiatanStatus,
-  pic: k.pic_user?.full_name || k.pic || "",
+  pic: k.pic_name || k.pic?.full_name || k.pic?.username || k.pic || "",
   budget: k.budget || "",
   proposal: k.proposal_file
     ? {
@@ -39,7 +39,28 @@ export const kegiatanService = {
     event_date: string;
     location?: string;
     budget?: string;
+    pic?: string;
+    pic_name?: string;
+    status?: string;
+    notes?: string;
   }) => api.post("/kegiatan", data),
+
+  /** Full update kegiatan */
+  update: (id: string, data: {
+    title?: string;
+    description?: string;
+    division_id?: string;
+    event_date?: string;
+    location?: string;
+    budget?: string;
+    pic?: string;
+    pic_name?: string;
+    status?: string;
+    notes?: string;
+  }) => api.put(`/kegiatan/${id}`, data),
+
+  /** Delete kegiatan */
+  delete: (id: string) => api.delete(`/kegiatan/${id}`),
 
   /** Update kegiatan status */
   updateStatus: (id: string, status: string, notes?: string) =>

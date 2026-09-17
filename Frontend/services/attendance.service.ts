@@ -11,6 +11,7 @@ const mapMember = (u: any): Member => ({
   division_id: u.division_id,
   division: u.division?.name || "Umum",
   angkatan: u.angkatan || 2024,
+  tahun_masuk: u.tahun_masuk || u.angkatan || 2026,
 });
 
 const mapRecord = (r: any): AttendanceRecord => ({

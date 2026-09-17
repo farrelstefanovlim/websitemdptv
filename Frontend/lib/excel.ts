@@ -76,10 +76,14 @@ export function importFromExcel(
 /* ── Preset column configs for each data type ──────── */
 
 export const MEMBERS_COLUMNS: Column[] = [
+  { key: "npm", header: "NPM" },
   { key: "name", header: "Nama Lengkap" },
+  { key: "email", header: "Email" },
+  { key: "phone", header: "No HP" },
   { key: "division", header: "Divisi" },
   { key: "category", header: "Kategori (Inti/Biasa)" },
-  { key: "angkatan", header: "Angkatan" },
+  { key: "angkatan", header: "Angkatan Mahasiswa" },
+  { key: "tahun_masuk", header: "Tahun Masuk MDPTV" },
   { key: "is_active", header: "Status Aktif" },
 ];
 
@@ -99,7 +103,10 @@ export const RECRUITMENT_COLUMNS: Column[] = [
   { key: "email", header: "Email" },
   { key: "phone", header: "Telepon" },
   { key: "division", header: "Divisi" },
+  { key: "period", header: "Periode" },
   { key: "motivation", header: "Motivasi" },
+  { key: "cv_url", header: "Link CV / Foto" },
+  { key: "portfolio_url", header: "Link Portofolio" },
   { key: "status", header: "Status" },
   { key: "adminNote", header: "Catatan Admin" },
   { key: "appliedAt", header: "Tanggal Daftar" },

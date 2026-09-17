@@ -5,9 +5,13 @@ import { memberService, type CreateMemberDto } from "@/services/member.service";
 export interface AppMember {
   id: string;
   name: string;
+  npm?: string;
+  phone?: string;
+  email?: string;
   division_id?: string;
   division: string;
   angkatan: number;
+  tahun_masuk?: number;
   is_core?: boolean;
   is_active: boolean;
 }

@@ -18,7 +18,7 @@ export default function CtaSection() {
   if (hydrated && !registrationOpen) return null;
 
   return (
-    <section className="py-20 sm:py-28 md:py-[160px] px-4 sm:px-6 md:px-[80px] relative" id="cta">
+    <section className="py-20 sm:py-28 md:py-[160px] px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 relative" id="cta">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent" />
 
       <AnimateOnScroll variant="scaleUp" duration={0.8}>

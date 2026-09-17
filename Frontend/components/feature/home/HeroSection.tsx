@@ -48,7 +48,7 @@ export default function HeroSection() {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-[80px] pt-32 pb-32">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pt-32 pb-32">
         <div className="max-w-5xl">
           <AnimateOnScroll variant="fadeDown" delay={0.2}>
             <Badge variant="glass" dot dotColor="bg-secondary animate-pulse" className="mb-8 sm:mb-10">
@@ -57,11 +57,11 @@ export default function HeroSection() {
           </AnimateOnScroll>
 
           <AnimateOnScroll variant="fadeUp" delay={0.4} duration={0.8}>
-            <h1 className="text-3xl sm:text-headline-lg-mobile md:text-[96px] md:leading-[0.92] text-white leading-[0.95] mb-8 sm:mb-10 flex flex-col gap-1 w-full max-w-[100vw] break-words">
-              <span className="font-black relative tracking-tight whitespace-normal sm:whitespace-nowrap break-words overflow-hidden">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white leading-[0.95] md:leading-[0.92] mb-6 sm:mb-10 flex flex-col gap-1 w-full max-w-[100vw] break-words">
+              <span className="font-black relative tracking-tight whitespace-normal break-words">
                 {h.titleLine1}
               </span>
-              <span className="font-extralight italic opacity-80 text-2xl sm:text-[36px] md:text-[72px] whitespace-normal sm:whitespace-nowrap break-words overflow-hidden">
+              <span className="font-extralight italic opacity-80 text-2xl sm:text-4xl md:text-5xl lg:text-6xl whitespace-normal break-words">
                 {h.titleLine2}
               </span>
             </h1>

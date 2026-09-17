@@ -9,6 +9,7 @@ export interface Member {
   division_id?: string;
   division: string;
   angkatan: number;
+  tahun_masuk?: number;
   is_core?: boolean;
   is_active?: boolean;
 }

@@ -5,6 +5,7 @@ import MemberModal from "./MemberModal";
 import { toast } from "@/stores/toast.store";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import ActionMenu from "@/components/ui/ActionMenu";
 import { useHydrated } from "@/hooks/useHydrated";
 import { createPortal } from "react-dom";
@@ -16,6 +17,7 @@ export default function MemberManagementPage() {
   const { members, fetchMembers, addMember, updateMember, removeMember, toggleActive } = useMemberStore();
   const hydrated = useHydrated();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; member: AppMember | null } | null>(null);
+  const [deleteTargetMember, setDeleteTargetMember] = useState<AppMember | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [categoryFilter, setCategoryFilter] = useState<"all" | "core" | "regular">("all");
@@ -29,10 +31,14 @@ export default function MemberManagementPage() {
 
   const handleExport = () => {
     const exportData = members.map((m) => ({
+      npm: m.npm || "-",
       name: m.name,
+      email: m.email || "-",
+      phone: m.phone || "-",
       division: m.division || "Umum",
       category: m.is_core ? "Pengurus Inti" : "Anggota Biasa",
       angkatan: m.angkatan,
+      tahun_masuk: m.tahun_masuk || m.angkatan || 2026,
       is_active: m.is_active ? "Aktif" : "Nonaktif",
     }));
     exportToExcel(exportData, MEMBERS_COLUMNS, "data_anggota_mdptv");
@@ -48,7 +54,7 @@ export default function MemberManagementPage() {
 
       let imported = 0;
       for (const row of rows) {
-        if (!row.name || !row.angkatan) continue;
+        if (!row.name) continue;
         let divId: string | undefined = undefined;
         if (row.division) {
           const matched = divList.find((d) => d.name.toLowerCase() === row.division.toLowerCase());
@@ -59,9 +65,28 @@ export default function MemberManagementPage() {
           row.category?.toLowerCase().includes("inti") ||
           row.category?.toLowerCase().includes("core");
 
+        let angkatanMhs = parseInt(row.angkatan);
+        if (isNaN(angkatanMhs) || angkatanMhs < 2000) {
+          if (row.npm && row.npm.trim().length >= 2) {
+            const prefix = parseInt(row.npm.trim().substring(0, 2), 10);
+            if (!isNaN(prefix) && prefix >= 10 && prefix <= 99) {
+              angkatanMhs = 2000 + prefix;
+            }
+          }
+        }
+        if (isNaN(angkatanMhs) || angkatanMhs < 2000) {
+          angkatanMhs = new Date().getFullYear();
+        }
+
+        const tahunMasukMdptv = parseInt(row.tahun_masuk) || new Date().getFullYear();
+
         await addMember({
           full_name: row.name,
-          angkatan: parseInt(row.angkatan) || new Date().getFullYear(),
+          npm: row.npm && row.npm !== "-" ? row.npm : undefined,
+          email: row.email && row.email !== "-" ? row.email : undefined,
+          phone: row.phone && row.phone !== "-" ? row.phone : undefined,
+          angkatan: angkatanMhs,
+          tahun_masuk: tahunMasukMdptv,
           is_core: isCore,
           is_active: row.is_active?.toLowerCase() !== "nonaktif",
           division_id: divId,
@@ -87,7 +112,9 @@ export default function MemberManagementPage() {
     const matchesSearch =
       !search ||
       m.name.toLowerCase().includes(search.toLowerCase()) ||
+      (m.npm && m.npm.toLowerCase().includes(search.toLowerCase())) ||
       String(m.angkatan).includes(search) ||
+      String(m.tahun_masuk || "").includes(search) ||
       (m.division && m.division.toLowerCase().includes(search.toLowerCase()));
 
     const matchesStatus =
@@ -122,8 +149,9 @@ export default function MemberManagementPage() {
       {hydrated && mobileTitlePortalTarget && createPortal(topbarTitle, mobileTitlePortalTarget)}
 
       <div className="p-4 sm:p-6 lg:p-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="max-w-[1440px] mx-auto space-y-6">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-4 sm:p-5 rounded-3xl border bg-surface-container-low border-outline-variant/15">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
@@ -314,9 +342,16 @@ export default function MemberManagementPage() {
                     </span>
                   )}
 
-                  {/* Angkatan / Tahun Masuk Badge */}
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/60">
-                    Angkatan: {m.angkatan}
+                  {/* Angkatan Mahasiswa Badge */}
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/60">
+                    <Icon name="school" size="sm" className="!text-[10px]" />
+                    Angkatan Mhs: {m.angkatan}
+                  </span>
+
+                  {/* Tahun Masuk MDPTV Badge */}
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200/60">
+                    <Icon name="event" size="sm" className="!text-[10px]" />
+                    MDPTV: {m.tahun_masuk || m.angkatan || 2026}
                   </span>
 
                   {/* Status Nonaktif Badge */}
@@ -327,7 +362,13 @@ export default function MemberManagementPage() {
                   )}
                 </div>
 
-                <div className="text-xs font-medium text-on-surface-variant/60 flex items-center gap-2">
+                <div className="text-xs font-medium text-on-surface-variant/60 flex items-center gap-3 flex-wrap">
+                  {m.npm && (
+                    <span className="inline-flex items-center gap-1 font-mono text-[11px] text-on-surface-variant/70">
+                      <Icon name="tag" size="sm" className="!text-xs text-on-surface-variant/40" />
+                      {m.npm}
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1">
                     <Icon name="diversity_3" size="sm" className="!text-xs text-on-surface-variant/40" />
                     {m.division || "Divisi Umum"}
@@ -363,9 +404,7 @@ export default function MemberManagementPage() {
                 <Button
                   variant="icon"
                   size="icon"
-                  onClick={() => {
-                    if (confirm(`Hapus anggota "${m.name}"?`)) removeMember(m.id);
-                  }}
+                  onClick={() => setDeleteTargetMember(m)}
                   className="hover:bg-rose-50 hover:text-rose-600 text-on-surface-variant/40"
                   title="Hapus Anggota"
                 >
@@ -375,6 +414,7 @@ export default function MemberManagementPage() {
             </div>
           ))}
         </div>
+        </div>
       </div>
 
       {modal && (
@@ -383,9 +423,13 @@ export default function MemberManagementPage() {
           onClose={() => setModal(null)}
           onSave={async (data) => {
             const mappedData = {
-              full_name: data.name,
+              full_name: data.full_name || data.name,
+              npm: data.npm || undefined,
+              email: data.email || undefined,
+              phone: data.phone || undefined,
               division_id: data.division_id && data.division_id !== "" ? data.division_id : undefined,
               angkatan: data.angkatan || new Date().getFullYear(),
+              tahun_masuk: data.tahun_masuk || new Date().getFullYear(),
               is_core: data.is_core ?? false,
               is_active: data.is_active ?? true,
             };
@@ -398,6 +442,23 @@ export default function MemberManagementPage() {
           }}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetMember)}
+        onClose={() => setDeleteTargetMember(null)}
+        onConfirm={async () => {
+          if (deleteTargetMember) {
+            await removeMember(deleteTargetMember.id);
+            toast.success(`Anggota "${deleteTargetMember.name}" berhasil dihapus.`);
+            setDeleteTargetMember(null);
+          }
+        }}
+        title="Hapus Data Anggota"
+        message={`Apakah Anda yakin ingin menghapus data anggota "${deleteTargetMember?.name}"? Data kehadiran dan riwayat anggota ini akan ikut terhapus.`}
+        confirmText="Hapus Anggota"
+        variant="danger"
+      />
     </>
   );
 }
