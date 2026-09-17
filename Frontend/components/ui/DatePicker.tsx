@@ -13,6 +13,8 @@ export interface DatePickerProps extends Omit<InputHTMLAttributes<HTMLInputEleme
   value?: string;
   clearable?: boolean;
   startIcon?: string | ReactNode;
+  showChevron?: boolean;
+  formatDisplay?: (date: Date) => string;
   onChange?: (e: { target: { value: string } }) => void;
 }
 
@@ -21,6 +23,21 @@ const MONTH_NAMES = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+function parseDateSafe(val?: string): Date | null {
+  if (!val || typeof val !== "string") return null;
+  const parts = val.split("-");
+  if (parts.length === 3) {
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+      return new Date(y, m, d);
+    }
+  }
+  const d = new Date(val);
+  return !isNaN(d.getTime()) ? d : null;
+}
 
 export default function DatePicker({
   label,
@@ -33,6 +50,8 @@ export default function DatePicker({
   disabled,
   clearable = true,
   startIcon,
+  showChevron = true,
+  formatDisplay,
   required,
   placeholder = "Pilih tanggal...",
   ...props
@@ -42,16 +61,12 @@ export default function DatePicker({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
 
-  // Currently viewed month/year in the calendar
-  const [viewDate, setViewDate] = useState(() => {
-    if (typeof value === "string" && value) {
-      const d = new Date(value);
-      if (!isNaN(d.getTime())) return d;
-    }
-    return new Date();
-  });
+  const parsedValue = parseDateSafe(value);
 
-  const parsedValue = typeof value === "string" && value ? new Date(value) : null;
+  // Currently viewed month/year in the calendar
+  const [viewDate, setViewDate] = useState<Date>(() => {
+    return parseDateSafe(value) || new Date();
+  });
 
   const updatePosition = () => {
     if (buttonRef.current && isOpen) {
@@ -136,7 +151,9 @@ export default function DatePicker({
 
   // Format display value
   const displayValue = parsedValue && !isNaN(parsedValue.getTime())
-    ? `${parsedValue.getDate()} ${MONTH_NAMES[parsedValue.getMonth()]} ${parsedValue.getFullYear()}`
+    ? formatDisplay
+      ? formatDisplay(parsedValue)
+      : `${parsedValue.getDate()} ${MONTH_NAMES[parsedValue.getMonth()]} ${parsedValue.getFullYear()}`
     : "";
 
   return (
@@ -162,7 +179,7 @@ export default function DatePicker({
           }
         }}
         className={`
-          w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium
+          w-full px-3 py-2 rounded-xl border text-sm font-medium
           bg-surface-container-lowest text-primary text-left
           flex items-center justify-between transition-all duration-200
           focus:outline-none focus:ring-4
@@ -176,8 +193,8 @@ export default function DatePicker({
         `}
         {...(props as any)}
       >
-        <div className="flex items-center gap-2 truncate pr-2">
-          <span className="text-on-surface-variant/40 shrink-0">
+        <div className="flex items-center gap-2 truncate pr-1 flex-1 min-w-0">
+          <span className="text-secondary/70 shrink-0">
             {typeof startIcon === "string" ? (
               <Icon name={startIcon} size="sm" />
             ) : startIcon ? (
@@ -186,7 +203,7 @@ export default function DatePicker({
               <Icon name="calendar_today" size="sm" />
             )}
           </span>
-          <span className={`truncate ${!displayValue ? "text-on-surface-variant/40 font-normal" : "text-primary font-medium"}`}>
+          <span className={`truncate text-xs ${!displayValue ? "text-on-surface-variant/40 font-normal" : "text-primary font-bold"}`}>
             {displayValue || placeholder}
           </span>
         </div>
@@ -201,9 +218,11 @@ export default function DatePicker({
               <Icon name="close" size="xs" />
             </div>
           )}
-          <div className={`text-on-surface-variant/40 transition-colors duration-200 ${isOpen ? "text-secondary" : ""}`}>
-            <Icon name="expand_more" size="sm" className={isOpen ? "rotate-180" : ""} />
-          </div>
+          {showChevron && (
+            <div className={`text-on-surface-variant/40 transition-colors duration-200 ${isOpen ? "text-secondary" : ""}`}>
+              <Icon name="expand_more" size="sm" className={isOpen ? "rotate-180" : ""} />
+            </div>
+          )}
         </div>
       </button>
 

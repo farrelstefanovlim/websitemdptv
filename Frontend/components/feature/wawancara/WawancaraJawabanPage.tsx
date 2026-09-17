@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Icon from "@/components/ui/Icon"
 import Button from "@/components/ui/Button"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { toast } from "@/stores/toast.store"
 import { wawancaraService, InterviewQuestion } from "@/services/wawancara.service"
 import { recruitmentService } from "@/services/recruitment.service"
@@ -135,39 +136,35 @@ export default function WawancaraJawabanPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
-        {/* Header & Year Selector */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15 shadow-sm">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
-              <Icon name="edit_note" className="text-secondary" />
-              Pengisian Jawaban Wawancara ({selectedPeriod})
-            </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
-              Panggil nama calon anggota berstatus <b>Interview</b> dari Penerimaan atau ketik nama secara manual.
-            </p>
-          </div>
+        {/* ── Page Header ────────────────────────────────────── */}
+        <AdminPageHeader
+          breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara", href: "/admin/wawancara" }, { label: "Form Jawaban" }]}
+          icon="edit_note"
+          title="Pengisian Jawaban Wawancara"
+          description={`Panggil calon anggota berstatus Interview dan simpan jawaban wawancara (Periode: Tahun ${selectedPeriod}).`}
+          actions={
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Period Selector Tabs */}
+              <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
+                {periods.map((p) => {
+                  const isSelected = selectedPeriod === p
+                  return (
+                    <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                      {p}
+                    </button>
+                  )
+                })}
+              </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Period Selector Tabs */}
-            <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-              {periods.map((p) => {
-                const isSelected = selectedPeriod === p
-                return (
-                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                    {p}
-                  </button>
-                )
-              })}
+              <Link href="/admin/wawancara/log">
+                <Button variant="outline" size="sm">
+                  <Icon name="folder_shared" size="sm" />
+                  <span>Lihat Log Dokumentasi</span>
+                </Button>
+              </Link>
             </div>
-
-            <Link href="/admin/wawancara/log">
-              <Button variant="outline" size="sm">
-                <Icon name="folder_shared" size="sm" />
-                <span>Lihat Log Dokumentasi</span>
-              </Button>
-            </Link>
-          </div>
-        </div>
+          }
+        />
 
         {/* Main Form */}
         <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant/15 shadow-sm space-y-6">

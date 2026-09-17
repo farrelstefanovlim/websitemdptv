@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { useAuthStore } from "@/stores/auth.store"
+import { useHydrated } from "@/hooks/useHydrated"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
 import Alert from "@/components/ui/Alert"
@@ -12,10 +13,18 @@ import Icon from "@/components/ui/Icon"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, isLoading, error, clearError } = useAuthStore()
+  const { login, isLoading, error, clearError, isAuthenticated, accessToken } = useAuthStore()
+  const isHydrated = useHydrated()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+
+  useEffect(() => {
+    if (!isHydrated) return
+    if (isAuthenticated && accessToken) {
+      router.replace("/admin/dashboard")
+    }
+  }, [isHydrated, isAuthenticated, accessToken, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,6 +33,20 @@ export default function LoginPage() {
     if (success) {
       router.push("/admin/dashboard")
     }
+  }
+
+  if (!isHydrated || (isAuthenticated && accessToken)) {
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <svg className="animate-spin h-8 w-8 text-secondary" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-on-primary-container text-sm">Memverifikasi status login...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

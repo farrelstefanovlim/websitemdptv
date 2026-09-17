@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button"
 import Modal from "@/components/ui/Modal"
 import Badge from "@/components/ui/Badge"
 import ConfirmModal from "@/components/ui/ConfirmModal"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { toast } from "@/stores/toast.store"
 import { wawancaraService, InterviewQuestion, InterviewResponseLog } from "@/services/wawancara.service"
 import { exportToExcel } from "@/lib/excel"
@@ -139,40 +140,38 @@ export default function WawancaraLogPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
-        {/* Header & Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15 shadow-sm">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
-              <Icon name="folder_shared" className="text-secondary" />
-              Log Dokumentasi Wawancara ({selectedPeriod})
-            </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">Arsip & dokumentasi lengkap hasil wawancara anggota per tahun.</p>
-          </div>
+        {/* ── Page Header ────────────────────────────────────── */}
+        <AdminPageHeader
+          breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara", href: "/admin/wawancara" }, { label: "Log Dokumentasi" }]}
+          icon="folder_shared"
+          title="Log Dokumentasi Wawancara"
+          description={`Arsip & dokumentasi lengkap hasil penilaian wawancara calon anggota (Periode: Tahun ${selectedPeriod}).`}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Period Selector Tabs */}
+              <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
+                {periods.map((p) => {
+                  const isSelected = selectedPeriod === p
+                  return (
+                    <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                      {p}
+                    </button>
+                  )
+                })}
+              </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Period Selector Tabs */}
-            <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-              {periods.map((p) => {
-                const isSelected = selectedPeriod === p
-                return (
-                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                    {p}
-                  </button>
-                )
-              })}
+              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0}>
+                <Icon name="download" size="sm" className="text-emerald-500" />
+                <span>Export Excel</span>
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0}>
+                <Icon name="picture_as_pdf" size="sm" className="text-rose-500" />
+                <span>Export PDF</span>
+              </Button>
             </div>
-
-            <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0}>
-              <Icon name="download" size="sm" className="text-emerald-500" />
-              <span>Export Excel</span>
-            </Button>
-
-            <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0}>
-              <Icon name="picture_as_pdf" size="sm" className="text-rose-500" />
-              <span>Export PDF</span>
-            </Button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Toolbar: Search */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-lowest p-3.5 rounded-2xl border border-outline-variant/15">

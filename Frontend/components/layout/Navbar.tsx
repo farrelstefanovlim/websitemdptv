@@ -3,10 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import Icon from "@/components/ui/Icon"
-import Button from "@/components/ui/Button"
 
 import { useLayoutConfigStore } from "@/stores/layoutConfig.store"
 import { useSectionContentStore } from "@/stores/sectionContent.store"
@@ -23,7 +20,6 @@ export default function Navbar() {
   const [activeHash, setActiveHash] = useState("#home")
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const router = useRouter()
 
   const isLayoutLoading = useLayoutConfigStore((s) => s.isLoading)
   const isContentLoading = useSectionContentStore((s) => s.isLoading)
@@ -127,13 +123,6 @@ export default function Navbar() {
           <span className={`w-6 h-0.5 transition-all duration-300 ${isScrolled ? "bg-primary" : "bg-white"} ${mobileOpen ? "opacity-0" : ""}`} />
           <span className={`w-6 h-0.5 transition-all duration-300 ${isScrolled ? "bg-primary" : "bg-white"} ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </div>
-
-        {/* CTA — Desktop */}
-        <div className="hidden md:block">
-          <Button variant={isScrolled ? "primary" : "glass"} size="sm" onClick={() => router.push("/daftar")}>
-            Join Us
-          </Button>
-        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -156,17 +145,6 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
-            <Button
-              variant="primary"
-              size="md"
-              className="mt-2 w-full min-h-[48px]"
-              onClick={() => {
-                router.push("/daftar")
-                setMobileOpen(false)
-              }}
-            >
-              Join Us
-            </Button>
           </nav>
         </motion.div>
       )}

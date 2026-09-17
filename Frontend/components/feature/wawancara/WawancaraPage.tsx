@@ -8,6 +8,7 @@ import Textarea from "@/components/ui/Textarea"
 import Modal from "@/components/ui/Modal"
 import Badge from "@/components/ui/Badge"
 import ConfirmModal from "@/components/ui/ConfirmModal"
+import AdminPageHeader from "@/components/layout/AdminPageHeader"
 import { toast } from "@/stores/toast.store"
 import { wawancaraService, InterviewQuestion, InterviewResponseLog } from "@/services/wawancara.service"
 import { recruitmentService } from "@/services/recruitment.service"
@@ -48,11 +49,7 @@ export default function WawancaraPage() {
   const loadData = async (period: string) => {
     setIsLoading(true)
     try {
-      const [qRes, rRes, appRes] = await Promise.all([
-        wawancaraService.getQuestions(period),
-        wawancaraService.getResponses(period),
-        recruitmentService.fetchApplicants({ status: "interview", period }).catch(() => ({ applicants: [] })),
-      ])
+      const [qRes, rRes, appRes] = await Promise.all([wawancaraService.getQuestions(period), wawancaraService.getResponses(period), recruitmentService.fetchApplicants({ status: "interview", period }).catch(() => ({ applicants: [] }))])
 
       if (qRes.success) {
         setQuestions(qRes.data)
@@ -272,50 +269,47 @@ export default function WawancaraPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1440px] mx-auto space-y-6">
-        {/* Header & Year Selector */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
-              <Icon name="quiz" className="text-secondary" />
-              Wawancara Anggota Baru
-            </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">Kelola pertanyaan wawancara, isi jawaban anggota secara langsung, dan akses dokumentasi log per tahun.</p>
-          </div>
+        {/* ── Page Header ────────────────────────────────────── */}
+        <AdminPageHeader
+          breadcrumbs={[{ label: "Operasional & Anggota" }, { label: "Wawancara" }]}
+          icon="quiz"
+          title="Wawancara Calon Anggota"
+          description={`Kelola pertanyaan wawancara, form penilaian, dan dokumentasi log (Periode: Tahun ${selectedPeriod}).`}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 text-xs font-bold">
+                {periods.map((p) => (
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${selectedPeriod === p ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
 
-          {/* Year Log Selector Tabs & Export Controls */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 text-xs font-bold">
-              {periods.map((p) => (
-                <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${selectedPeriod === p ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                  {p}
-                </button>
-              ))}
+              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0}>
+                <Icon name="download" size="sm" className="text-emerald-500" />
+                <span>Export Excel</span>
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0}>
+                <Icon name="picture_as_pdf" size="sm" className="text-rose-500" />
+                <span>Export PDF</span>
+              </Button>
             </div>
+          }
+        >
+          {/* Main View Tabs: Form vs Documentation Log */}
+          <div className="flex gap-4 pt-1">
+            <button onClick={() => setActiveTab("INTERVIEW_FORM")} className={`pb-2 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "INTERVIEW_FORM" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
+              <Icon name="assignment" size="sm" />
+              <span>Form Pewawancaraan ({selectedPeriod})</span>
+            </button>
 
-            <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={responses.length === 0}>
-              <Icon name="download" size="sm" className="text-emerald-500" />
-              <span>Export Excel</span>
-            </Button>
-
-            <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={responses.length === 0}>
-              <Icon name="picture_as_pdf" size="sm" className="text-rose-500" />
-              <span>Export PDF</span>
-            </Button>
+            <button onClick={() => setActiveTab("DOCUMENTATION")} className={`pb-2 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === "DOCUMENTATION" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
+              <Icon name="folder_shared" size="sm" />
+              <span>Dokumentasi & Log ({responses.length} Anggota)</span>
+            </button>
           </div>
-        </div>
-
-        {/* Main View Tabs: Form vs Documentation Log */}
-        <div className="flex border-b border-outline-variant/15 gap-4">
-          <button onClick={() => setActiveTab("INTERVIEW_FORM")} className={`pb-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${activeTab === "INTERVIEW_FORM" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
-            <Icon name="assignment" size="sm" />
-            Form Pewawancaraan ({selectedPeriod})
-          </button>
-
-          <button onClick={() => setActiveTab("DOCUMENTATION")} className={`pb-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${activeTab === "DOCUMENTATION" ? "border-secondary text-secondary" : "border-transparent text-on-surface-variant/60 hover:text-primary"}`}>
-            <Icon name="folder_shared" size="sm" />
-            Dokumentasi & Log ({responses.length} Anggota)
-          </button>
-        </div>
+        </AdminPageHeader>
 
         {/* TAB 1: FORM PEWAWANCARAAN & MANAJEMEN PERTANYAAN */}
         {activeTab === "INTERVIEW_FORM" && (
