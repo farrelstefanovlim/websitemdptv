@@ -29,32 +29,32 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-on-primary hover:bg-secondary hover:text-on-secondary border-b-4 border-black/15 hover:border-secondary-container hover:shadow-lg hover:shadow-secondary/10",
+    "bg-primary text-on-primary hover:bg-secondary hover:text-on-secondary border border-transparent shadow-xs hover:shadow-md hover:shadow-secondary/20",
   secondary:
-    "bg-secondary text-on-secondary hover:brightness-110 hover:scale-[1.02] border-b-4 border-black/30 hover:shadow-lg hover:shadow-secondary/20",
+    "bg-secondary text-on-secondary hover:brightness-110 border border-transparent shadow-xs hover:shadow-md hover:shadow-secondary/25",
   outline:
-    "bg-white/80 backdrop-blur-xs text-primary border border-outline-variant/25 border-b-4 border-gray-200/80 hover:bg-secondary hover:text-on-secondary hover:border-secondary hover:shadow-lg hover:shadow-secondary/10",
+    "bg-surface-container-lowest text-primary border border-outline-variant/25 hover:bg-surface-container-low hover:border-secondary/50 hover:text-secondary shadow-xs",
   glass:
-    "glass-card-premium text-white border-b-4 border-white/8 hover:bg-white/12 hover:text-white",
+    "glass-card-premium text-white border border-white/15 hover:bg-white/15 hover:text-white shadow-xs",
   ghost:
-    "bg-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-primary",
+    "bg-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-primary border border-transparent",
   subtle:
     "bg-surface-container-low text-primary hover:bg-surface-container-high border border-outline-variant/15",
   danger:
-    "bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 hover:border-rose-300",
+    "bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 hover:border-rose-300 shadow-xs",
   success:
-    "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300",
+    "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300 shadow-xs",
   icon:
-    "bg-transparent text-on-surface-variant/60 hover:bg-surface-container-high hover:text-primary rounded-xl",
+    "bg-transparent text-on-surface-variant/70 hover:bg-surface-container-high hover:text-primary rounded-xl border border-transparent",
   none: "",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: "px-3 py-1.5 text-[11px] rounded-lg",
-  sm: "px-4 py-2 text-xs rounded-xl",
-  md: "px-6 py-3 text-sm rounded-2xl",
-  lg: "px-8 py-4 text-base rounded-2xl",
-  icon: "w-9 h-9 p-0 rounded-xl flex items-center justify-center shrink-0",
+  xs: "h-8 px-2.5 text-xs font-semibold rounded-lg",
+  sm: "h-9 px-3.5 text-xs font-semibold rounded-xl",
+  md: "h-10 px-4 text-sm font-semibold rounded-xl",
+  lg: "h-12 px-6 text-base font-semibold rounded-xl",
+  icon: "h-9 w-9 p-0 rounded-xl flex items-center justify-center shrink-0",
   none: "",
 };
 
@@ -75,15 +75,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const isIconOnly = size === "icon" || variant === "icon";
-
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
         className={`
           inline-flex items-center justify-center gap-2
-          ${isIconOnly ? "" : "font-bold uppercase tracking-wider"}
           transition-all duration-200 ease-out active:scale-95 select-none
           ${disabled || isLoading ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}
           ${fullWidth ? "w-full" : ""}

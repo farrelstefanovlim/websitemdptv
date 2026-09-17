@@ -15,20 +15,18 @@ import { periodToYear, useRecruitmentPeriods } from "@/hooks/useRecruitmentPerio
 
 export default function WawancaraLogPage() {
   const { periods, activePeriod } = useRecruitmentPeriods()
-  const [selectedYear, setSelectedYear] = useState<number>(periodToYear("2026/2027"))
-  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2027])
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("2026/2027")
   const [questions, setQuestions] = useState<InterviewQuestion[]>([])
   const [responses, setResponses] = useState<InterviewResponseLog[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [search, setSearch] = useState("")
   const [selectedResponseDetail, setSelectedResponseDetail] = useState<InterviewResponseLog | null>(null)
   const [deleteTargetResponse, setDeleteTargetResponse] = useState<InterviewResponseLog | null>(null)
-  const periodLabel = (year: number) => periods.find((period) => periodToYear(period) === year) || `${year}/${year + 1}`
 
-  const loadLogs = async (year: number) => {
+  const loadLogs = async (period: string) => {
     setIsLoading(true)
     try {
-      const [qRes, rRes] = await Promise.all([wawancaraService.getQuestions(year), wawancaraService.getResponses(year)])
+      const [qRes, rRes] = await Promise.all([wawancaraService.getQuestions(period), wawancaraService.getResponses(period)])
       if (qRes.success) setQuestions(qRes.data)
       if (rRes.success) setResponses(rRes.data)
     } catch (err) {
@@ -39,20 +37,19 @@ export default function WawancaraLogPage() {
   }
 
   useEffect(() => {
-    loadLogs(selectedYear)
-  }, [selectedYear])
+    loadLogs(selectedPeriod)
+  }, [selectedPeriod])
 
   useEffect(() => {
-    if (activePeriod) setSelectedYear(periodToYear(activePeriod))
-    if (periods.length > 0) setAvailableYears(periods.map(periodToYear))
-  }, [activePeriod, periods])
+    if (activePeriod) setSelectedPeriod(activePeriod)
+  }, [activePeriod])
 
   const handleDeleteResponseConfirm = async () => {
     if (!deleteTargetResponse) return
     try {
       await wawancaraService.deleteResponse(deleteTargetResponse.id)
       toast.success("Log hasil wawancara berhasil dihapus.")
-      await loadLogs(selectedYear)
+      await loadLogs(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menghapus log wawancara.")
     } finally {
@@ -98,7 +95,7 @@ export default function WawancaraLogPage() {
       return rowObj
     })
 
-    exportToExcel(exportRows, cols, `Dokumentasi_Wawancara_${selectedYear}_MDPTV`, `Wawancara ${selectedYear}`)
+    exportToExcel(exportRows, cols, `Dokumentasi_Wawancara_${selectedPeriod.replace(/[^a-zA-Z0-9]/g, "_")}_MDPTV`, `Wawancara ${selectedPeriod}`)
     toast.success("Dokumen Excel berhasil diekspor.")
   }
 
@@ -120,13 +117,13 @@ export default function WawancaraLogPage() {
     })
 
     exportToPDF({
-      title: `Dokumentasi Hasil Wawancara Anggota - Periode ${selectedYear}`,
+      title: `Dokumentasi Hasil Wawancara Anggota - Periode ${selectedPeriod}`,
       subtitle: `Total Peserta Terwawancara: ${responses.length} anggota`,
       headers,
       rows,
-      filename: `Dokumentasi_Wawancara_${selectedYear}`,
+      filename: `Dokumentasi_Wawancara_${selectedPeriod.replace(/[^a-zA-Z0-9]/g, "_")}`,
       summaryRows: [
-        { label: "Periode Log Wawancara", value: `Tahun ${selectedYear}` },
+        { label: "Periode Log Wawancara", value: `Periode ${selectedPeriod}` },
         { label: "Jumlah Soal Wawancara", value: `${questions.length} Soal` },
         { label: "Total Anggota Diwawancarai", value: `${responses.length} Orang` },
       ],
@@ -147,7 +144,7 @@ export default function WawancaraLogPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
               <Icon name="folder_shared" className="text-secondary" />
-              Log Dokumentasi Wawancara ({periodLabel(selectedYear)})
+              Log Dokumentasi Wawancara ({selectedPeriod})
             </h1>
             <p className="text-xs sm:text-sm text-on-surface-variant mt-1">Arsip & dokumentasi lengkap hasil wawancara anggota per tahun.</p>
           </div>
@@ -155,11 +152,11 @@ export default function WawancaraLogPage() {
           <div className="flex flex-wrap items-center gap-2">
             {/* Period Selector Tabs */}
             <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-              {availableYears.map((yr) => {
-                const isSelected = selectedYear === yr
+              {periods.map((p) => {
+                const isSelected = selectedPeriod === p
                 return (
-                  <button key={yr} type="button" onClick={() => setSelectedYear(yr)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                    Periode {periodLabel(yr)}
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
                   </button>
                 )
               })}
@@ -203,7 +200,7 @@ export default function WawancaraLogPage() {
         ) : filteredResponses.length === 0 ? (
           <div className="p-12 text-center bg-surface-container-lowest rounded-3xl border border-outline-variant/15 text-xs text-on-surface-variant flex flex-col items-center gap-3">
             <Icon name="folder_off" size="lg" className="text-on-surface-variant/30" />
-            <p className="font-semibold text-primary">Belum ada log dokumentasi wawancara untuk periode {periodLabel(selectedYear)}.</p>
+            <p className="font-semibold text-primary">Belum ada log dokumentasi wawancara untuk periode {selectedPeriod}.</p>
             <Link href="/admin/wawancara/jawaban">
               <Button variant="primary" size="sm">
                 <Icon name="edit_note" size="sm" />

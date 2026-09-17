@@ -329,18 +329,16 @@ export default function KegiatanPage() {
                       <div className="flex items-center gap-2 pt-2">
                         <Button
                           variant="outline"
-                          size="none"
+                          size="sm"
                           onClick={() => setModal({ mode: "edit", kegiatan: k })}
-                          className="px-3.5 py-2 text-xs font-semibold text-primary"
                         >
                           <Icon name="edit" size="sm" className="!text-xs" />
                           <span>Edit Kegiatan</span>
                         </Button>
                         <Button
                           variant="danger"
-                          size="none"
+                          size="sm"
                           onClick={() => setDeleteTargetKegiatan(k)}
-                          className="px-3.5 py-2 text-xs font-semibold"
                         >
                           <Icon name="delete" size="sm" className="!text-xs" />
                           <span>Hapus</span>

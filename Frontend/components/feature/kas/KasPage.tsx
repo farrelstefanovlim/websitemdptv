@@ -556,7 +556,7 @@ export default function KasPage() {
                 <Button
                   onClick={() => fileInputRef.current?.click()}
                   variant="primary"
-                  className="!rounded-xl"
+                  size="sm"
                 >
                   <Icon name="upload_file" size="sm" />
                   <span>Upload Excel Transaksi</span>
@@ -565,7 +565,7 @@ export default function KasPage() {
                 <Button
                   onClick={() => setShowManualModal(true)}
                   variant="outline"
-                  className="!rounded-xl"
+                  size="sm"
                 >
                   <Icon name="add" size="sm" />
                   <span>Tambah Manual</span>
@@ -784,7 +784,7 @@ export default function KasPage() {
                 <Button
                   onClick={() => unpaidFileInputRef.current?.click()}
                   variant="primary"
-                  className="!rounded-xl"
+                  size="sm"
                 >
                   <Icon name="upload_file" size="sm" />
                   <span>Upload Excel Belum Bayar</span>
@@ -793,7 +793,7 @@ export default function KasPage() {
                 <Button
                   onClick={() => setShowUnpaidModal(true)}
                   variant="outline"
-                  className="!rounded-xl"
+                  size="sm"
                 >
                   <Icon name="person_add" size="sm" />
                   <span>Tambah Anggota</span>

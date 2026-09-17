@@ -143,23 +143,23 @@ export default function DaftarPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="none"
+                  size="md"
                   onClick={() => {
                     setErrorMSG(null)
                     setStep((s) => (s - 1) as Step)
                   }}
-                  className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center"
+                  className="flex-1 justify-center"
                 >
                   Kembali
                 </Button>
               )}
 
               {step < 3 ? (
-                <Button type="button" variant="secondary" size="none" onClick={handleNext} className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center shadow-md shadow-secondary/20">
+                <Button type="button" variant="secondary" size="md" onClick={handleNext} className="flex-1 justify-center">
                   Selanjutnya
                 </Button>
               ) : (
-                <Button type="button" variant="secondary" size="none" onClick={attemptSubmit} disabled={isSubmitting || isLoading} className="flex-1 py-3.5 rounded-2xl text-xs sm:text-sm font-bold justify-center shadow-lg shadow-secondary/30 disabled:opacity-50">
+                <Button type="button" variant="secondary" size="md" onClick={attemptSubmit} disabled={isSubmitting || isLoading} className="flex-1 justify-center">
                   {isSubmitting || isLoading ? (
                     <span className="inline-flex items-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -68,19 +68,18 @@ export default function ContentEditorPage() {
   const topbarActions = (
     <div className="flex items-center gap-2">
       <Button
-        variant="none"
-        size="none"
+        variant="danger"
+        size="xs"
         onClick={() => setShowResetAllConfirm(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:bg-error/10 hover:text-error hover:border-error/30 text-xs font-semibold transition-all shrink-0 cursor-pointer"
+        startIcon={<Icon name="restart_alt" size="sm" className="!text-xs" />}
       >
-        <Icon name="restart_alt" size="sm" className="!text-xs" />
         <span className="hidden sm:inline">Reset All</span>
       </Button>
       <a
         href="/"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary text-white text-xs font-semibold hover:brightness-110 shadow-sm shadow-secondary/20 transition-all shrink-0"
+        className="inline-flex items-center justify-center gap-1.5 h-8 px-2.5 rounded-lg bg-secondary text-white text-xs font-semibold hover:brightness-110 shadow-xs transition-all shrink-0"
       >
         <Icon name="open_in_new" size="sm" className="!text-xs" />
         <span className="hidden sm:inline">Preview</span>

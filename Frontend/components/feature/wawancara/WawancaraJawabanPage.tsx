@@ -12,8 +12,7 @@ import { periodToYear, useRecruitmentPeriods } from "@/hooks/useRecruitmentPerio
 
 export default function WawancaraJawabanPage() {
   const { periods, activePeriod } = useRecruitmentPeriods()
-  const [selectedYear, setSelectedYear] = useState<number>(periodToYear("2026/2027"))
-  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2027])
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("2026/2027")
   const [questions, setQuestions] = useState<InterviewQuestion[]>([])
   const [interviewCandidates, setInterviewCandidates] = useState<Applicant[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -28,12 +27,11 @@ export default function WawancaraJawabanPage() {
   // Select2 Searchable Dropdown State
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const periodLabel = (year: number) => periods.find((period) => periodToYear(period) === year) || `${year}/${year + 1}`
 
-  const loadQuestions = async (year: number) => {
+  const loadQuestions = async (period: string) => {
     setIsLoading(true)
     try {
-      const qRes = await wawancaraService.getQuestions(year)
+      const qRes = await wawancaraService.getQuestions(period)
       if (qRes.success) {
         setQuestions(qRes.data)
       }
@@ -44,9 +42,9 @@ export default function WawancaraJawabanPage() {
     }
   }
 
-  const loadInterviewCandidates = async () => {
+  const loadInterviewCandidates = async (period: string) => {
     try {
-      const res = await recruitmentService.fetchApplicants({ status: "interview" })
+      const res = await recruitmentService.fetchApplicants({ status: "interview", period })
       if (res.applicants) {
         setInterviewCandidates(res.applicants)
       }
@@ -56,14 +54,13 @@ export default function WawancaraJawabanPage() {
   }
 
   useEffect(() => {
-    loadQuestions(selectedYear)
-    loadInterviewCandidates()
-  }, [selectedYear])
+    loadQuestions(selectedPeriod)
+    loadInterviewCandidates(selectedPeriod)
+  }, [selectedPeriod])
 
   useEffect(() => {
-    if (activePeriod) setSelectedYear(periodToYear(activePeriod))
-    if (periods.length > 0) setAvailableYears(periods.map(periodToYear))
-  }, [activePeriod, periods])
+    if (activePeriod) setSelectedPeriod(activePeriod)
+  }, [activePeriod])
 
   // Handle outside click for Select2 dropdown
   useEffect(() => {
@@ -96,7 +93,7 @@ export default function WawancaraJawabanPage() {
     }
 
     if (questions.length === 0) {
-      toast.warning("Belum ada pertanyaan wawancara untuk tahun ini. Silakan buat pertanyaan terlebih dahulu.")
+      toast.warning("Belum ada pertanyaan wawancara untuk periode ini. Silakan buat pertanyaan terlebih dahulu.")
       return
     }
 
@@ -110,7 +107,8 @@ export default function WawancaraJawabanPage() {
     setIsSubmitting(true)
     try {
       await wawancaraService.submitResponse({
-        year_period: selectedYear,
+        year_period: selectedPeriod,
+        period: selectedPeriod,
         candidate_name: candidateName.trim(),
         interviewer_name: interviewerName.trim(),
         answers: payloadAnswers,
@@ -121,7 +119,7 @@ export default function WawancaraJawabanPage() {
       setCandidateName("")
       setAnswers({})
       setInterviewNotes("")
-      loadInterviewCandidates() // Reload list jika ada perubahan
+      loadInterviewCandidates(selectedPeriod)
     } catch (err) {
       toast.error("Gagal menyimpan data jawaban wawancara.")
     } finally {
@@ -142,7 +140,7 @@ export default function WawancaraJawabanPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-primary font-display flex items-center gap-2">
               <Icon name="edit_note" className="text-secondary" />
-              Pengisian Jawaban Wawancara ({periodLabel(selectedYear)})
+              Pengisian Jawaban Wawancara ({selectedPeriod})
             </h1>
             <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
               Panggil nama calon anggota berstatus <b>Interview</b> dari Penerimaan atau ketik nama secara manual.
@@ -152,11 +150,11 @@ export default function WawancaraJawabanPage() {
           <div className="flex items-center gap-2 flex-wrap">
             {/* Period Selector Tabs */}
             <div className="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-2xl border border-outline-variant/15 overflow-x-auto text-xs font-bold">
-              {availableYears.map((yr) => {
-                const isSelected = selectedYear === yr
+              {periods.map((p) => {
+                const isSelected = selectedPeriod === p
                 return (
-                  <button key={yr} type="button" onClick={() => setSelectedYear(yr)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
-                    Periode {periodLabel(yr)}
+                  <button key={p} type="button" onClick={() => setSelectedPeriod(p)} className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${isSelected ? "bg-secondary text-white shadow-xs shadow-secondary/20" : "text-on-surface-variant/70 hover:text-primary hover:bg-surface-container-highest"}`}>
+                    {p}
                   </button>
                 )
               })}
@@ -276,7 +274,7 @@ export default function WawancaraJawabanPage() {
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-outline-variant/15 pb-3">
                 <h3 className="text-xs uppercase font-bold tracking-widest text-on-surface-variant/70">
-                  Pertanyaan Wawancara Periode {selectedYear} ({questions.length} Soal)
+                  Pertanyaan Wawancara Periode {selectedPeriod} ({questions.length} Soal)
                 </h3>
                 <Link href="/admin/wawancara/pertanyaan" className="text-xs text-secondary hover:underline font-bold">
                   + Ubah / Buat Soal
@@ -287,7 +285,7 @@ export default function WawancaraJawabanPage() {
                 <div className="p-8 text-center text-xs text-on-surface-variant">Memuat pertanyaan...</div>
               ) : questions.length === 0 ? (
                 <div className="p-8 text-center text-xs text-on-surface-variant/70 border border-dashed rounded-2xl space-y-2">
-                  <p className="font-semibold text-primary">Belum ada pertanyaan wawancara untuk tahun {selectedYear}.</p>
+                  <p className="font-semibold text-primary">Belum ada pertanyaan wawancara untuk periode {selectedPeriod}.</p>
                   <Link href="/admin/wawancara/pertanyaan" className="inline-block text-secondary underline font-bold">
                     Klik di sini untuk membuat pertanyaan wawancara terlebih dahulu.
                   </Link>

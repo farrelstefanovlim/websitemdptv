@@ -86,7 +86,7 @@ export default function GaleriAdminPage() {
         href="/galeri"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:bg-surface-container-high text-xs font-semibold transition-all shrink-0"
+        className="inline-flex items-center justify-center gap-1.5 h-8 px-2.5 rounded-lg border border-outline-variant/20 text-on-surface-variant hover:bg-surface-container-high text-xs font-semibold transition-all shrink-0"
       >
         <Icon name="open_in_new" size="sm" className="!text-xs" />
         <span className="hidden sm:inline">Preview</span>
