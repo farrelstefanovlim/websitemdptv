@@ -245,6 +245,15 @@ export const useRecruitmentStore = create<RecruitmentState>()(
         }
       },
     }),
-    { name: "mdptv-recruitment" }
+    { name: "mdptv-recruitment",
+      partialize: (state) => ({
+        selectedPeriod: state.selectedPeriod,
+        availablePeriods: state.availablePeriods,
+        groupLink: state.groupLink,
+        announcementOpen: state.announcementOpen,
+        announcementPeriod: state.announcementPeriod,
+        registrationOpen: state.registrationOpen,
+      }), 
+    }
   )
 );
