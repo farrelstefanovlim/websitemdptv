@@ -175,10 +175,12 @@ Beberapa fitur utama dikelola melalui folder `components/feature/` dan `services
 
 ## 🛡️ Catatan Pengembangan
 
-- Semua request API diarahkan melalui [Frontend/lib/axios.ts](Frontend/lib/axios.ts) agar konfigurasi base URL konsisten.
-- Konfigurasi asset media (gambar/logo) dikelola melalui [Frontend/lib/image.ts](Frontend/lib/image.ts).
-- Untuk kebutuhan file dokumen, PDF, dan Excel, gunakan utilitas di folder [Frontend/lib](Frontend/lib).
-- Penamaan store dan service dibuat agar modular dan mudah diperluas per domain fitur.
+- **Axios Client Interceptor**: Semua request API diarahkan melalui [Frontend/lib/axios.ts](Frontend/lib/axios.ts) yang otomatis menyematkan header `Authorization: Bearer <token>` dan menangani _token auto-refresh_ pada respons 401.
+- **Client-Side Image Optimization**: Seluruh proses upload foto (CMS, Galeri, Form Pendaftaran) otomatis dioptimasi dan dikompresi ke format WebP di sisi browser via `optimizeImage` di [Frontend/lib/image.ts](Frontend/lib/image.ts) sebelum dikirim ke server/ImageKit.
+- **Smart Auth & Route Guards**: Halaman `/login` secara otomatis mengalihkan pengguna yang sudah login ke `/admin/dashboard`, dan `AdminLayout` melindungi seluruh panel admin dari akses yang belum terotentikasi.
+- **Integrasi Mahasiswa**: Lookup otomatis data nama dan email resmi mahasiswa Universitas MDP via integrasi API Sipenamas di [Frontend/lib/mhsLookup.ts](Frontend/lib/mhsLookup.ts).
+- **Export & Utilitas Dokumen**: Export laporan PDF formal berstandar MDPTV ([Frontend/lib/pdf.ts](Frontend/lib/pdf.ts)) dan spreadsheet Excel ([Frontend/lib/excel.ts](Frontend/lib/excel.ts)).
+- **Modular Stores & Services**: Penamaan Zustand store dan service layer dirancang modular dan terpisah per domain fitur.
 
 ---
 

@@ -151,69 +151,97 @@ Semua endpoint API terpusat pada prefix `/api/v1`:
 
 ### 1. System & Health Check
 
-- `GET /api/v1/health` — Status kesehatan server dan versi runtime.
+- `GET /api/v1/health` — Status kesehatan server dan timestamp runtime.
 
 ### 2. Autentikasi (`/api/v1/auth`)
 
-- `POST /api/v1/auth/login` — Login pengguna (Admin, Pengurus, Anggota).
-- `POST /api/v1/auth/register` — Pendaftaran akun user baru.
-- `POST /api/v1/auth/refresh` — Refresh access token via refresh token.
-- `POST /api/v1/auth/logout` — Logout dan invalidasi token.
-- `GET /api/v1/auth/me` — Ambil profil user yang sedang login.
+- `POST /api/v1/auth/login` — Login admin/pengurus dengan rate limiting.
+- `POST /api/v1/auth/refresh` — Refresh access token via cookie token.
+- `POST /api/v1/auth/logout` — Logout dan invalidasi sesi.
 
-### 3. Open Recruitment (`/api/v1/recruitment`)
+### 3. Pengguna / Users (`/api/v1/users`)
 
-- `GET /api/v1/recruitment/periods` — Ambil seluruh daftar periode open recruitment.
-- `POST /api/v1/recruitment/periods` — Tambah periode penerimaan baru (hanya dari Pendaftaran).
-- `PUT /api/v1/recruitment/periods/:id` — Update periode & status aktif.
-- `GET /api/v1/recruitment/applicants` — Daftar pendaftar (filter per periode, tahap, & divisi).
-- `POST /api/v1/recruitment/apply` — Form submit pendaftaran pendaftar baru (Publik).
-- `PATCH /api/v1/recruitment/applicants/:id/status` — Update status kelulusan / tahap pendaftar.
-- `GET /api/v1/recruitment/check-status/:nim` — Cek status pengumuman penerimaan calon anggota.
+- `POST /api/v1/users/register` — Pendaftaran akun user baru dengan validasi Zod.
+- `GET /api/v1/users` — Ambil daftar seluruh user admin.
 
-### 4. Wawancara & Seleksi (`/api/v1/wawancara`)
+### 4. Open Recruitment (`/api/v1/recruitment`)
 
-- `GET /api/v1/wawancara/schedules` — Jadwal sesi wawancara pendaftar (tersinkronisasi dengan periode pendaftaran).
-- `POST /api/v1/wawancara/score` — Input nilai dan catatan interviewer / pewawancara.
-- `PATCH /api/v1/wawancara/schedules/:id` — Update jadwal dan pewawancara.
+- `GET /api/v1/recruitment/periods` — Ambil seluruh daftar periode open recruitment (Publik).
+- `POST /api/v1/recruitment/periods` — Tambah periode penerimaan baru (Protected).
+- `PATCH /api/v1/recruitment/periods/active` — Setel periode aktif (Protected).
+- `DELETE /api/v1/recruitment/periods/:period` — Hapus periode tertentu (Protected).
+- `GET /api/v1/recruitment/applicants` — Daftar pelamar dengan paginasi, pencarian & filter (Protected).
+- `POST /api/v1/recruitment/apply` — Form submit pendaftaran calon anggota baru (Publik).
+- `POST /api/v1/recruitment/upload` — Upload berkas CV/Foto pendaftar langsung (Publik).
+- `PATCH /api/v1/recruitment/applicants/:id/status` — Update status seleksi & catatan pelamar (Protected).
+- `DELETE /api/v1/recruitment/applicants/:id` — Hapus data pelamar (Protected).
+- `GET /api/v1/recruitment/announcement` — Cek status pengumuman kelulusan (Publik).
+- `PATCH /api/v1/recruitment/announcement/toggle` — Buka/tutup pengumuman kelulusan (Protected).
+- `GET /api/v1/recruitment/whatsapp-link` — Ambil link grup WhatsApp pendaftaran (Publik).
+- `PUT /api/v1/recruitment/whatsapp-link` — Update link grup WhatsApp pendaftaran (Protected).
 
-### 5. Absensi Kegiatan (`/api/v1/attendance`)
+### 5. Bank Soal & Wawancara (`/api/v1/wawancara`)
 
-- `GET /api/v1/attendance/sessions` — Daftar sesi presensi kegiatan.
-- `POST /api/v1/attendance/sessions` — Buat sesi absensi baru (dengan QR code generator).
-- `POST /api/v1/attendance/check-in` — Submit presensi anggota (via scan QR atau manual).
-- `GET /api/v1/attendance/recap/:sessionId` — Rekapitulasi kehadiran peserta per kegiatan.
+- `GET /api/v1/wawancara/years` / `POST /api/v1/wawancara/years` — Manajemen periode wawancara.
+- `GET /api/v1/wawancara/questions` — Daftar bank soal wawancara per periode.
+- `POST /api/v1/wawancara/questions` — Tambah butir pertanyaan wawancara.
+- `PUT /api/v1/wawancara/questions/:id` — Edit pertanyaan wawancara.
+- `DELETE /api/v1/wawancara/questions/:id` — Hapus pertanyaan wawancara.
+- `GET /api/v1/wawancara/responses` — Daftar rekap jawaban dan penilaian kandidat.
+- `POST /api/v1/wawancara/responses` — Simpan lembar penilaian & nilai kandidat.
+- `DELETE /api/v1/wawancara/responses/:id` — Hapus hasil wawancara kandidat.
 
-### 6. Kegiatan Organisasi (`/api/v1/kegiatan`)
+### 6. Presensi & Absensi (`/api/v1/attendance`)
 
-- `GET /api/v1/kegiatan` — Daftar kegiatan dan program kerja MDPTV.
-- `POST /api/v1/kegiatan` — Tambah kegiatan baru.
-- `PUT /api/v1/kegiatan/:id` — Update data kegiatan & dokumentasi.
-- `DELETE /api/v1/kegiatan/:id` — Hapus kegiatan.
+- `POST /api/v1/attendance` — Input presensi kehadiran anggota (Protected).
+- `GET /api/v1/attendance` — Rekapitulasi riwayat presensi anggota (Protected).
 
-### 7. Keuangan & Kas (`/api/v1/kas`)
+### 7. Program Kerja & Kegiatan (`/api/v1/kegiatan`)
 
-- `GET /api/v1/kas/transactions` — Daftar arus kas masuk (debit) & kas keluar (kredit).
-- `POST /api/v1/kas/transactions` — Catat transaksi kas baru dengan bukti nota upload.
-- `GET /api/v1/kas/summary` — Ringkasan total saldo, total pemasukan, dan pengeluaran.
+- `GET /api/v1/kegiatan` — Daftar program kerja dan kegiatan organisasi.
+- `POST /api/v1/kegiatan` — Tambah kegiatan baru (Protected).
+- `PUT /api/v1/kegiatan/:id` — Update detail kegiatan (Protected).
+- `DELETE /api/v1/kegiatan/:id` — Hapus kegiatan (Protected).
+- `PATCH /api/v1/kegiatan/:id/status` — Ubah status approval kegiatan (Protected).
+- `POST /api/v1/kegiatan/:id/upload-proposal` — Unggah berkas proposal PDF (Protected).
 
-### 8. Manajemen Anggota & Divisi (`/api/v1/members`, `/api/v1/divisions`)
+### 8. Keuangan & Kas (`/api/v1/kas`)
 
-- `GET /api/v1/members` — Direktori anggota aktif dan alumni per angkatan & divisi.
+- `GET /api/v1/kas` — Daftar transaksi kas masuk/keluar & saldo berjalan.
+- `POST /api/v1/kas` — Catat transaksi kas baru.
+- `POST /api/v1/kas/upload` — Bulk import transaksi kas via Excel.
+- `DELETE /api/v1/kas/:id` — Hapus catatan transaksi kas.
+- `DELETE /api/v1/kas/reset/all` — Reset seluruh catatan kas.
+- `GET /api/v1/kas/unpaid` — Daftar tagihan kas anggota yang belum lunas.
+- `POST /api/v1/kas/unpaid` / `POST /api/v1/kas/unpaid/upload` — Tambah & import tunggakan kas.
+- `PUT /api/v1/kas/unpaid/:id` — Update status tagihan kas.
+- `DELETE /api/v1/kas/unpaid/:id` — Hapus data tunggakan kas.
+
+### 9. Anggota & Divisi (`/api/v1/members`, `/api/v1/divisions`)
+
+- `GET /api/v1/members` — Daftar database anggota dan status kepengurusan.
 - `POST /api/v1/members` — Tambah anggota baru.
-- `PUT /api/v1/members/:id` — Update profil dan status keaktifan anggota.
-- `GET /api/v1/divisions` — Daftar divisi (tersinkronisasi dengan struktur CMS).
+- `PATCH /api/v1/members/:id` — Update data anggota.
+- `DELETE /api/v1/members/:id` — Hapus data anggota.
+- `PATCH /api/v1/members/:id/feature` — Toggle keaktifan anggota.
+- `GET /api/v1/divisions` — Daftar divisi resmi MDPTV.
 
-### 9. CMS & Konten Website (`/api/v1/cms`, `/api/v1/faqs`, `/api/v1/upload`)
+### 10. CMS & Konten Website (`/api/v1/cms`, `/api/v1/faqs`, `/api/v1/upload`)
 
-- `GET /api/v1/cms/content` — Ambil konten landing page (Hero, Visi-Misi, Sejarah, Layout).
-- `PUT /api/v1/cms/content` — Update konfigurasi konten dan tata letak bagian website.
-- `GET /api/v1/faqs` / `POST /api/v1/faqs` — Tanya Jawab seputar MDPTV.
-- `POST /api/v1/upload` — Upload media (PNG, JPG, PDF) langsung ke ImageKit CDN.
+- `GET /api/v1/cms/sections` — Ambil konten landing page (Hero, About, Divisions, Documentation, FAQ, Footer) (Publik).
+- `PUT /api/v1/cms/sections/:key` — Update konten section tertentu (Protected).
+- `PATCH /api/v1/cms/sections/layouts` — Update urutan & visibilitas section (Protected).
+- `GET /api/v1/cms/gallery` — Ambil foto galeri kegiatan (Publik).
+- `POST /api/v1/cms/gallery` — Tambah foto dokumentasi ke galeri (Protected).
+- `DELETE /api/v1/cms/gallery/:id` — Hapus foto galeri (Protected).
+- `PATCH /api/v1/cms/gallery/:id/feature` — Toggle status featured foto (Protected).
+- `GET /api/v1/faqs` / `POST /api/v1/faqs` / `PUT /api/v1/faqs/:id` / `DELETE /api/v1/faqs/:id` — CRUD FAQ landing page.
+- `POST /api/v1/upload` — Upload media umum ke ImageKit CDN (Protected).
+- `POST /api/v1/upload/cv` — Upload berkas CV/Foto calon pendaftar ke ImageKit (Publik).
 
-### 10. Dashboard Metrik (`/api/v1/dashboard`)
+### 11. Dashboard Metrik (`/api/v1/dashboard`)
 
-- `GET /api/v1/dashboard/metrics` — Metrik statistik ringkas untuk admin (total anggota, kas, pendaftar aktif, kegiatan berjalan).
+- `GET /api/v1/dashboard/metrics` — Statistik metrik utama organisasi untuk admin dashboard.
 
 ---
 
@@ -223,57 +251,9 @@ Semua endpoint API terpusat pada prefix `/api/v1`:
 2. **CORS Whitelist**: Origin protektif untuk mencegah unauthorized web client access.
 3. **Rate Limiting**: Melindungi API dari serangan brute force dan flood requests.
 4. **Prisma Type Safety**: Bebas dari celah SQL Injection dengan parameter binding bawaan.
+5. **Decoupled Architecture**: Logika bisnis murni terisolasi di domain & application use-case layer.
 
-Mendaftarkan akun user baru dengan validasi domain bisnis.
-
-- **Method**: `POST`
-- **URL**: `http://localhost:5000/api/users/register`
-- **Headers**: `Content-Type: application/json`
-- **Request Body**:
-  ```json
-  {
-    "name": "Budi Santoso",
-    "email": "budi@example.com",
-    "password": "mySecurePassword123"
-  }
-  ```
-- **Response (201 Created)**:
-  ```json
-  {
-    "success": true,
-    "message": "User berhasil didaftarkan.",
-    "data": {
-      "id": "a9a8f4c2-9e8c-4a3d-b4f1-0987654321ab",
-      "name": "Budi Santoso",
-      "email": "budi@example.com",
-      "createdAt": "2026-05-18T03:20:10.123Z",
-      "updatedAt": "2026-05-18T03:20:10.123Z"
-    }
-  }
-  ```
-
-### 3. Ambil Semua User
-
-Mengambil daftar seluruh user terdaftar (Data disimpan in-memory, akan ter-reset saat server restart).
-
-- **Method**: `GET`
-- **URL**: `http://localhost:5000/api/users`
-- **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Berhasil mengambil semua data user.",
-    "data": [
-      {
-        "id": "a9a8f4c2-9e8c-4a3d-b4f1-0987654321ab",
-        "name": "Budi Santoso",
-        "email": "budi@example.com",
-        "createdAt": "2026-05-18T03:20:10.123Z",
-        "updatedAt": "2026-05-18T03:20:10.123Z"
-      }
-    ]
-  }
-  ```
+```
 
 ---
 
@@ -302,3 +282,4 @@ Apabila Anda ingin menambahkan fitur baru (misal: **Product** / Produk), ikuti l
 2. Definisikan route & validasi skema input di `src/presentation/http/routes/productRoutes.ts`.
 3. Hubungkan di router utama `src/presentation/http/routes/index.ts`.
 4. Lakukan wiring / Dependency Injection objek tersebut di file utama `src/index.ts`.
+```

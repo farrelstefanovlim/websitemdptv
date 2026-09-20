@@ -20,8 +20,25 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
 
   useEffect(() => {
-    if (!isHydrated) return
-    if (isAuthenticated && accessToken) {
+    // Fast-path: jika sudah login, langsung arahkan ke admin dashboard
+    const isStoreAuthenticated = isAuthenticated && Boolean(accessToken)
+    let isLocalAuthenticated = false
+
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("mdptv-auth")
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (parsed?.state?.isAuthenticated && parsed?.state?.accessToken) {
+            isLocalAuthenticated = true
+          }
+        }
+      } catch {
+        // Abaikan parse error
+      }
+    }
+
+    if (isStoreAuthenticated || isLocalAuthenticated) {
       router.replace("/admin/dashboard")
     }
   }, [isHydrated, isAuthenticated, accessToken, router])
@@ -31,11 +48,13 @@ export default function LoginPage() {
     clearError()
     const success = await login(email, password)
     if (success) {
-      router.push("/admin/dashboard")
+      router.replace("/admin/dashboard")
     }
   }
 
-  if (!isHydrated || (isAuthenticated && accessToken)) {
+  const isAlreadyLoggedIn = isHydrated && isAuthenticated && Boolean(accessToken)
+
+  if (!isHydrated || isAlreadyLoggedIn) {
     return (
       <div className="min-h-screen bg-primary flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
