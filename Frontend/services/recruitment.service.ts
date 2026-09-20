@@ -45,7 +45,7 @@ export const recruitmentService = {
     const formData = new FormData()
     formData.append("file", processedFile)
 
-    const res = await api.post("/upload/cv", formData, {
+    const res = await api.post("/recruitment/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })
 
