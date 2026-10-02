@@ -42,7 +42,7 @@ export default function RecruitmentStats() {
     return Array.from(new Set([...base, ...fromApplicants]));
   }, [dbDivisions, applicants]);
 
-  const total = applicants.length;
+  const total = meta?.total ?? applicants.length; 
 
   const counts: Record<RecruitmentStatus, number> = {
     pending: 0,

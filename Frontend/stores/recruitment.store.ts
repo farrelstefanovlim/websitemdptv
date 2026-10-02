@@ -150,6 +150,7 @@ export const useRecruitmentStore = create<RecruitmentState>()(
           const { applicants, meta } = await recruitmentService.fetchApplicants({
             ...params,
             period: currentPeriod,
+            limit: params?.limit ?? 50,
           });
           set({ applicants, meta, isLoading: false });
         } catch (err: any) {

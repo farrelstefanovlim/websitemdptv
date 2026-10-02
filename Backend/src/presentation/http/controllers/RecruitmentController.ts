@@ -82,7 +82,7 @@ export class RecruitmentController {
     try {
       const { search, status, period, page: pageStr } = req.query
       const page = parseInt(pageStr as string) || 1
-      const limit = 20
+      const limit = parseInt(req.query.limit as string) || 20
       const skip = (page - 1) * limit
 
       const where: any = {}

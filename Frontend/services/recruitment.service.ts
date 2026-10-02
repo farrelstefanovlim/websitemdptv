@@ -3,6 +3,7 @@ import { optimizeImage } from "@/lib/image"
 import type { Applicant, RecruitmentStatus } from "@/components/feature/recruitment/types/recruitment.type"
 
 /* ── Mapper ── */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapApplicant = (a: any): Applicant => ({
   id: a.id,
   name: a.name,
@@ -61,7 +62,7 @@ export const recruitmentService = {
   },
 
   /** Fetch applicants — returns frontend-ready Applicant[] + meta */
-  fetchApplicants: async (params?: { search?: string; status?: string; period?: string; page?: number }) => {
+  fetchApplicants: async (params?: { search?: string; status?: string; period?: string; page?: number; limit?: number }) => {
     const res = await api.get("/recruitment/applicants", { params })
     const applicants = (res.data.data || []).map(mapApplicant)
     const meta = res.data.meta || null
