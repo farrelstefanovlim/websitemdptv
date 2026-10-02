@@ -23,7 +23,7 @@ const DEFAULT_DIVISIONS = [
 ];
 
 export default function RecruitmentStats() {
-  const { applicants } = useRecruitmentStore();
+  const { applicants, meta } = useRecruitmentStore();
   const [dbDivisions, setDbDivisions] = useState<string[]>([]);
 
   useEffect(() => {
