@@ -27,7 +27,7 @@ interface RecruitmentState {
   createPeriod: (period: string, title?: string, is_active?: boolean) => Promise<boolean>;
   setActivePeriod: (period: string) => Promise<boolean>;
   deletePeriod: (period: string) => Promise<boolean>;
-  fetchApplicants: (params?: { search?: string; status?: string; period?: string; page?: number }) => Promise<void>;
+  fetchApplicants: (params?: { search?: string; status?: string; period?: string; page?: number; limit?: number }) => Promise<void>;
   addApplicant: (data: Omit<Applicant, "id" | "status" | "adminNote" | "appliedAt">) => Promise<boolean>;
   updateStatus: (id: string, status: RecruitmentStatus) => Promise<void>;
   updateNote: (id: string, note: string) => Promise<void>;
