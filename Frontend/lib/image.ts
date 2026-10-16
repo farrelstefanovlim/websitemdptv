@@ -31,7 +31,7 @@ export interface ImageOptimizationOptions {
 }
 
 /**
- * Mengoptimasi dan meresize file gambar di sisi browser sebelum dikirim ke server / ImageKit.
+ * Mengoptimasi dan meresize file gambar di sisi browser sebelum dikirim ke server / Cloud.
  * - Mengurangi ukuran berkas secara signifikan (misal: 5-10MB kamera HP menjadi 150-350KB).
  * - Menjaga rasio aspek dengan downscaling bicubic halus (imageSmoothingQuality: high).
  * - Berkas non-gambar (seperti PDF pada CV) atau gambar vektor (SVG) dan GIF animasi tidak disentuh.

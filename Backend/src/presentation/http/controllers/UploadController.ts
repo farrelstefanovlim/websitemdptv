@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import path from "path";
 import { randomUUID } from "crypto";
-import { ImageKitService } from "@infrastructure/services/ImageKitService";
+// import { ImageKitService } from "@infrastructure/services/ImageKitService";
+import { GoogleDriveService} from "@infrastructure/services/GoogleDriveService";
 
 const storage = multer.memoryStorage();
 
@@ -45,10 +46,14 @@ export const uploadCv = multer({
 });
 
 export class UploadController {
-  private imageKitService: ImageKitService;
+  // private imageKitService: ImageKitService;
+  private driveService: GoogleDriveService;
 
-  constructor(imageKitService?: ImageKitService) {
-    this.imageKitService = imageKitService || new ImageKitService();
+  // constructor(imageKitService?: ImageKitService) {
+  //   this.imageKitService = imageKitService || new ImageKitService();
+  // }
+  constructor(driveService: GoogleDriveService) {
+    this.driveService = driveService;
   }
 
   public uploadImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -61,10 +66,11 @@ export class UploadController {
       const ext = path.extname(req.file.originalname) || ".jpg";
       const uniqueName = `${Date.now()}-${randomUUID().slice(0, 8)}${ext}`;
 
-      const uploadResult = await this.imageKitService.upload({
+      const uploadResult = await this.driveService.upload({
         file: req.file.buffer,
         fileName: uniqueName,
-        folder: "/mdptv",
+        mimeType: req.file.mimetype,
+        makePublic: true,
       });
 
       res.status(200).json({
@@ -94,10 +100,10 @@ export class UploadController {
       const cleanOriginalName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
       const uniqueName = `cv_${Date.now()}_${cleanOriginalName}`;
 
-      const uploadResult = await this.imageKitService.upload({
+      const uploadResult = await this.driveService.upload({
         file: req.file.buffer,
         fileName: uniqueName,
-        folder: "/mdptv/applicants/cv",
+        mimeType: req.file.mimetype,
       });
 
       res.status(200).json({

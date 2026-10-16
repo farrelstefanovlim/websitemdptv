@@ -26,6 +26,12 @@ export default function ApplicantCard({ applicant }: { applicant: Applicant }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const colors = STATUS_COLORS[applicant.status];
+  const cvHref = applicant.cv_url
+  ? applicant.cv_url.startsWith("http")
+    ? applicant.cv_url
+    : `https://${applicant.cv_url}`
+  : null;
+const isLegacyPdf = applicant.cv_url?.toLowerCase().includes(".pdf") ?? false;
 
   const handleSaveNote = () => {
     updateNote(applicant.id, noteValue);
@@ -148,22 +154,22 @@ export default function ApplicantCard({ applicant }: { applicant: Applicant }) {
 
               {/* Lampiran CV / Foto & Portofolio */}
               <div className="pt-2 border-t border-outline-variant/10 flex flex-wrap gap-2 items-center">
-                {applicant.cv_url ? (
+                {cvHref ? (
                   <a
-                    href={applicant.cv_url.startsWith("http") ? applicant.cv_url : `https://${applicant.cv_url}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors border ${
-                      applicant.cv_url.toLowerCase().includes(".pdf")
-                        ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border-rose-500/20"
-                        : "bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-blue-500/20"
-                    }`}
-                    title="Buka Berkas CV / Foto Pelamar di Tab Baru"
-                  >
-                    <Icon name={applicant.cv_url.toLowerCase().includes(".pdf") ? "picture_as_pdf" : "image"} size="xs" />
-                    <span>{applicant.cv_url.toLowerCase().includes(".pdf") ? "Buka CV (PDF)" : "Lihat Foto / CV"}</span>
-                    <Icon name="open_in_new" size="xs" className="!text-[10px]" />
-                  </a>
+    href={cvHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors border ${
+      isLegacyPdf
+        ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border-rose-500/20"
+        : "bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-blue-500/20"
+    }`}
+    title="Buka berkas CV / foto pelamar di tab baru"
+  >
+    <Icon name={isLegacyPdf ? "picture_as_pdf" : "description"} size="xs" />
+    <span>{isLegacyPdf ? "Buka CV (PDF)" : "Buka Berkas CV"}</span>
+    <Icon name="open_in_new" size="xs" className="!text-[10px]" />
+  </a>
                 ) : (
                   <span className="text-[10px] px-2.5 py-1 rounded-xl bg-surface-container-low text-on-surface-variant/40 font-medium">
                     CV/Foto: -

@@ -13,9 +13,18 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   JWT_REFRESH_SECRET: z.string(),
   CORS_ORIGIN: z.string().optional(),
-  IMAGEKIT_PUBLIC_KEY: z.string(),
-  IMAGEKIT_PRIVATE_KEY: z.string(),
-  IMAGEKIT_URL_ENDPOINT: z.string(),
+
+  // Google Drive (OAuth2 + refresh token)
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+  GOOGLE_REFRESH_TOKEN: z.string().min(1),
+  // Kosongkan saja. Folder "MDPTV Uploads" dibuat otomatis oleh aplikasi.
+  GOOGLE_DRIVE_FOLDER_ID: z.string().optional(),
+
+  // ImageKit tidak dipakai lagi. Hapus tiga baris ini setelah ImageKitService dihapus.
+  // IMAGEKIT_PUBLIC_KEY: z.string().optional(),
+  // IMAGEKIT_PRIVATE_KEY: z.string().optional(),
+  // IMAGEKIT_URL_ENDPOINT: z.string().optional(),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)

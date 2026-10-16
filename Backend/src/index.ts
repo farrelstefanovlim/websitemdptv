@@ -2,7 +2,8 @@ import { env } from "@infrastructure/config/env";
 import { createExpressApp } from "@presentation/http/app";
 import { PrismaUserRepository } from "@infrastructure/database/PrismaUserRepository";
 import { BunHashService } from "@infrastructure/services/BunHashService";
-import { ImageKitService } from "@infrastructure/services/ImageKitService";
+import { GoogleDriveService} from "@infrastructure/services/GoogleDriveService";
+// import { ImageKitService } from "@infrastructure/services/ImageKitService";
 import { RegisterUserUseCase } from "@application/use-cases/RegisterUserUseCase";
 import { GetAllUsersUseCase } from "@application/use-cases/GetAllUsersUseCase";
 import { UserController } from "@presentation/http/controllers/UserController";
@@ -32,7 +33,8 @@ async function bootstrap() {
 
   // 2. Inisialisasi Services (Infrastructure Layer)
   const hashService = new BunHashService();
-  const imageKitService = new ImageKitService();
+  const driveService = new GoogleDriveService();
+  // const imageKitService = new ImageKitService();
 
   // 3. Inisialisasi Use Cases (Application Layer) dengan Dependency Injection (DI)
   const registerUserUseCase = new RegisterUserUseCase(userRepository, hashService);
@@ -46,7 +48,8 @@ async function bootstrap() {
   const recruitmentController = new RecruitmentController();
   const kegiatanController = new KegiatanController();
   const attendanceController = new AttendanceController();
-  const uploadController = new UploadController(imageKitService);
+  const uploadController = new UploadController(driveService);
+  // const uploadController = new UploadController(imageKitService);
   const memberController = new MemberController();
   const divisionController = new DivisionController();
   const dashboardController = new DashboardController(getDashboardMetricsUseCase);

@@ -116,7 +116,7 @@ export default function UploadPhotoForm({ onAdd, onCancel }: UploadPhotoFormProp
               </div>
               <div>
                 <span className="text-xs font-bold text-primary block">Pilih File Foto / Dokumentasi</span>
-                <span className="text-[10px] text-on-surface-variant/50">Mendukung JPG, PNG, WEBP, GIF (Maks 20MB via ImageKit)</span>
+                <span className="text-[10px] text-on-surface-variant/50">Mendukung JPG, PNG, WEBP, GIF (Maks 20MB via GoogleDrive)</span>
               </div>
             </button>
           )}

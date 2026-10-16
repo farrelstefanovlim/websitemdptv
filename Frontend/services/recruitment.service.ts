@@ -32,7 +32,7 @@ const mapApplicant = (a: any): Applicant => ({
 })
 
 export const recruitmentService = {
-  /** Upload CV / Berkas dokumen pendaftar ke ImageKit (Public dengan auto-optimasi untuk gambar/foto) */
+  /** Upload CV / Berkas dokumen pendaftar ke Google Drive (Public dengan auto-optimasi untuk gambar/foto) */
   uploadCv: async (file: File): Promise<{ url: string; filename: string }> => {
     // Jika berkas adalah gambar/foto diri, optimasi ukurannya (max 1200px, quality 0.85 WebP)
     // Jika berkas adalah PDF, lewati optimasi secara otomatis

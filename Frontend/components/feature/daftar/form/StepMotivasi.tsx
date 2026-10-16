@@ -103,7 +103,7 @@ export default function StepMotivasi({ form, set, onEnter }: Props) {
       }
     } catch (err: any) {
       console.error("Upload error:", err)
-      const msg = err.response?.data?.message || err.message || "Gagal mengunggah berkas ke ImageKit. Coba lagi."
+      const msg = err.response?.data?.message || err.message || "Gagal mengunggah berkas ke GoogleDrive. Coba lagi."
       toast.error(msg)
       set("cv_url", "")
       setFileName("")
@@ -212,7 +212,7 @@ export default function StepMotivasi({ form, set, onEnter }: Props) {
                 {isUploading ? (
                   <div className="py-2 flex flex-col items-center gap-2">
                     <div className="w-6 h-6 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin" />
-                    <span className="text-xs font-bold text-secondary">Mengunggah berkas ke cloud ImageKit...</span>
+                    <span className="text-xs font-bold text-secondary">Mengunggah berkas ke cloud ...</span>
                   </div>
                 ) : (
                   <>

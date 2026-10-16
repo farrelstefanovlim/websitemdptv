@@ -57,6 +57,7 @@ websitemdptv-v2/
 - PostgreSQL / Supabase
 - Redis
 - ImageKit
+- GoogleDrive
 - JWT + Cookie Authentication
 - Zod validation
 
